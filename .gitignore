@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+!.env.coolify.example
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/data/
+videos/.work/
+videos/verification/
+videos/*.log
+mobile/.expo/
+mobile/dist/
+*.log

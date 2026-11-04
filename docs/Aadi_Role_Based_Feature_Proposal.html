@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aadi — Business Performance &amp; Project Profitability · Interactive Product Proposal</title>
+<style>
+:root{--bg:#f5f7fa;--panel:#fff;--ink:#1c2433;--mute:#5f6b7e;--line:#e3e8ef;--acc:#2f5bea;--acc-s:#e9eefd;--ok:#12805c;--ok-s:#e3f6ee;--warn:#9a6700;--warn-s:#fff4d6;--bad:#b42318;--bad-s:#fde8e6;--info:#0b6e99;--info-s:#e1f3fa;--sb:#111a2e;--sb-ink:#c9d3e6;--r:10px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px;border-radius:6px}
+.skip{position:absolute;left:-999px;top:0;background:#fff;padding:8px;z-index:100}.skip:focus{left:8px;top:8px}
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+aside.sb{background:var(--sb);color:var(--sb-ink);position:sticky;top:0;height:100vh;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;gap:6px}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;color:#fff}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--acc);display:grid;place-items:center;font-weight:800;color:#fff}
+.brand b{display:block;font-size:15px;line-height:1.1}.brand small{color:#8fa0c0;font-size:11px}
+.navh{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#7f90b2;padding:10px 10px 4px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;color:var(--sb-ink);padding:9px 10px;border-radius:8px}
+.nav:hover{background:#1c2845}.nav[aria-current=page]{background:var(--acc);color:#fff}
+.nav .ic{width:20px;text-align:center}.nav .lk{margin-left:auto;font-size:12px;opacity:.7}
+.nav[aria-disabled=true]{opacity:.5}
+.sbfoot{margin-top:auto;font-size:11px;color:#8fa0c0;padding:10px 8px;border-top:1px solid #243255}
+main{min-width:0}
+.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 24px}
+.toprow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.banner{background:var(--warn-s);color:var(--warn);border:1px solid #f1d98b;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:600}
+.menu-btn{display:none;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.spacer{flex:1}
+.who{font-size:12px;color:var(--mute);text-align:right}.who b{color:var(--ink);display:block;font-size:13px}
+.roles{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:thin}
+.roles label{white-space:nowrap}
+.rp{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font-weight:600;font-size:13px;color:var(--mute);display:inline-flex;gap:6px;align-items:center}
+.rp:hover{border-color:var(--acc);color:var(--acc)}
+.rp[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+.rp .tag{font-size:10px;font-weight:700;background:rgba(0,0,0,.08);border-radius:6px;padding:0 5px}
+.rolesel{display:none;width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.content{padding:22px 24px 60px;max-width:1400px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;margin:0 0 6px}
+.sub{color:var(--mute);margin:0 0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card.flat{padding:0;overflow:hidden}
+.card>h2:first-child{margin-top:0}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g32{grid-template-columns:3fr 2fr}
+.mb{margin-bottom:14px}
+.kpi .l{color:var(--mute);font-size:12px;display:flex;gap:4px;align-items:center}
+.kpi .v{font-size:24px;font-weight:700;margin:2px 0}.kpi .s{font-size:12px;color:var(--mute)}
+.tip{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#e7ebf3;color:#44506a;font-size:10px;font-weight:700;cursor:help;border:0;padding:0}
+.chip{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#eef1f6;color:#445068;white-space:nowrap}
+.c-ok{background:var(--ok-s);color:var(--ok)}.c-warn{background:var(--warn-s);color:var(--warn)}.c-bad{background:var(--bad-s);color:var(--bad)}.c-info{background:var(--info-s);color:var(--info)}.c-acc{background:var(--acc-s);color:var(--acc)}
+.p1{background:#e9eefd;color:#2f5bea}.p2{background:#fdeaf3;color:#b0286a}.p3{background:#efe8fd;color:#6a38c7}
+.pill-p{font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;margin-left:4px;vertical-align:middle}
+.bar{height:8px;background:#e9edf3;border-radius:99px;overflow:hidden;min-width:70px}.bar>i{display:block;height:100%;background:var(--acc);border-radius:99px}
+.bar.ok>i{background:#17a673}.bar.warn>i{background:#e0a100}.bar.bad>i{background:#d92d20}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{background:#f8fafc;color:var(--mute);font-weight:600;font-size:12px;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tools input,.tools select,.f input,.f select,.f textarea{border:1px solid #cfd6e2;background:#fff;border-radius:8px;padding:7px 10px}
+.btn{border:1px solid #cfd6e2;background:#fff;border-radius:8px;padding:7px 13px;font-weight:600}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.pri:hover{background:#2449c2;color:#fff}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.can{margin:0;padding-left:18px}.can li{margin:2px 0}
+.lock{background:var(--bad-s);border:1px solid #f4c3bd;color:#7a1b12;border-radius:var(--r);padding:28px;text-align:center}
+.lock .big{font-size:34px}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+.note{background:var(--info-s);border:1px solid #b9e0ef;color:#0b5575;border-radius:8px;padding:9px 12px;font-size:13px}
+.note.w{background:var(--warn-s);border-color:#f1d98b;color:#6f4a00}
+.rolecard{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}
+.rolecard .cap{flex:1;min-width:260px}
+.board{display:grid;grid-template-columns:repeat(6,minmax(170px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px}
+.col{background:#eef1f6;border-radius:10px;padding:8px;min-height:120px}
+.col h3{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between}
+.tk{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:8px;font-size:12.5px}
+.tk b{display:block;font-size:13px}.tk select{width:100%;margin-top:6px;font-size:12px;padding:3px;border:1px solid #cfd6e2;border-radius:6px}
+.tk.bl{border-color:#f0b4ac;background:#fff8f7}
+.cols{display:flex;align-items:flex-end;gap:14px;height:170px;padding:6px 0 0}
+.cg{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.cb{display:flex;gap:4px;align-items:flex-end;height:100%;width:100%;justify-content:center}
+.cb i{display:block;width:40%;max-width:26px;border-radius:5px 5px 0 0}
+.cb .t{background:#c9d4f5}.cb .a{background:var(--acc)}
+.cg small{color:var(--mute);font-size:11px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:8px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.hb{display:grid;grid-template-columns:130px 1fr 70px;gap:8px;align-items:center;margin:7px 0;font-size:13px}
+.hb .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hb .vl{text-align:right;font-variant-numeric:tabular-nums}
+.donut{width:120px;height:120px;border-radius:50%;position:relative;flex:none}
+.donut::after{content:"";position:absolute;inset:26px;background:#fff;border-radius:50%}
+.flex{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.mx th,.mx td{text-align:center;padding:7px 8px;font-size:12.5px}
+.mx th:first-child,.mx td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1;min-width:230px}
+.mx th:first-child{background:#f8fafc}
+.mx .sel{background:var(--acc-s)}
+.pv{display:inline-block;min-width:78px;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600}
+.v-Full{background:#d6f1e5;color:#0b6a49}.v-Manage{background:#dbe7ff;color:#1c43b8}.v-View{background:#e8eef6;color:#3d4f6b}.v-Own{background:#fff0c9;color:#7a5400}.v-Delegated{background:#efe3fd;color:#5b2da8}.v-No{background:#f3f4f6;color:#98a1b0}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:left;position:relative}
+.step:hover{border-color:var(--acc)}
+.step.me{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc-s)}
+.step.on{background:var(--acc-s)}
+.step .no{width:24px;height:24px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;margin-bottom:6px}
+.step b{display:block;font-size:13px;margin-bottom:4px}
+.step .rr{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.step .rr span{font-size:10.5px;background:#eef1f6;border-radius:5px;padding:0 5px;color:#445068}
+.step .rr span.m{background:var(--acc);color:#fff}
+.chain{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px;font-weight:600}
+.chain span{background:var(--acc-s);color:var(--acc);padding:3px 10px;border-radius:999px;font-size:12.5px}.chain i{color:#98a1b0;font-style:normal}
+dialog{border:0;border-radius:14px;padding:0;max-width:640px;width:calc(100% - 28px);box-shadow:0 20px 60px rgba(10,20,40,.35)}
+dialog::backdrop{background:rgba(10,20,40,.45)}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0}.db{padding:16px 18px;max-height:70vh;overflow:auto}.df{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.x{border:0;background:none;font-size:20px;line-height:1}
+.f{display:grid;gap:10px}.f label{display:grid;gap:3px;font-weight:600;font-size:12.5px}.f textarea{min-height:60px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(30px);background:#17213a;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:92vw;font-size:13px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ai{border:1px dashed #b9a3ec;background:#faf7ff}
+.ai .q{display:flex;gap:6px;flex-wrap:wrap}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.tab{border:0;background:none;padding:8px 14px;border-bottom:2px solid transparent;color:var(--mute);font-weight:600}
+.tab[aria-selected=true]{color:var(--acc);border-color:var(--acc)}
+.scrim{display:none}
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}.g32{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:860px){
+ .app{grid-template-columns:1fr}
+ aside.sb{position:fixed;left:0;top:0;z-index:60;width:270px;transform:translateX(-100%);transition:.25s}
+ body.nav-open aside.sb{transform:none}
+ body.nav-open .scrim{display:block;position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:50}
+ .menu-btn{display:inline-block}
+ .roles{display:none}.rolesel{display:block}
+ .top{padding:10px 14px}.content{padding:16px 14px 50px}
+ .g2,.g3,.g4{grid-template-columns:1fr}.steps{grid-template-columns:1fr}
+ .who{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#view">Skip to content</a>
+<div class="app">
+ <aside class="sb" id="sb" aria-label="Primary">
+  <div class="brand"><div class="logo">A</div><div><b>Aadi Performance</b><small>Profitability Platform</small></div></div>
+  <div class="navh">Workspace</div>
+  <nav id="nav" aria-label="Modules"></nav>
+  <div class="sbfoot">Proposal prototype · no login, no backend, no data saved. Menu reflects the selected role's proposed access.</div>
+ </aside>
+ <div class="scrim" id="scrim"></div>
+ <main>
+  <header class="top">
+   <div class="toprow">
+    <button class="menu-btn" id="menuBtn" aria-label="Open navigation">☰ Menu</button>
+    <span class="banner">Interactive Product Proposal — Illustrative Data</span>
+    <span class="spacer"></span>
+    <div class="who" id="who"></div>
+   </div>
+   <div class="roles" id="roles" role="group" aria-label="Select role to preview"></div>
+   <select class="rolesel" id="roleSel" aria-label="Select role to preview"></select>
+  </header>
+  <div class="content" id="view" tabindex="-1"></div>
+ </main>
+</div>
+<dialog id="dlg" aria-labelledby="dt"><div class="dh"><h2 id="dt"></h2><button class="x" id="dx" aria-label="Close">×</button></div><div class="db" id="dbody"></div><div class="df" id="dfoot"></div></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============ helpers ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L=n=>'₹'+(Math.abs(n)>=100?(n/100).toFixed(2)+' Cr':n.toFixed(1)+' L'); // values stored in lakhs
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const tone=p=>p>=90?'ok':p>=65?'warn':'bad';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),3400)}
+const demo=a=>toast('Prototype only: “'+a+'” is illustrative. No data is saved.');
+const TIP={
+ 'Revenue target achievement':'Recognized actual revenue ÷ target revenue × 100. Revenue basis (invoiced / collected / recognized / milestone) is an open decision.',
+ 'Contribution':'Recognized revenue − direct project cost − allocated overhead. Proposed formula; to be validated with the customer’s accountant.',
+ 'Contribution margin':'Project contribution ÷ recognized revenue × 100 (zero revenue handled separately).',
+ 'Utilization':'Approved productive hours ÷ available working hours × 100. Not a measure of employee quality.',
+ 'Estimate variance':'Actual approved hours − estimated hours (and % of estimate).',
+ 'Outstanding':'Invoice total − recorded payments − credits/adjustments.',
+ 'Allocated overhead':'Shared costs (rent, Wi‑Fi, hosting, AI subscriptions…) distributed using the selected allocation method.'
+};
+const tip=k=>TIP[k]?` <button class="tip" type="button" aria-label="${esc(k)}: ${esc(TIP[k])}" title="${esc(TIP[k])}">?</button>`:'';
+const chip=(t,c)=>`<span class="chip ${c?'c-'+c:''}">${esc(t)}</span>`;
+const stTone={Active:'ok',Planned:'info','On Hold':'warn',Completed:'ok',Green:'ok',Amber:'warn',Red:'bad',Draft:'',Submitted:'info',Approved:'ok',Returned:'warn',Rejected:'bad',Issued:'info','Partially Paid':'warn',Paid:'ok',Overdue:'bad',Void:'',Pending:'warn',Acknowledged:'ok',Initiated:'info','Pending acknowledgement':'warn'};
+const sChip=s=>chip(s,stTone[s]);
+const bar=(p,t)=>`<div class="bar ${t||tone(p)}" role="img" aria-label="${p}%"><i style="width:${Math.min(100,p)}%"></i></div>`;
+const pillar=n=>`<span class="pill-p p${n}" title="${['','Pillar 1 — Software Product','Pillar 2 — Marketing & Sales','Pillar 3 — AI Solutions'][n]}">P${n}</span>`;
+function kpi(l,v,s,t){return `<div class="card kpi"><div class="l">${esc(l)}${tip(t||l)}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`}
+function table(cols,rows,empty){
+ if(!rows.length)return `<div class="empty">${empty||'No records match the current filters.'}</div>`;
+ return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td class="${c.n?'n':''}">${c.r?c.r(r):esc(r[c.k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function hbars(items,fmt,max){
+ const m=max||Math.max(...items.map(i=>i.v),1);
+ return items.map(i=>`<div class="hb"><span class="nm" title="${esc(i.n)}">${esc(i.n)}</span><div class="bar ${i.t||''}"><i style="width:${i.v/m*100}%"></i></div><span class="vl">${fmt?fmt(i.v):i.v}</span></div>`).join('');
+}
+function colChart(labels,t,a){
+ const m=Math.max(...t,...a);
+ return `<div class="cols" role="img" aria-label="Monthly target versus actual chart">${labels.map((l,i)=>`<div class="cg"><div class="cb"><i class="t" style="height:${t[i]/m*100}%" title="Target ${t[i].toFixed(1)} L"></i><i class="a" style="height:${a[i]/m*100}%" title="Actual ${a[i].toFixed(1)} L"></i></div><small>${l}</small></div>`).join('')}</div><div class="legend"><span><i class="sw" style="background:#c9d4f5"></i>Target</span><span><i class="sw" style="background:var(--acc)"></i>Actual</span><span>Illustrative · ₹ lakhs</span></div>`;
+}
+function donut(items){
+ const tot=sum(items,i=>i.v);let acc=0;
+ const g=items.map(i=>{const s=acc/tot*100;acc+=i.v;return `${i.c} ${s}% ${acc/tot*100}%`}).join(',');
+ return `<div class="flex"><div class="donut" role="img" aria-label="Distribution chart" style="background:conic-gradient(${g})"></div><div>${items.map(i=>`<div><i class="sw" style="background:${i.c}"></i>${esc(i.n)} <b>${i.l||i.v}</b></div>`).join('')}</div></div>`;
+}
+const searchBar=(id,ph,extra)=>`<div class="tools"><label class="sr" for="${id}" style="position:absolute;left:-999px">${ph}</label><input id="${id}" type="search" placeholder="${ph}" value="${esc(ui[id]||'')}">${extra||''}</div>`;
+const sel=(id,label,opts)=>`<label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--mute)">${label}<select id="${id}">${opts.map(o=>`<option ${String(ui[id]??opts[0])===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
+const match=(o,q)=>!q||JSON.stringify(Object.values(o)).toLowerCase().includes(q.toLowerCase());
+
+/* ============ sample data (fictional & illustrative) ============ */
+const MONTHS=['Jun','Jul','Aug','Sep','Oct','Nov'];
+const TGT=[8,9,10,10,11,12],ACT=[6.2,7.5,8.4,6.9,9.1,7.6];
+const BASIS={'Recognized':1,'Invoiced':1.08,'Collected':.82,'Milestone-based':.9};
+const CATS=[
+ {n:'Infrastructure',v:2.4},{n:'Third Party Solutions',v:3.1},{n:'Software',v:2.2},{n:'Marketing',v:1.5},{n:'Sales',v:1.2},{n:'Consulting',v:2.6},{n:'Salary',v:22.0,restricted:true}];
+const PRJ=[
+ {id:'PRJ-101',n:'Retail Portal Revamp',c:'Northwind Retail',pm:'Asha',s:'Active',h:'Amber',bud:18,rev:12.5,cost:7.4,oh:1.1,est:900,act:842,p:68,mem:5,scope:'Storefront redesign, checkout, catalogue filters, admin console',ms:['Design sign-off ✔','Checkout beta (in progress)','UAT','Go-live']},
+ {id:'PRJ-102',n:'Learning App Pilot',c:'Lumen Academy',pm:'Asha',s:'Active',h:'Green',bud:9,rev:6.0,cost:3.1,oh:.6,est:520,act:455,p:74,mem:3,scope:'Quiz engine, teacher dashboard, progress reports',ms:['Prototype ✔','Pilot release (in progress)','Feedback round']},
+ {id:'PRJ-103',n:'Supply Tracker',c:'Orbit Logistics',pm:'Nisha',s:'Active',h:'Red',bud:14,rev:8.4,cost:6.9,oh:.9,est:700,act:790,p:52,mem:5,scope:'Telemetry ingestion, driver app, live map',ms:['Architecture ✔','Telemetry v1 (overrun)','Driver app beta']},
+ {id:'PRJ-104',n:'Menu & Ordering Suite',c:'Harbor Foods',pm:'Nisha',s:'Active',h:'Green',bud:7.5,rev:5.5,cost:2.6,oh:.5,est:400,act:360,p:71,mem:3,scope:'Digital menu CMS, order notifications',ms:['CMS ✔','Notifications ✔','Roll-out']},
+ {id:'PRJ-105',n:'Showroom Visualiser',c:'Pixel Interiors',pm:'Nisha',s:'On Hold',h:'Amber',bud:6,rev:2.0,cost:1.7,oh:.3,est:300,act:248,p:35,mem:2,scope:'3D room previews and quote builder',ms:['Discovery ✔','Prototype (on hold)']},
+ {id:'PRJ-106',n:'Internal Analytics Product',c:'Aadi Internal (business unit)',pm:'Asha',s:'Planned',h:'Green',bud:5,rev:0,cost:.8,oh:.2,est:250,act:40,p:10,mem:2,scope:'Internal product: usage analytics and reporting',ms:['Schema design (in progress)','Pipeline spike']}
+];
+const PRJ_MAP={}; PRJ.forEach(p=>PRJ_MAP[p.id]=p);
+const TASKS=[
+ {id:'T-201',t:'Checkout API integration',p:'PRJ-101',o:'Meera',s:'inprog',e:16,a:11,d:'6 Nov'},
+ {id:'T-202',t:'Product listing filters',p:'PRJ-101',o:'Dev',s:'review',e:12,a:13,d:'5 Nov'},
+ {id:'T-203',t:'Payment gateway sandbox',p:'PRJ-101',o:'Isha',s:'blocked',e:10,a:4,d:'9 Nov',b:'Awaiting vendor credentials'},
+ {id:'T-204',t:'Quiz module UI',p:'PRJ-102',o:'Meera',s:'todo',e:14,a:0,d:'10 Nov'},
+ {id:'T-205',t:'Progress report export',p:'PRJ-102',o:'Dev',s:'inprog',e:8,a:5,d:'8 Nov'},
+ {id:'T-206',t:'Teacher dashboard',p:'PRJ-102',o:'Isha',s:'done',e:12,a:12,d:'4 Nov'},
+ {id:'T-207',t:'Telemetry ingestion',p:'PRJ-103',o:'Nina',s:'inprog',e:20,a:24,d:'5 Nov'},
+ {id:'T-208',t:'Driver app map view',p:'PRJ-103',o:'Arjun',s:'blocked',e:16,a:9,d:'11 Nov',b:'API contract pending'},
+ {id:'T-209',t:'Order notifications',p:'PRJ-104',o:'Nina',s:'done',e:10,a:9,d:'3 Nov'},
+ {id:'T-210',t:'Menu CMS bulk upload',p:'PRJ-104',o:'Arjun',s:'review',e:9,a:8,d:'6 Nov'},
+ {id:'T-211',t:'Analytics schema',p:'PRJ-106',o:'Rohan',s:'inprog',e:6,a:3,d:'12 Nov'},
+ {id:'T-212',t:'Data pipeline spike',p:'PRJ-106',o:'Meera',s:'backlog',e:8,a:0,d:'—'}
+];
+const COLS=[['backlog','Backlog'],['todo','Committed'],['inprog','In Progress'],['blocked','Blocked'],['review','Review'],['done','Done']];
+const TEAM_TL=['Rohan','Meera','Dev','Isha']; // Team Lead's team
+let HAND=[
+ {id:'H-01',tk:'T-203 Payment gateway sandbox',p:'PRJ-101',from:'Isha',to:'Dev',st:'Pending acknowledgement',rem:6,bl:'Vendor credentials awaited',next:'Request sandbox keys from vendor'},
+ {id:'H-02',tk:'T-208 Driver app map view',p:'PRJ-103',from:'Arjun',to:'Nina',st:'Acknowledged',rem:7,bl:'API contract pending',next:'Review contract draft with PM'},
+ {id:'H-03',tk:'T-204 Quiz module UI',p:'PRJ-102',from:'Dev',to:'Meera',st:'Pending acknowledgement',rem:14,bl:'None',next:'Start with question-bank screen'},
+ {id:'H-04',tk:'T-210 Menu CMS bulk upload',p:'PRJ-104',from:'Arjun',to:'Nina',st:'Initiated',rem:1,bl:'None',next:'Final QA pass'}
+];
+let TS=[
+ {id:1,e:'Meera',d:'2 Nov',p:'PRJ-101',t:'Checkout API integration',h:6.5,b:'Billable',s:'Approved'},
+ {id:2,e:'Meera',d:'3 Nov',p:'PRJ-101',t:'Checkout API integration',h:7,b:'Billable',s:'Approved'},
+ {id:3,e:'Meera',d:'4 Nov',p:'PRJ-102',t:'Quiz module design',h:5,b:'Billable',s:'Submitted'},
+ {id:4,e:'Meera',d:'4 Nov',p:'PRJ-106',t:'Pipeline spike',h:2,b:'Non-billable',s:'Returned'},
+ {id:5,e:'Meera',d:'5 Nov',p:'PRJ-101',t:'Checkout API integration',h:6,b:'Billable',s:'Draft'},
+ {id:6,e:'Dev',d:'4 Nov',p:'PRJ-101',t:'Product listing filters',h:7.5,b:'Billable',s:'Submitted'},
+ {id:7,e:'Dev',d:'4 Nov',p:'PRJ-102',t:'Progress report export',h:3,b:'Billable',s:'Submitted'},
+ {id:8,e:'Isha',d:'4 Nov',p:'PRJ-102',t:'Teacher dashboard',h:8,b:'Billable',s:'Approved'},
+ {id:9,e:'Isha',d:'5 Nov',p:'PRJ-101',t:'Payment gateway sandbox',h:4,b:'Billable',s:'Submitted'},
+ {id:10,e:'Rohan',d:'4 Nov',p:'PRJ-106',t:'Analytics schema',h:5,b:'Non-billable',s:'Approved'},
+ {id:11,e:'Nina',d:'4 Nov',p:'PRJ-103',t:'Telemetry ingestion',h:9,b:'Billable',s:'Submitted'},
+ {id:12,e:'Arjun',d:'4 Nov',p:'PRJ-104',t:'Menu CMS bulk upload',h:8,b:'Billable',s:'Approved'}
+];
+const EMP=[
+ {n:'Rohan',team:'Team A (Lead)',role:'Team Lead',pl:140,ap:128,done:9,ho:1,sc:[4,4,4,5,2,4]},
+ {n:'Meera',team:'Team A',role:'Engineer',pl:160,ap:151,done:14,ho:2,sc:[4,5,4,4,4,4]},
+ {n:'Dev',team:'Team A',role:'Engineer',pl:160,ap:158,done:12,ho:1,sc:[4,4,3,4,5,3]},
+ {n:'Isha',team:'Team A',role:'Engineer',pl:160,ap:149,done:11,ho:1,sc:[3,4,4,5,4,4]},
+ {n:'Nina',team:'Team B',role:'Engineer',pl:160,ap:165,done:13,ho:2,sc:[4,3,2,4,5,4]},
+ {n:'Arjun',team:'Team B',role:'Engineer',pl:160,ap:144,done:8,ho:2,sc:[3,4,3,3,4,3]}
+];
+const DIM=['Delivery reliability','Quality / acceptance','Estimate accuracy','Collaboration & handover','Billable contribution','Goal achievement'];
+const CUST_T=[{n:'Northwind Retail',t:14,a:11.2},{n:'Lumen Academy',t:9,a:7.4},{n:'Orbit Logistics',t:12,a:9.1},{n:'Harbor Foods',t:7,a:6.3},{n:'Pixel Interiors',t:5,a:2.8},{n:'Other / unassigned',t:13,a:8.9}];
+const PRJ_T=PRJ.map(p=>({n:p.n,t:+(p.bud*.7).toFixed(1),a:p.rev}));
+const OWN_T=[{n:'Kabir (Sales)',t:20,a:15.3},{n:'Tara (Sales)',t:15,a:11.4},{n:'Unassigned / direct',t:25,a:19}];
+let INV=[
+ {id:'INV-0141',c:'Northwind Retail',p:'PRJ-101',amt:4.2,paid:4.2,due:'20 Oct',s:'Paid'},
+ {id:'INV-0142',c:'Lumen Academy',p:'PRJ-102',amt:3.0,paid:1.5,due:'28 Oct',s:'Partially Paid'},
+ {id:'INV-0143',c:'Orbit Logistics',p:'PRJ-103',amt:5.4,paid:0,due:'15 Oct',s:'Overdue'},
+ {id:'INV-0144',c:'Harbor Foods',p:'PRJ-104',amt:2.5,paid:0,due:'25 Nov',s:'Issued'},
+ {id:'INV-0145',c:'Northwind Retail',p:'PRJ-101',amt:3.6,paid:0,due:'—',s:'Draft'},
+ {id:'INV-0146',c:'Pixel Interiors',p:'PRJ-105',amt:1.2,paid:0,due:'—',s:'Approved'}
+];
+const OPP=[
+ {n:'Retail loyalty app',c:'Northwind Retail',v:12,pr:60,st:'Proposal',cl:'30 Nov',fu:'Send revised estimate'},
+ {n:'Kitchen display add-on',c:'Harbor Foods',v:4,pr:80,st:'Negotiation',cl:'15 Nov',fu:'Call decision maker'},
+ {n:'Showroom phase 2',c:'Pixel Interiors',v:8,pr:30,st:'Qualified',cl:'20 Dec',fu:'Resume after hold review'},
+ {n:'Fleet reports module',c:'Orbit Logistics',v:6,pr:50,st:'Proposal',cl:'5 Dec',fu:'Demo scheduled'}
+];
+const TENANTS=[
+ {n:'Tenant 001 (sample)',plan:'Business',users:48,st:'Active',use:78},{n:'Tenant 002 (sample)',plan:'Growth',users:22,st:'Active',use:55},
+ {n:'Tenant 003 (sample)',plan:'Starter',users:8,st:'Trial',use:20},{n:'Tenant 004 (sample)',plan:'Growth',users:31,st:'Active',use:64},
+ {n:'Tenant 005 (sample)',plan:'Business',users:75,st:'Active',use:91},{n:'Tenant 006 (sample)',plan:'Starter',users:5,st:'Suspended',use:0}
+];
+
+/* ============ roles ============ */
+const V=[['dash','Overview Dashboard','▦'],['projects','Projects','📁'],['sprint','Sprint Planning','🗓'],['handover','Team Handover','⇄'],['timesheets','Timesheets','⏱'],['perf','Employee Performance','★'],['revenue','Revenue Targets','◎'],['expenses','Expenses & Cost','₹'],['invoices','Invoices','🧾'],['matrix','Role & Permission Matrix','🔐'],['workflow','Product Workflow','➜'],['assump','Assumptions & Decisions','❓']];
+const OPEN={matrix:'View',workflow:'View',assump:'View'};
+const ROLES=[
+ {id:'ceo',name:'Organization Owner / CEO',short:'Owner / CEO',user:'Priya Rao (sample)',scope:'Whole organization',
+  acc:{dash:'Full',projects:'Full',sprint:'View',handover:'View',timesheets:'View',perf:'Full',revenue:'Full',expenses:'Full',invoices:'Full'},
+  can:{dash:['Revenue target vs actual, total cost and overhead','Delivery health, invoice outstanding and variance alerts','Ask the AI Management Assistant (advisory)'],projects:['Customer/project profitability incl. margin','Review scope changes and budgets'],sprint:['Read-only view of sprint health'],handover:['Read-only view of handovers'],timesheets:['Read-only view across the organization','Override / escalate approvals'],perf:['Org-wide employee performance matrix','Transparent definitions; hours are not a sole score'],revenue:['Set and approve revenue targets at any level','Actual-vs-target variance'],expenses:['All categories incl. restricted salary cost','Choose shared-cost allocation method'],invoices:['Approve invoices; review receivables']}},
+ {id:'fin',name:'Finance Manager',short:'Finance',user:'Sameer Joshi (sample)',scope:'Financial data',
+  acc:{dash:'Full',projects:'View',timesheets:'View',revenue:'Manage',expenses:'Full',invoices:'Full'},
+  can:{dash:['Revenue, expense mix, invoice status and receivables'],projects:['Finance view of project revenue, cost and contribution'],timesheets:['Finance validation of approved billable hours only'],revenue:['Enter revenue and monitor targets','Record revenue on the chosen basis'],expenses:['Record expenses and allocate costs','Restricted salary cost visibility','Export and reconcile'],invoices:['Prepare, approve and issue invoices','Record payments; chase overdue invoices']}},
+ {id:'ops',name:'Operations / Delivery Manager',short:'Operations',user:'Vikram Shah (sample)',scope:'Delivery portfolio',
+  acc:{dash:'Full',projects:'Full',sprint:'Full',handover:'Full',timesheets:'Manage',perf:'Full',revenue:'View',expenses:'View'},
+  can:{dash:['Active projects, sprint completion, overdue tasks, workload, effort variance'],projects:['Manage scope, capacity and planned effort','No salary cost or margin shown'],sprint:['Sprint health, blocked work, reassignment'],handover:['Oversee all handovers'],timesheets:['Approve or return timesheets'],perf:['Employee performance matrix across teams'],revenue:['Read-only targets for planning'],expenses:['Summary only; salary and cost rates hidden']}},
+ {id:'pm',name:'Project Manager',short:'Project Manager',user:'Asha Kulkarni (sample)',scope:'Assigned projects only: PRJ-101, 102, 106',
+  acc:{dash:'Delegated',projects:'Delegated',sprint:'Delegated',handover:'Manage',timesheets:'Delegated',perf:'Delegated',revenue:'View',expenses:'Delegated',invoices:'Delegated'},
+  can:{dash:['Project budget/effort, sprint progress, tasks by status'],projects:['Scope, milestones and budget (as permitted)','Assigned projects only'],sprint:['Create sprints and tasks; assign and reassign'],handover:['Initiate handover; track acknowledgements'],timesheets:['Review timesheets for delegated team'],perf:['Project-evidence view only; no reviews or salary'],revenue:['View targets of assigned projects'],expenses:['Raise cost requests for assigned projects'],invoices:['Request invoice drafts only; cannot issue']}},
+ {id:'tl',name:'Team Lead',short:'Team Lead',user:'Rohan Mehta (sample)',scope:'Team A: Rohan, Meera, Dev, Isha',
+  acc:{dash:'Delegated',projects:'Delegated',sprint:'Delegated',handover:'Manage',timesheets:'Delegated',perf:'Delegated'},
+  can:{dash:['Team workload, board, blockers, pending timesheets'],projects:['Progress and effort of assigned projects (no financials)'],sprint:['Commit work and manage team assignments'],handover:['Review team handovers'],timesheets:['Review timesheets (delegated)'],perf:['Team scorecards; no salary data']}},
+ {id:'emp',name:'Employee / Contributor',short:'Employee',user:'Meera Nair (sample)',scope:'Own work only',
+  acc:{dash:'Own',sprint:'Own',handover:'Own',timesheets:'Own',perf:'Own'},
+  can:{dash:['My tasks, hours, timesheet status, goals'],sprint:['My commitments; update status and notes'],handover:['Receive and acknowledge my handovers'],timesheets:['Log work, submit, see approval status'],perf:['My own metrics and goals; acknowledge reviews']}},
+ {id:'sales',name:'Sales / Business Development',short:'Sales / BD',user:'Kabir Sethi (sample)',scope:'Assigned customers',
+  acc:{dash:'Delegated',projects:'View',revenue:'Delegated'},
+  can:{dash:['Target vs achieved, pipeline, forecast, follow-ups'],projects:['Won / assigned projects, contract value only'],revenue:['Opportunities, expected revenue, follow-ups, convert won deals']}},
+ {id:'plat',name:'SaaS Platform Administrator',short:'Platform Admin',user:'Platform Ops (sample)',scope:'Platform level, separate from tenant data',tag:'Platform',
+  acc:{dash:'Manage'},
+  can:{dash:['Tenant list, plans, usage and platform alerts only','Support access only via controlled, audited process']}}
+];
+const ROLE=id=>ROLES.find(r=>r.id===id);
+const MXROLES=[['ceo','Owner / CEO'],['fin','Finance'],['ops','Operations'],['pm','Project Mgr'],['tl','Team Lead'],['emp','Employee'],['sales','Sales / BD'],['plat','Platform Admin'],['hr','HR / People (optional)']];
+const N='No Access';
+const MX=[
+ ['Organization & User Administration',1,'P0',['Full',N,'View',N,N,'Own',N,'Manage','View']],
+ ['Customer / Business Register',1,'P0',['Full','Full','Full','Delegated','Delegated','Delegated',"Delegated",N,N]],
+ ['Project & Scope Management',1,'P0',['Full','View','Full','Delegated','Delegated','Own','View',N,N]],
+ ['Sprint & Task Planning',1,'P0',['Full',N,'Full','Delegated','Delegated','Own',N,N,N]],
+ ['Team Transition / Handover',1,'P0',['View',N,'Full','Manage','Manage','Own',N,N,N]],
+ ['Timesheet Entry',1,'P0',['Own','Own','Own','Own','Own','Own','Own',N,'Own']],
+ ['Timesheet Approval',1,'P0',['Full','View','Full','Delegated','Delegated',N,N,N,N]],
+ ['Employee Performance',1,'P1',['Full',N,'Full','Delegated','Delegated','Own',N,N,'Manage']],
+ ['Revenue Targets',1,'P0',['Full','Manage','View','View',N,N,'Delegated',N,N]],
+ ['Expense & Cost Allocation',1,'P0',['Full','Full','View','Delegated',N,N,N,N,N]],
+ ['Invoice Management',1,'P1',['Full','Full',N,'Delegated',N,N,N,N,N]],
+ ['Executive / Financial / Delivery Reports',1,'P0',['Full','Manage','Manage','Delegated','Delegated','Own','Delegated','View','View']],
+ ['AI Management Assistant',3,'P2 pilot',['Full','Delegated','Delegated','Delegated','Delegated',N,N,N,N]],
+ ['Lightweight Opportunity Tracking',2,'P2',['View',N,N,N,N,N,'Manage',N,N]]
+];
+const WF=[
+ ['Revenue target is defined','Management sets period targets (org / customer / project / owner — level is an open decision).',['ceo','fin','sales'],'revenue'],
+ ['Customer / project is created','Customer or internal business unit linked to a project with PM and billing model.',['ceo','ops','sales'],'projects'],
+ ['Scope & deliverables defined','Scope, milestones, budget and planned effort captured; scope changes are recorded.',['ops','pm'],'projects'],
+ ['Sprint & tasks planned','Sprint goal, backlog and estimates; Team Lead confirms capacity.',['pm','tl','ops'],'sprint'],
+ ['Employees are assigned','Each active task has an accountable owner; reassignment creates an auditable handover.',['pm','tl','ops','emp'],'handover'],
+ ['Work recorded in timesheets','Employees log time against project/task and submit daily or weekly.',['emp','tl','pm'],'timesheets'],
+ ['Manager approves timesheets','Approve, reject or return with comments. Only approved effort counts.',['tl','pm','ops'],'timesheets'],
+ ['Actual effort & cost calculated','Approved effort + direct costs + allocated overhead (salary rates restricted).',['fin','ceo'],'expenses'],
+ ['Invoice prepared / issued','Finance prepares from milestones or approved billable time; approval policy applies.',['fin','ceo','pm'],'invoices'],
+ ['Management reviews performance','Revenue, cost, margin, and project/employee performance reviewed with context.',['ceo','ops','fin'],'dash']
+];
+const ASSUME=[
+ ['Meaning of daily S / H markers in the November planning sheet','Not defined in the workbook. Not inferred.','Make the planning marker configurable per tenant and ask the customer to define S and H.','Sheet'],
+ ['Meaning of “Matrix/Invoice – Employee Performance”','Ambiguous: employee matrix, customer invoice matrix, invoice generation, or all three.','Build the performance matrix (P1) and invoice tracking; treat full invoicing as a configurable decision.','Note'],
+ ['Invoice PDF / GST / tax workflows required?','Unknown. Tax rules and statutory formats need accountant validation.','Start with draft, approval and payment tracking; no hardcoded tax assumptions.','Open'],
+ ['Revenue basis: invoiced, collected, recognized or milestone-based','Unknown. Estimated, accrued, invoiced, collected and recognized must not be conflated.','Make the revenue basis a visible tenant setting; default proposal: recognized on milestone.','Open'],
+ ['How salary and shared overhead are allocated','Unknown. Options: actual salary ÷ hours, standard rate, % allocation, manual; overhead by equal / % / headcount / hours / manual.','Standard hourly cost rate × approved hours; overhead by approved hours. Salary rates restricted.','Open'],
+ ['Target level: organization, customer, project, employee or sales owner','Unknown.','Organization + customer + project in MVP; sales-owner level optional.','Open'],
+ ['Native mobile app required?','Not confirmed by source inputs.','Responsive web first; native app only if confirmed.','Open'],
+ ['Final role hierarchy and approval delegation','Roles shown are a proposed starting set.','Configurable roles with capability-based permissions; final names and delegation to be approved.','Open'],
+ ['What the business names in the workbook represent','Customers, internal products, departments, or a mixture.','Support both customers and internal business units.','Open'],
+ ['Sprint cadence and meaning of “team transition”','Task reassignment, project handover, sprint carry-forward, or all.','Two-week sprints; handover record on every owner change, with acknowledgement.','Open']
+];
+
+/* ============ state ============ */
+const ui={};
+const state={role:'ceo',view:'dash',basis:'Recognized',alloc:'Approved hours',wf:0,mxRole:'All',tab:{}};
+let BYPASS=0;
+const rr=()=>ROLE(state.role);
+const access=v=>OPEN[v]||rr().acc[v]||null;
+
+/* ============ shell ============ */
+function renderShell(){
+ const r=rr();
+ $('#roles').innerHTML=ROLES.map(x=>`<button type="button" class="rp" data-role="${x.id}" aria-pressed="${x.id===state.role}">${esc(x.short)}${x.tag?`<span class="tag">${x.tag}</span>`:''}</button>`).join('');
+ $('#roleSel').innerHTML=ROLES.map(x=>`<option value="${x.id}" ${x.id===state.role?'selected':''}>Previewing as: ${esc(x.name)}</option>`).join('');
+ $('#who').innerHTML=`<b>${esc(r.name)}</b>${esc(r.user)} · ${esc(r.scope)}`;
+ $('#nav').innerHTML=V.map(([k,l,i],ix)=>{
+  const ok=!!access(k);
+  return (ix===9?'<div class="navh">Product</div>':'')+`<button type="button" class="nav" data-view="${k}" ${state.view===k?'aria-current="page"':''} ${ok?'':'aria-disabled="true" title="Access restricted for this role"'}><span class="ic" aria-hidden="true">${i}</span>${l}${ok?'':'<span class="lk" aria-hidden="true">🔒</span>'}</button>`;
+ }).join('');
+}
+function head(title,sub){
+ const r=rr(),a=access(state.view);
+ return `<h1>${title}</h1><p class="sub">${sub}</p>`+(a&&!OPEN[state.view]?`<div class="card mb rolecard"><div class="cap"><h3>As ${esc(r.name)} you can <span class="chip c-acc">${esc(a)}</span></h3><ul class="can">${(r.can[state.view]||[]).map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div><div style="min-width:220px"><div style="font-size:12px;color:var(--mute)">Data scope</div><b>${esc(r.scope)}</b></div></div>`:'');
+}
+function restricted(){
+ const v=V.find(x=>x[0]===state.view),r=rr();
+ const sal=['expenses','invoices','perf'].includes(state.view);
+ return `<div class="lock" role="alert"><div class="big" aria-hidden="true">🔒</div><h1>Access restricted</h1><p><b>${esc(v[1])}</b> is not part of the proposed access for <b>${esc(r.name)}</b>.${sal?' It may contain confidential financial, salary or review data.':''}</p><p style="max-width:560px;margin:8px auto">Permissions are configurable by the Organization Owner and enforced by backend APIs. No data from this module is loaded in this view.</p><button class="btn" data-go="matrix">See Role &amp; Permission Matrix</button></div>`;
+}
+function render(){
+ const f=document.activeElement,fid=f&&f.id,ss=f&&f.selectionStart;
+ renderShell();
+ const a=access(state.view);
+ $('#view').innerHTML=a?VIEWS[state.view]():restricted();
+ if(fid&&fid in ui||fid&&$('#'+fid)){const e=$('#'+fid);if(e){e.focus();try{if(ss!=null)e.setSelectionRange(ss,ss)}catch(_){}}}
+}
+function go(v){state.view=v;document.body.classList.remove('nav-open');render();window.scrollTo(0,0);$('#view').focus({preventScroll:true})}
+function setRole(id){state.role=id;ui.q1=ui.q2=ui.q3=ui.q4='';state.wf=0;toast('Previewing as '+rr().name+' (illustrative)');render()}
+
+/* ============ scoping helpers ============ */
+function scopedProjects(){const r=state.role;
+ if(r==='pm')return PRJ.filter(p=>p.pm==='Asha');
+ if(r==='tl')return PRJ.filter(p=>['PRJ-101','PRJ-102','PRJ-106'].includes(p.id));
+ if(r==='sales')return PRJ.filter(p=>['PRJ-101','PRJ-104','PRJ-105'].includes(p.id));
+ return PRJ;}
+function scopedTasks(){const r=state.role;
+ if(r==='emp')return TASKS.filter(t=>t.o==='Meera');
+ if(r==='tl')return TASKS.filter(t=>TEAM_TL.includes(t.o));
+ if(r==='pm')return TASKS.filter(t=>PRJ_MAP[t.p].pm==='Asha');
+ return TASKS;}
+function scopedTS(){const r=state.role;
+ if(r==='emp')return TS.filter(t=>t.e==='Meera');
+ if(r==='tl')return TS.filter(t=>TEAM_TL.includes(t.e));
+ if(r==='pm')return TS.filter(t=>PRJ_MAP[t.p].pm==='Asha');
+ if(r==='fin')return TS.filter(t=>t.s==='Approved'&&t.b==='Billable');
+ return TS;}
+function totals(){const rev=sum(ACT,x=>x)*BASIS[state.basis],tgt=sum(TGT,x=>x),exp=sum(CATS,c=>c.v);return {rev,tgt,exp,con:rev-exp}}
+const outstanding=()=>sum(INV.filter(i=>['Issued','Partially Paid','Overdue'].includes(i.s)),i=>i.amt-i.paid);
+
+/* ============ views ============ */
+const VIEWS={};
+function aiPanel(){
+ const A={
+  'Why is Supply Tracker over budget?':'Illustrative answer: PRJ-103 shows 790 h approved vs 700 h estimated (+13%). Two blocked tasks (T-208) and a telemetry overrun (T-207) are the main contributors visible in the data. Suggested human follow-up: review scope change with the PM. Confidence: medium — based only on approved timesheets and task notes you are permitted to see.',
+  'Summarize revenue shortfall this month':'Illustrative answer: November actual is below target by ~4.4 L on the selected revenue basis. Invoice INV-0143 (overdue) and the on-hold PRJ-105 are the largest visible factors. This is an advisory summary, not a financial posting.',
+  'Which handovers are pending?':'Illustrative answer: 2 handovers await acknowledgement (H-01, H-03). No ownership change is made by AI; the incoming owners must acknowledge.'};
+ return `<div class="card ai"><h2>AI Management Assistant ${pillar(3)} <span class="chip c-acc">Phase 2 pilot · advisory only</span></h2><p class="sub" style="margin-bottom:8px">Answers use only data this role may see. AI never approves timesheets, edits financials, rates employees or sends communications.</p><div class="q">${Object.keys(A).map((q,i)=>`<button class="btn sm" data-ai="${i}">${q}</button>`).join('')}</div></div>`.replace('</div></div>','</div></div>')+`<script type="application/json" id="aiData">${JSON.stringify(A)}<\/script>`;
+}
+VIEWS.dash=()=>{
+ const r=state.role,T=totals(),out=outstanding();
+ const t=H=>head('Overview Dashboard','Illustrative KPIs for the selected role. Sample data only, not customer actuals.')+H;
+ if(r==='ceo'){
+  const g=PRJ.filter(p=>p.s!=='Planned');
+  return t(`<div class="grid g4 mb">${kpi('Revenue target achievement',pct(T.rev,T.tgt)+'%',L(T.rev)+' of '+L(T.tgt)+' · '+state.basis+' basis')}${kpi('Total expenses',L(T.exp),'Incl. restricted salary cost')}${kpi('Contribution',L(T.con),'Margin '+pct(T.con,T.rev)+'%')}${kpi('Outstanding',L(out),INV.filter(i=>i.s==='Overdue').length+' overdue invoice')}</div>
+  <div class="grid g4 mb">${kpi('Active projects',PRJ.filter(p=>p.s==='Active').length,'Health: 2 green · 1 amber · 1 red',' ')}${kpi('Employee utilization','74%','Approved hours ÷ available hours','Utilization')}${kpi('Pending approvals','5','Timesheets 4 · invoices 1')}${kpi('Open alerts','3','Variance & delivery risk')}</div>
+  <div class="grid g32 mb"><div class="card"><h2>Monthly revenue: target vs actual (org level)</h2>${colChart(MONTHS,TGT,ACT.map(x=>x*BASIS[state.basis]))}</div>
+  <div class="card"><h2>Alerts</h2><ul class="can"><li>${chip('Red','bad')} Supply Tracker: effort +13% over estimate</li><li>${chip('Amber','warn')} Nov revenue ${pct(ACT[5],TGT[5])}% of target</li><li>${chip('Overdue','bad')} INV-0143 Orbit Logistics ${L(5.4)}</li></ul></div></div>
+  <div class="card flat mb"><div style="padding:14px 16px 0"><h2>Project contribution ${tip('Contribution')}</h2></div>${table([{h:'Project',k:'n'},{h:'Health',r:p=>sChip(p.h)},{h:'Revenue',n:1,r:p=>L(p.rev)},{h:'Contribution',n:1,r:p=>L(p.rev-p.cost-p.oh)},{h:'Margin',n:1,r:p=>p.rev?pct(p.rev-p.cost-p.oh,p.rev)+'%':'n/a'}],g)}</div>${aiPanel()}`);
+ }
+ if(r==='fin'){
+  return t(`<div class="grid g4 mb">${kpi('Revenue (period)',L(T.rev),state.basis+' basis')}${kpi('Expenses',L(T.exp),'Salary shown aggregated · rates restricted')}${kpi('Invoice outstanding',L(out),'Receivables')}${kpi('Overdue',L(sum(INV.filter(i=>i.s==='Overdue'),i=>i.amt-i.paid)),'1 invoice','Outstanding')}</div>
+  <div class="grid g2 mb"><div class="card"><h2>Expenses by category</h2>${hbars(CATS.map(c=>({n:c.n,v:c.v,t:c.restricted?'warn':''})),v=>L(v))}</div><div class="card"><h2>Invoice status</h2>${donut([{n:'Paid',v:1,c:'#17a673'},{n:'Partially paid',v:1,c:'#e0a100'},{n:'Issued / Approved',v:2,c:'#2f5bea'},{n:'Overdue',v:1,c:'#d92d20'},{n:'Draft',v:1,c:'#9aa5b8'}])}</div></div>
+  <div class="card flat mb"><div style="padding:14px 16px 0"><h2>Project cost summary</h2></div>${table([{h:'Project',k:'n'},{h:'Direct cost',n:1,r:p=>L(p.cost)},{h:'Allocated overhead',n:1,r:p=>L(p.oh)},{h:'Revenue',n:1,r:p=>L(p.rev)}],PRJ)}</div>${aiPanel()}`);
+ }
+ if(r==='ops'){
+  const od=TASKS.filter(x=>x.s!=='done'&&['5 Nov'].includes(x.d)).length;
+  return t(`<div class="grid g4 mb">${kpi('Active projects',PRJ.filter(p=>p.s==='Active').length,'1 on hold · 1 planned')}${kpi('Sprint 23 completion','41%','2 of 12 tasks done (illustrative)')}${kpi('Overdue / due today',od,'Tasks needing attention')}${kpi('Effort variance','+3.2%','Actual vs estimate (approved)','Estimate variance')}</div>
+  <div class="grid g2 mb"><div class="card"><h2>Workload (approved h vs planned h)</h2>${hbars(EMP.map(e=>({n:e.n,v:pct(e.ap,e.pl),t:e.ap>e.pl?'bad':''})),v=>v+'%',130)}</div><div class="card"><h2>Blocked work</h2>${table([{h:'Task',k:'t'},{h:'Owner',k:'o'},{h:'Reason',k:'b'}],TASKS.filter(x=>x.s==='blocked'))}</div></div>
+  <div class="card flat mb"><div style="padding:14px 16px 0"><h2>Estimate vs actual by project</h2></div>${table([{h:'Project',k:'n'},{h:'Estimate h',n:1,k:'est'},{h:'Actual h',n:1,k:'act'},{h:'Variance',n:1,r:p=>(p.act-p.est>0?'+':'')+pct(p.act-p.est,p.est)+'%'}],PRJ)}</div>${aiPanel()}`);
+ }
+ if(r==='pm'){
+  const P=scopedProjects(),tk=scopedTasks();
+  return t(`<div class="grid g4 mb">${kpi('My projects',P.length,'PRJ-101, 102, 106')}${kpi('Budget (assigned)',L(sum(P,p=>p.bud)),'Margin and salary not shown')}${kpi('Effort',sum(P,p=>p.act)+' / '+sum(P,p=>p.est)+' h','Actual vs estimate','Estimate variance')}${kpi('Handovers',HAND.filter(h=>P.some(p=>p.id===h.p)&&h.st!=='Acknowledged').length,'Awaiting acknowledgement')}</div>
+  <div class="grid g2 mb"><div class="card"><h2>Tasks by status</h2>${hbars(COLS.map(([k,l])=>({n:l,v:tk.filter(x=>x.s===k).length})),null,5)}</div><div class="card"><h2>Sprint 23 progress</h2>${P.map(p=>`<div class="hb" style="grid-template-columns:1fr 2fr 50px"><span class="nm">${esc(p.n)}</span>${bar(p.p)}<span class="vl">${p.p}%</span></div>`).join('')}</div></div>${aiPanel()}`);
+ }
+ if(r==='tl'){
+  const tk=scopedTasks();
+  return t(`<div class="grid g4 mb">${kpi('Team size','4','Team A')}${kpi('Open tasks',tk.filter(x=>x.s!=='done').length,'In sprint 23')}${kpi('Blocked',tk.filter(x=>x.s==='blocked').length,'Needs attention')}${kpi('Timesheets to review',scopedTS().filter(x=>x.s==='Submitted').length,'Delegated approval')}</div>
+  <div class="grid g2 mb"><div class="card"><h2>Team workload (open estimated h)</h2>${hbars(TEAM_TL.map(n=>({n,v:sum(tk.filter(x=>x.o===n&&x.s!=='done'),x=>x.e-x.a)})),v=>v+' h')}</div><div class="card"><h2>Blockers</h2>${table([{h:'Task',k:'t'},{h:'Owner',k:'o'},{h:'Reason',k:'b'}],tk.filter(x=>x.s==='blocked'),'No blockers 🎉')}</div></div>`);
+ }
+ if(r==='emp'){
+  const tk=scopedTasks(),mine=scopedTS();
+  return t(`<div class="grid g4 mb">${kpi('My open tasks',tk.filter(x=>x.s!=='done').length,'Sprint 23')}${kpi('Due today',tk.filter(x=>x.d==='5 Nov'&&x.s!=='done').length,'5 Nov 2026')}${kpi('Hours this week',sum(mine,x=>x.h)+' / 40','Draft + submitted + approved')}${kpi('Timesheet status',mine.filter(x=>x.s==='Submitted').length+' submitted','Returned: '+mine.filter(x=>x.s==='Returned').length)}</div>
+  <div class="grid g2 mb"><div class="card"><h2>My tasks</h2>${table([{h:'Task',k:'t'},{h:'Due',k:'d'},{h:'Status',r:x=>chip(COLS.find(c=>c[0]===x.s)[1],x.s==='blocked'?'bad':x.s==='done'?'ok':'')}],tk)}</div>
+  <div class="card"><h2>My goals (own view)</h2>${[['Deliver Checkout API',70],['Reduce estimate variance to ±10%',55],['Complete 2 knowledge-share sessions',50]].map(g=>`<div class="hb" style="grid-template-columns:1.3fr 1fr 40px"><span>${g[0]}</span>${bar(g[1],'')}<span class="vl">${g[1]}%</span></div>`).join('')}</div></div>`);
+ }
+ if(r==='sales'){
+  const w=sum(OPP,o=>o.v*o.pr/100);
+  return t(`<div class="grid g4 mb">${kpi('Target achieved',pct(15.3,20)+'%',L(15.3)+' of '+L(20)+' (assigned)')}${kpi('Open pipeline',L(sum(OPP,o=>o.v)),OPP.length+' opportunities')}${kpi('Weighted forecast',L(w),'Value × probability (rule to be agreed)')}${kpi('Follow-ups due',OPP.length,'This fortnight')}</div>
+  <div class="grid g2 mb"><div class="card"><h2>Pipeline by stage</h2>${hbars(['Qualified','Proposal','Negotiation'].map(s=>({n:s,v:sum(OPP.filter(o=>o.st===s),o=>o.v)})),v=>L(v))}</div><div class="card"><h2>Follow-up reminders ${pillar(2)}</h2><ul class="can">${OPP.map(o=>`<li><b>${esc(o.c)}</b>: ${esc(o.fu)}</li>`).join('')}</ul></div></div><div class="note">Lightweight opportunity tracking only. A full CRM is out of scope without customer approval. No salary or cost data is available to this role.</div>`);
+ }
+ // plat
+ return t(`<div class="note w mb">Platform view: tenant business content (projects, financials, employees) is never shown here. Support access to a tenant requires a controlled, audited process.</div>
+ <div class="grid g4 mb">${kpi('Active tenants','4','of 6 sample tenants')}${kpi('Trials','1','Starter plan')}${kpi('Suspended','1','Billing hold')}${kpi('Platform alerts','1','Elevated API latency (sample)')}</div>
+ <div class="grid g2 mb"><div class="card"><h2>Plan distribution</h2>${donut([{n:'Starter',v:2,c:'#9aa5b8'},{n:'Growth',v:2,c:'#2f5bea'},{n:'Business',v:2,c:'#17a673'}])}</div><div class="card"><h2>Usage summary</h2>${hbars(TENANTS.map(x=>({n:x.n,v:x.use})),v=>v+'%',100)}</div></div>
+ <div class="card flat"><div style="padding:14px 16px 0"><h2>Tenants</h2></div>${table([{h:'Organization',k:'n'},{h:'Plan',k:'plan'},{h:'Users',n:1,k:'users'},{h:'Status',r:x=>chip(x.st,x.st==='Active'?'ok':x.st==='Trial'?'info':'bad')},{h:'Action',r:x=>`<button class="btn sm" data-demo="Request audited support access to ${x.n}">Request audited access</button>`}],TENANTS)}</div>`);
+};
+
+VIEWS.projects=()=>{
+ const r=state.role,q=ui.q1||'',st=ui.f1||'All';
+ let P=scopedProjects().filter(p=>match(p,q)&&(st==='All'||p.s===st));
+ const fin=['ceo','fin'].includes(r);
+ const cols=[{h:'Project',r:p=>`<b>${esc(p.n)}</b><br><small>${p.id}</small>`},{h:'Customer',k:'c'},{h:'PM',k:'pm'},{h:'Status',r:p=>sChip(p.s)}];
+ if(r==='sales')cols.push({h:'Contract value',n:1,r:p=>L(p.bud)});
+ else{
+  cols.push({h:'Health',r:p=>sChip(p.h)});
+  if(r!=='tl')cols.push({h:'Budget',n:1,r:p=>L(p.bud)});
+  if(fin)cols.push({h:'Revenue',n:1,r:p=>L(p.rev)},{h:'Direct cost',n:1,r:p=>L(p.cost)},{h:'Contribution',n:1,r:p=>L(p.rev-p.cost-p.oh)},{h:'Margin',n:1,r:p=>p.rev?pct(p.rev-p.cost-p.oh,p.rev)+'%':'n/a'});
+  if(r!=='fin')cols.push({h:'Est / Actual h',n:1,r:p=>p.est+' / '+p.act},{h:'Progress',r:p=>bar(p.p)});
+ }
+ cols.push({h:'',r:p=>`<button class="btn sm" data-prj="${p.id}">Details</button>`});
+ const canNew=['ceo','ops'].includes(r);
+ return head('Projects',r==='sales'?'Won and assigned projects (contract value only).':'Customer/project portfolio, scope, effort and status.')+
+ searchBar('q1','Search projects, customers, PMs…',sel('f1','Status',['All','Active','Planned','On Hold'])+(canNew?'<button class="btn pri" data-demo="Create project (customer, PM, scope, budget)">+ New project</button>':'')+(r==='pm'?'<button class="btn" data-demo="Request scope change (date, reason, approver recorded)">Request scope change</button>':''))+
+ `<div class="card flat">${table(cols,P)}</div>`+(fin?`<p class="note mt" style="margin-top:12px">Revenue &amp; contribution use the proposed formulas ${tip('Contribution')}; allocation rules are open decisions. Unallocated or incomplete data would be flagged.</p>`:'');
+};
+
+VIEWS.sprint=()=>{
+ const r=state.role;let T=scopedTasks();
+ const q=ui.q2||'',pf=ui.f2||'All projects';
+ T=T.filter(t=>match(t,q)&&(pf==='All projects'||t.p===pf.split(' ')[0]));
+ const edit=['ops','pm','tl','emp'].includes(r);
+ const plist=['All projects',...scopedProjects().map(p=>p.id+' '+p.n)];
+ const board=`<div class="board">${COLS.map(([k,l])=>{const c=T.filter(t=>t.s===k);return `<div class="col"><h3>${l}<span>${c.length}</span></h3>${c.map(t=>`<div class="tk ${t.s==='blocked'?'bl':''}"><b>${esc(t.t)}</b>${t.id} · ${esc(t.o)} · ${t.a}/${t.e} h · due ${t.d}${t.b?`<br><span class="chip c-bad">${esc(t.b)}</span>`:''}${edit?`<select data-task="${t.id}" aria-label="Move ${esc(t.t)}">${COLS.map(([k2,l2])=>`<option value="${k2}" ${k2===t.s?'selected':''}>${l2}</option>`).join('')}</select>`:''}</div>`).join('')||'<div class="empty" style="padding:10px;font-size:12px">Empty</div>'}</div>`}).join('')}</div>`;
+ const btns=(r==='pm'||r==='ops'?'<button class="btn pri" data-demo="Create sprint / task with estimate and acceptance criteria">+ New task</button><button class="btn" data-demo="Reassign task (creates a handover record)">Reassign</button>':'')+(r==='tl'?'<button class="btn" data-demo="Commit work to sprint after capacity check">Commit to sprint</button>':'');
+ return head('Sprint Planning','Sprint 23 · 2–13 Nov 2026 (illustrative). Move tasks with the status selector'+(edit?'.':' — read-only for your role.'))+
+ searchBar('q2','Search tasks, owners…',sel('f2','Project',plist)+btns+(r==='emp'?'<button class="btn" data-demo="Add work note">Add work note</button>':''))+
+ `<div class="note mb">Calendar planning markers (the workbook’s <b>S</b>/<b>H</b>) are intentionally <b>not</b> interpreted — configurable once the customer defines them. Reassigning a task never transfers accountability silently; it creates a handover.</div>`+(T.length?board:'<div class="card empty">No tasks match.</div>');
+};
+
+VIEWS.handover=()=>{
+ const r=state.role;let H=HAND.filter(h=>{
+  if(r==='emp')return h.from==='Meera'||h.to==='Meera';
+  if(r==='tl')return TEAM_TL.includes(h.from)||TEAM_TL.includes(h.to);
+  if(r==='pm')return PRJ_MAP[h.p].pm==='Asha';
+  return true;}).filter(h=>match(h,ui.q3||''));
+ const me='Meera';
+ const cols=[{h:'Task',r:h=>`<b>${esc(h.tk)}</b><br><small>${h.p}</small>`},{h:'From → To',r:h=>`${h.from} → ${h.to}`},{h:'Status',r:h=>sChip(h.st)},{h:'Remaining',n:1,r:h=>h.rem+' h'},{h:'Blockers',k:'bl'},{h:'Next action',k:'next'},{h:'Action',r:h=>{
+  if(r==='emp'&&h.to===me&&h.st!=='Acknowledged')return `<button class="btn sm pri" data-ack="${h.id}">Acknowledge</button>`;
+  if(h.st==='Acknowledged')return '<span class="chip c-ok">✔ Audited</span>';
+  if(['pm','tl','ops'].includes(r))return `<button class="btn sm" data-demo="Send reminder to ${h.to}">Remind</button>`;
+  return '—';}}];
+ return head('Team Handover','Controlled team transition: outgoing owner, incoming owner, status, remaining effort, blockers, next action and acknowledgement.')+
+ searchBar('q3','Search handovers…',['pm','tl','ops'].includes(r)?'<button class="btn pri" data-handover="1">+ Initiate handover</button>':'')+
+ `<div class="card flat">${table(cols,H,'No handovers in your scope.')}</div><p class="note" style="margin-top:12px">Ownership history is preserved. Accountability transfers only after the incoming owner acknowledges.</p>`;
+};
+
+VIEWS.timesheets=()=>{
+ const r=state.role;let T=scopedTS().filter(t=>match(t,ui.q4||'')&&((ui.f4||'All')==='All'||t.s===ui.f4));
+ const own=r==='emp',appr=['ops','pm','tl'].includes(r);
+ const cols=[{h:'Employee',k:'e'},{h:'Date',k:'d'},{h:'Project',r:t=>PRJ_MAP[t.p].n},{h:'Task / work',k:'t'},{h:'Hours',n:1,k:'h'},{h:'Type',k:'b'},{h:'Status',r:t=>sChip(t.s)}];
+ if(own)cols.push({h:'',r:t=>t.s==='Draft'?`<button class="btn sm" data-tssub="${t.id}">Submit</button>`:t.s==='Returned'?`<button class="btn sm" data-tssub="${t.id}">Fix &amp; resubmit</button>`:''});
+ if(appr)cols.push({h:'Review',r:t=>t.s==='Submitted'?`<button class="btn sm pri" data-tsa="${t.id}:Approved">Approve</button> <button class="btn sm" data-tsa="${t.id}:Returned">Return</button>`:'—'});
+ const wk=own?`<div class="grid g4 mb">${kpi('Week total',sum(T,x=>x.h)+' h','Target 40 h')}${kpi('Approved',sum(T.filter(x=>x.s==='Approved'),x=>x.h)+' h','Counts toward cost & utilization')}${kpi('Awaiting approval',sum(T.filter(x=>x.s==='Submitted'),x=>x.h)+' h','Not yet official effort')}${kpi('Returned',T.filter(x=>x.s==='Returned').length,'Needs correction')}</div>`:'';
+ return head('Timesheets',r==='fin'?'Approved billable hours for finance validation only.':'Daily work log, submission and approval. Only approved effort feeds cost and utilization.')+wk+
+ searchBar('q4','Search entries…',sel('f4','Status',['All','Draft','Submitted','Approved','Returned'])+(own?'<button class="btn pri" data-newts="1">+ Add entry</button>':''))+
+ `<div class="card flat">${table(cols,T,'No entries match. Try clearing filters.')}</div><p class="note" style="margin-top:12px">Validations proposed: positive duration, tenant-set daily limit, overlap flags. Approved entries are never silently edited — corrections use an audited adjustment.</p>`;
+};
+
+VIEWS.perf=()=>{
+ const r=state.role;
+ let E=EMP;if(r==='tl')E=EMP.filter(e=>TEAM_TL.includes(e.n));if(r==='emp')E=EMP.filter(e=>e.n==='Meera');if(r==='pm')E=EMP.filter(e=>['Meera','Dev','Isha','Rohan'].includes(e.n));
+ E=E.filter(e=>match(e,ui.q5||''));
+ const dims=r==='pm'?[0,2,3]:[0,1,2,3,4,5];
+ const cols=[{h:'Employee',r:e=>`<b>${esc(e.n)}</b><br><small>${e.role} · ${e.team}</small>`},{h:'Planned / approved h',n:1,r:e=>e.pl+' / '+e.ap},{h:'Utilization'+'',n:1,r:e=>pct(e.ap,e.pl)+'%'},{h:'Tasks done',n:1,k:'done'},{h:'Handovers',n:1,k:'ho'},...dims.map(d=>({h:DIM[d],n:1,r:e=>`<span class="chip ${e.sc[d]>=4?'c-ok':e.sc[d]===3?'c-warn':'c-bad'}">${e.sc[d]}/5</span>`}))];
+ if(r!=='pm'&&r!=='emp')cols.push({h:'Review',r:e=>`<button class="btn sm" data-demo="Add evidence-based review comment for ${e.n}">Add comment</button>`});
+ return head('Employee Performance','Role-appropriate scorecard with transparent definitions. Scores are illustrative.')+
+ `<div class="note w mb"><b>Not a ranking.</b> Hours alone never decide performance; managers add evidence-based comments. No salary, cost rates or confidential reviews are shown here. ${tip('Utilization')}</div>`+
+ (r==='emp'?'':searchBar('q5','Search employees…'))+
+ `<div class="card flat">${table(cols,E)}</div>`+
+ (r==='emp'?`<div class="card" style="margin-top:14px"><h2>My review</h2><p>Manager comment (sample): “Reliable delivery on checkout work; keep sharing estimate assumptions early.”</p><button class="btn" data-demo="Submit comment / acknowledge review">Acknowledge &amp; comment</button></div>`:'')+
+ `<div class="card" style="margin-top:14px"><h3>Scorecard dimensions (proposed)</h3><p style="margin:0">${DIM.join(' · ')}</p></div>`;
+};
+
+VIEWS.revenue=()=>{
+ const r=state.role,T=totals();
+ if(r==='sales'){
+  return head('Revenue Targets','Your assigned targets and expected revenue. Lightweight opportunity tracking '+pillar(2))+
+  `<div class="grid g3 mb">${kpi('Target',L(20),'Assigned customers')}${kpi('Achieved',L(15.3),'76% of target')}${kpi('Gap',L(4.7),'Remaining')}</div>
+  <div class="card flat mb"><div style="padding:14px 16px 0"><h2>Opportunities</h2></div>${table([{h:'Opportunity',k:'n'},{h:'Customer',k:'c'},{h:'Value',n:1,r:o=>L(o.v)},{h:'Prob.',n:1,r:o=>o.pr+'%'},{h:'Stage',r:o=>chip(o.st,'info')},{h:'Close',k:'cl'},{h:'Follow-up',k:'fu'},{h:'',r:o=>o.st==='Negotiation'?`<button class="btn sm" data-demo="Convert won opportunity ${o.n} to a project">Convert to project</button>`:`<button class="btn sm" data-demo="Add follow-up reminder">Add reminder</button>`}],OPP)}</div>`;
+ }
+ let rows;const lvl=ui.f6||'Customer';
+ if(r==='pm')rows=PRJ_T.filter((x,i)=>PRJ[i].pm==='Asha');
+ else rows=lvl==='Organization'?[{n:'Aadi (organization)',t:T.tgt,a:T.rev}]:lvl==='Project'?PRJ_T:lvl==='Sales owner'?OWN_T:CUST_T;
+ const k=BASIS[state.basis];
+ const tableRows=(lvl==='Organization'||r==='pm')?rows:rows.map(x=>({...x,a:+(x.a*k).toFixed(1)}));
+ const mgr=r==='fin'||r==='ceo';
+ return head('Revenue Targets','Target vs actual by period. Revenue basis and target level are open decisions, shown here as proposal selectors.')+
+ `<div class="tools">${r==='pm'?'':sel('f6','Target level',['Customer','Organization','Project','Sales owner'])}<label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--mute)">Revenue basis ${tip('Revenue target achievement')}<select id="basis">${Object.keys(BASIS).map(b=>`<option ${b===state.basis?'selected':''}>${b}</option>`).join('')}</select></label>${mgr?'<button class="btn pri" data-demo="Set / approve revenue target">+ Set target</button><button class="btn" data-demo="Record revenue entry">+ Revenue entry</button>':''}</div>
+ <div class="note w mb">Basis “${state.basis}” is a <b>proposal</b>; the customer has not decided how revenue is recognized. Estimated, invoiced, collected and recognized revenue are never mixed.</div>
+ ${r==='pm'?'':`<div class="grid g32 mb"><div class="card"><h2>Monthly target vs actual</h2>${colChart(MONTHS,TGT,ACT.map(x=>x*k))}</div><div class="card"><h2>Achievement</h2><div class="kpi"><div class="v">${pct(T.rev,T.tgt)}%</div><div class="s">${L(T.rev)} of ${L(T.tgt)} · gap ${L(T.tgt-T.rev)}</div></div>${bar(pct(T.rev,T.tgt))}</div></div>`}
+ <div class="card flat">${table([{h:r==='pm'?'Project (assigned)':lvl,k:'n'},{h:'Target',n:1,r:x=>L(x.t)},{h:'Actual',n:1,r:x=>L(x.a)},{h:'Variance',n:1,r:x=>`<span style="color:${x.a>=x.t?'var(--ok)':'var(--bad)'}">${x.a>=x.t?'+':'−'}${Math.abs(x.a-x.t).toFixed(1)} L</span>`},{h:'Achievement',r:x=>bar(pct(x.a,x.t))+' '+pct(x.a,x.t)+'%'}],tableRows)}</div>`;
+};
+
+VIEWS.expenses=()=>{
+ const r=state.role;
+ if(r==='pm'){
+  return head('Expenses & Cost','Raise cost requests for assigned projects. Approval and recording are done by Finance.')+
+  `<div class="tools"><button class="btn pri" data-demo="Submit project cost request">+ Cost request</button></div><div class="card flat">${table([{h:'Request',k:'n'},{h:'Project',k:'p'},{h:'Category',k:'c'},{h:'Amount',n:1,r:x=>L(x.a)},{h:'Status',r:x=>sChip(x.s)}],[{n:'Staging server (3 months)',p:'PRJ-101',c:'Infrastructure',a:.6,s:'Submitted'},{n:'Icon licence',p:'PRJ-102',c:'Software',a:.1,s:'Approved'}])}</div><p class="note" style="margin-top:12px">Salary cost, cost rates and other projects’ costs are not visible to this role.</p>`;
+ }
+ const full=r==='ceo'||r==='fin',pool=4.5;
+ const w={ 'Equal share':PRJ.map(()=>1),'Percentage (manual %)':[30,20,20,15,5,10],'Headcount':PRJ.map(p=>p.mem),'Approved hours':PRJ.map(p=>p.act),'Manual amounts':[1.2,.8,.9,.7,.4,.5]}[state.alloc];
+ const tw=sum(w,x=>x),al=state.alloc==='Manual amounts'?w:w.map(x=>x/tw*pool);
+ const cats=CATS.filter(c=>full||!c.restricted);
+ return head('Expenses & Cost',full?'Category spend, direct vs shared cost and allocation. Salary cost is restricted to authorized roles.':'Summary view. Salary and cost rates are hidden for your role.')+
+ `<div class="grid g2 mb"><div class="card"><h2>Spend by category</h2>${hbars(cats.map(c=>({n:c.n,v:c.v,t:c.restricted?'warn':''})),v=>L(v))}${full?'':'<div class="note w" style="margin-top:8px">🔒 Salary &amp; cost rates: restricted to Owner and Finance.</div>'}</div>
+ <div class="card"><h2>Shared overhead pool ${tip('Allocated overhead')}</h2><p style="margin:0 0 8px">Rent, Wi‑Fi, hosting, AI subscriptions: <b>${L(pool)}</b> (sample)</p>${full?`<label>Allocation method <select id="alloc">${['Equal share','Percentage (manual %)','Headcount','Approved hours','Manual amounts'].map(m=>`<option ${m===state.alloc?'selected':''}>${m}</option>`).join('')}</select></label>`:`<p>Method: <b>${state.alloc}</b> (view only)</p>`}<p class="note" style="margin-top:10px">Method and period stay visible and auditable. Allocation total reconciles: ${L(sum(al,x=>x))} ✔</p></div></div>
+ <div class="card flat mb"><div style="padding:14px 16px 0"><h2>Allocation by project</h2></div>${table([{h:'Project',k:'n'},{h:'Direct cost',n:1,r:(p)=>full?L(p.cost):'—'},{h:'Allocated overhead',n:1,r:p=>L(al[PRJ.indexOf(p)])}],PRJ)}</div>
+ ${full?`<div class="tools"><button class="btn pri" data-demo="Record expense with category, vendor, allocation and attachment">+ Record expense</button><button class="btn" data-demo="Export expenses (CSV/XLSX)">Export</button><button class="btn" data-demo="Run reconciliation">Reconcile</button></div><div class="note">Source-sheet totals (e.g. the workbook’s displayed total) must be reconciled before being treated as actual cost. Salary uses approved cost rates × approved effort; method is an open decision.</div>`:''}`;
+};
+
+VIEWS.invoices=()=>{
+ const r=state.role,fin=r==='fin',ceo=r==='ceo';
+ if(r==='pm'){
+  return head('Invoices','You may request an invoice draft for assigned projects. Issuing is restricted to Finance.')+`<div class="tools"><button class="btn pri" data-demo="Request invoice draft for milestone / approved billable time">+ Request draft</button></div><div class="card flat">${table([{h:'Request',k:'n'},{h:'Project',k:'p'},{h:'Basis',k:'b'},{h:'Status',r:x=>sChip(x.s)}],[{n:'Draft request #1',p:'PRJ-101',b:'Milestone: Checkout beta',s:'Submitted'}])}</div>`;
+ }
+ const f=ui.f7||'All';let I=INV.filter(i=>(f==='All'||i.s===f)&&match(i,ui.q7||''));
+ const act=i=>{
+  if(fin||ceo){
+   if(i.s==='Draft'||i.s==='Void')return fin?`<button class="btn sm" data-inv="${i.id}:Approved">Submit for approval</button>`:'—';
+   if(i.s==='Approved')return fin?`<button class="btn sm pri" data-inv="${i.id}:Issued">Issue</button>`:`<button class="btn sm" data-demo="Approve ${i.id}">Review</button>`;
+   if(fin&&['Issued','Partially Paid','Overdue'].includes(i.s))return `<button class="btn sm" data-inv="${i.id}:Paid">Record payment</button>`;
+  } return '—';};
+ return head('Invoices','Invoice preparation, approval, payments and receivables. Exact invoice scope needs customer confirmation.')+
+ `<div class="grid g3 mb">${kpi('Outstanding',L(outstanding()),'Issued + part-paid + overdue','Outstanding')}${kpi('Overdue',L(sum(INV.filter(i=>i.s==='Overdue'),i=>i.amt-i.paid)),'Chase now')}${kpi('Drafts / awaiting approval',INV.filter(i=>['Draft','Approved'].includes(i.s)).length,'Not yet issued')}</div>`+
+ searchBar('q7','Search invoices…',sel('f7','Status',['All','Draft','Approved','Issued','Partially Paid','Paid','Overdue'])+(fin?'<button class="btn pri" data-demo="Create draft from milestones or approved billable timesheets">+ New draft</button><button class="btn" data-demo="Export invoice PDF">Export PDF</button>':''))+
+ `<div class="card flat">${table([{h:'Invoice',k:'id'},{h:'Customer',k:'c'},{h:'Project',k:'p'},{h:'Total',n:1,r:i=>L(i.amt)},{h:'Paid',n:1,r:i=>L(i.paid)},{h:'Balance',n:1,r:i=>L(i.amt-i.paid)},{h:'Due',k:'due'},{h:'Status',r:i=>sChip(i.s)},{h:'Action',r:act}],I)}</div><p class="note" style="margin-top:12px">Tax/GST fields, invoice numbering and PDF format are <b>not assumed</b>; they await customer and accountant validation.</p>`;
+};
+
+VIEWS.matrix=()=>{
+ const rf=state.mxRole,q=ui.q8||'';
+ const cols=MXROLES.filter(([k])=>rf==='All'||k===rf||k===state.role);
+ const rows=MX.filter(m=>!q||m[0].toLowerCase().includes(q.toLowerCase()));
+ const cls=v=>'v-'+(v==='No Access'?'No':v);
+ return head('Role & Permission Matrix','Proposed starting permissions across modules. Final permissions are configurable and enforced by backend APIs.')+
+ `<div class="note mb"><b>Proposal, not approval.</b> Role names, delegation and scope rules require customer approval. The prototype uses capabilities, not hardcoded role names.</div>`+
+ searchBar('q8','Filter modules…',`<label style="display:inline-flex;gap:6px;align-items:center;font-size:12.5px;color:var(--mute)">Role<select id="mxRole"><option value="All">All roles</option>${MXROLES.map(([k,n])=>`<option value="${k}" ${rf===k?'selected':''}>${n}</option>`).join('')}</select></label>`)+
+ `<div class="legend" style="margin:0 0 10px">${['Full','Manage','View','Own','Delegated','No Access'].map(v=>`<span><span class="pv ${cls(v)}">${v}</span></span>`).join('')}<span>Delegated = by assignment/delegation scope · Own = own records only</span></div>
+ <div class="card flat"><div class="tw"><table class="mx"><thead><tr><th scope="col">Module</th>${cols.map(([k,n])=>`<th scope="col" class="${k===state.role?'sel':''}">${n}${k===state.role?'<br><small>(you)</small>':''}</th>`).join('')}</tr></thead><tbody>${rows.map(m=>`<tr><td><b>${m[0]}</b> ${pillar(m[1])}<br><small>MVP: ${m[2]}</small></td>${cols.map(([k])=>{const v=m[3][MXROLES.findIndex(x=>x[0]===k)];return `<td class="${k===state.role?'sel':''}"><span class="pv ${cls(v)}">${v}</span></td>`}).join('')}</tr>`).join('')||`<tr><td colspan="${cols.length+1}"><div class="empty">No modules match “${esc(q)}”.</div></td></tr>`}</tbody></table></div></div>
+ <p class="note" style="margin-top:12px"><b>HR / People Manager</b> is an <span class="chip c-warn">Optional / customer decision</span> and is <u>not</u> confirmed MVP scope. Platform Administrator has no default access to tenant business content.</p>`;
+};
+
+VIEWS.workflow=()=>{
+ const r=state.role,sIx=state.wf,s=WF[sIx];
+ const names=Object.fromEntries(ROLES.map(x=>[x.id,x.short]));
+ const maps=[['Matrix/Invoice – Employee Performance','Employee contribution matrix, project/customer cost matrix, invoice preparation and tracking.','Exact invoice scope requires confirmation','perf'],['Sprint Planning – To team transition','Sprint planning, task assignment, reassignment and auditable handover.','Cadence and meaning of “transition” to confirm','handover'],['Target – Revenue','Target set-up and actual-vs-target dashboard with variance.','Revenue basis and target level to decide','revenue'],['Timesheet – To capture details','Work logs, time entry, approval and estimate-vs-actual.','Approval hierarchy to confirm','timesheets']];
+ return head('Product Workflow','How revenue connects to performance. Steps where the selected role participates are highlighted.')+
+ `<div class="chain" aria-label="Value chain">${['Revenue','Customer / Project','Sprint / Tasks','Employee','Timesheet','Cost','Invoice','Performance'].map(x=>`<span>${x}</span>`).join('<i>→</i>')}</div>
+ <div class="steps mb">${WF.map((w,i)=>`<button type="button" class="step ${w[2].includes(r)?'me':''} ${i===sIx?'on':''}" data-step="${i}" aria-pressed="${i===sIx}"><div class="no">${i+1}</div><b>${w[0]}</b><div class="rr">${w[2].map(x=>`<span class="${x===r?'m':''}">${names[x]}</span>`).join('')}</div></button>`).join('')}</div>
+ <div class="card mb"><h2>Step ${sIx+1}: ${s[0]}</h2><p>${s[1]}</p><p>Participating roles: ${s[2].map(x=>chip(names[x],x===r?'acc':'')).join(' ')}</p>${access(s[3])?`<button class="btn" data-go="${s[3]}">Open related screen →</button>`:`<span class="chip c-bad">🔒 Related screen is restricted for your role</span>`}</div>
+ <h2>Customer input → proposed capability</h2><div class="grid g2">${maps.map(m=>`<div class="card"><h3>“${m[0]}”</h3><p style="margin:0 0 8px">${m[1]}</p><span class="chip c-warn">${m[2]}</span> ${access(m[3])?`<button class="btn sm" data-go="${m[3]}">Open screen</button>`:''}</div>`).join('')}</div>
+ <h2 style="margin-top:20px">Three-pillar strategy</h2><div class="grid g3"><div class="card"><h3>${pillar(1)} Software Product</h3><p style="margin:0">Operations &amp; profitability: projects, sprints, timesheets, costs, invoices, dashboards. <b>Essential</b>.</p></div><div class="card"><h3>${pillar(2)} Marketing &amp; Sales</h3><p style="margin:0">Lightweight opportunity and revenue conversion visibility. No full CRM without approval. <b>Recommended / limited</b>.</p></div><div class="card"><h3>${pillar(3)} AI Solutions</h3><p style="margin:0">Advisory, permission-aware, human-reviewed insights. <b>Phase 2 pilot</b>.</p></div></div>`;
+};
+
+VIEWS.assump=()=>{
+ const sup=[['Customer-wise revenue/cost matrix, owners, scope, estimated hours, progress','Supplied input'],['Four customer notes (original wording preserved)','Supplied; ambiguous'],['Profitability, utilization, forecasting, approvals, notifications, AI','Recommendation'],['Everything in this prototype’s sample data','Illustrative only']];
+ return head('Assumptions & Decisions','Unresolved questions and recommended defaults. Defaults are proposals only. Nothing here is approved.')+
+ `<div class="note mb">Tick “Discussed” to track your review in this session. Ticking does <b>not</b> approve anything and is not saved.</div>
+ <div class="card flat mb"><div class="tw"><table><thead><tr><th>#</th><th>Open question</th><th>What we know</th><th>Recommended default (proposal)</th><th>Status</th><th>Discussed</th></tr></thead><tbody>${ASSUME.map((a,i)=>`<tr><td>${i+1}</td><td><b>${a[0]}</b></td><td>${a[1]}</td><td>${a[2]}</td><td>${chip('Needs decision','warn')}</td><td><input type="checkbox" aria-label="Discussed: ${esc(a[0])}" ${ui['d'+i]?'checked':''} data-disc="d${i}"></td></tr>`).join('')}</tbody></table></div></div>
+ <div class="grid g2"><div class="card"><h2>Evidence boundaries</h2>${table([{h:'Item',k:0},{h:'Class',r:x=>chip(x[1],x[1].startsWith('Supplied')?'info':x[1]==='Recommendation'?'warn':'')}],sup.map(x=>({0:x[0],1:x[1]})))}</div>
+ <div class="card"><h2>MVP boundary (proposed)</h2><p><b>P0:</b> tenant/users/roles, customers &amp; projects, scope &amp; assignment, sprint/task with ownership history, basic handover, timesheets &amp; approval, revenue targets &amp; actuals, basic expenses, dashboards, audit trail.</p><p><b>P1:</b> performance matrix, invoices, configurable cost allocation, advanced reports.</p><p><b>P2/P3:</b> opportunity tracking, AI summaries, predictive forecasts, integrations, capacity planning.</p><p style="margin:0" class="note w">Strategy and implementation readiness are not yet approved.</p></div></div>`;
+};
+
+/* ============ modal ============ */
+const dlg=$('#dlg');
+function modal(title,body,okLabel,onOk){
+ $('#dt').textContent=title;$('#dbody').innerHTML=body;
+ $('#dfoot').innerHTML=`<button class="btn" id="dc">${okLabel?'Cancel':'Close'}</button>${okLabel?`<button class="btn pri" id="dok">${okLabel}</button>`:''}`;
+ $('#dc').onclick=()=>dlg.close();
+ if(okLabel)$('#dok').onclick=()=>{if(onOk()!==false)dlg.close()};
+ dlg.showModal();
+}
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+$('#dx').onclick=()=>dlg.close();
+
+/* ============ events ============ */
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,[data-go]');if(!t)return;
+ const d=t.dataset;
+ if(d.role)return setRole(d.role);
+ if(d.view){return go(d.view)}
+ if(d.go)return go(d.go);
+ if(d.demo)return demo(d.demo);
+ if(d.step){state.wf=+d.step;return render()}
+ if(d.prj){const p=PRJ_MAP[d.prj],f=['ceo','fin'].includes(state.role);return modal(p.n+' · '+p.id,`<p><b>Customer:</b> ${p.c}<br><b>Scope:</b> ${p.scope}</p><h3>Milestones</h3><ul class="can">${p.ms.map(m=>`<li>${m}</li>`).join('')}</ul>${f?`<p><b>Revenue</b> ${L(p.rev)} · <b>Direct cost</b> ${L(p.cost)} · <b>Overhead</b> ${L(p.oh)}</p>`:''}<p class="note">Scope changes are recorded with date, reason, requester and approver (illustrative).</p>`)}
+ if(d.ack){const h=HAND.find(x=>x.id===d.ack);h.st='Acknowledged';toast('Handover '+h.id+' acknowledged (illustrative; not saved).');return render()}
+ if(d.tsa){const [id,s]=d.tsa.split(':');TS.find(x=>x.id==id).s=s;toast('Timesheet '+s.toLowerCase()+' (illustrative; comment would be recorded).');return render()}
+ if(d.tssub){TS.find(x=>x.id==d.tssub).s='Submitted';toast('Submitted for approval (illustrative).');return render()}
+ if(d.inv){const [id,s]=d.inv.split(':');const i=INV.find(x=>x.id===id);i.s=s;if(s==='Paid')i.paid=i.amt;toast(id+' → '+s+' (illustrative; audit entry would be written).');return render()}
+ if(d.newts){return modal('Add timesheet entry',`<div class="f"><label>Project<select id="n_p">${PRJ.filter(p=>p.s!=='On Hold').map(p=>`<option value="${p.id}">${p.id} ${p.n}</option>`).join('')}</select></label><label>Task / work description<input id="n_t" maxlength="80"></label><label>Hours<input id="n_h" type="number" step="0.5" min="0.5" max="12" value="4"></label><label>Type<select id="n_b"><option>Billable</option><option>Non-billable</option></select></label></div><p class="note" style="margin-top:10px">Demo only; entry is kept in memory until you reload.</p>`,'Save as draft',()=>{
+  const h=parseFloat($('#n_h').value),tx=$('#n_t').value.trim();
+  if(!(h>0&&h<=12)||!tx){toast('Enter a description and 0.5–12 hours (validation example).');return false}
+  TS.push({id:Date.now(),e:'Meera',d:'5 Nov',p:$('#n_p').value,t:tx,h,b:$('#n_b').value,s:'Draft'});render();toast('Draft entry added (illustrative).')})}
+ if(d.handover){return modal('Initiate handover',`<div class="f"><label>Task<select>${scopedTasks().map(t=>`<option>${t.id} ${esc(t.t)}</option>`).join('')}</select></label><label>Incoming owner<select>${EMP.map(e=>`<option>${e.n}</option>`).join('')}</select></label><label>Remaining effort (h)<input type="number" value="4"></label><label>Blockers / next action<textarea></textarea></label></div>`,'Send for acknowledgement',()=>{toast('Handover initiated (illustrative; no data saved).')})}
+ if(d.ai!==undefined){const A=JSON.parse($('#aiData').textContent),k=Object.keys(A)[+d.ai];return modal(k,`<p>${A[k]}</p><p class="note w">Advisory only · permission-aware · human review required · usage logged. Illustrative response, not generated from real data.</p>`)}
+ if(t.id==='menuBtn'){document.body.classList.add('nav-open');return}
+});
+$('#scrim').onclick=()=>document.body.classList.remove('nav-open');
+document.addEventListener('change',e=>{
+ const t=e.target,d=t.dataset;
+ if(t.id==='roleSel')return setRole(t.value);
+ if(t.id==='basis'){state.basis=t.value;return render()}
+ if(t.id==='alloc'){state.alloc=t.value;return render()}
+ if(t.id==='mxRole'){state.mxRole=t.value;return render()}
+ if(d.task){TASKS.find(x=>x.id===d.task).s=t.value;toast('Task moved (illustrative; not saved).');return render()}
+ if(d.disc){ui[d.disc]=t.checked;return}
+ if(t.id&&/^f\d$/.test(t.id)){ui[t.id]=t.value;return render()}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t.id&&/^q\d$/.test(t.id)){ui[t.id]=t.value;render()}});
+renderShell();render();
+</script>
+</body>
+</html>

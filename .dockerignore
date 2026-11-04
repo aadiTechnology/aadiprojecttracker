@@ -1,0 +1,11 @@
+.git
+.env*
+**/node_modules
+**/__pycache__
+backend/tests
+backend/data
+frontend/dist
+mobile
+videos
+docs
+*.mp4

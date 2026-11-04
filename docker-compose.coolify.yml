@@ -1,0 +1,52 @@
+# Coolify "Docker Compose" resource. Variables come from the Coolify environment (see .env.coolify.example).
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    environment:
+      - SERVICE_FQDN_APP_8000
+      - APP_ENV=${APP_ENV:-production}
+      - APP_SEED_DEMO=${APP_SEED_DEMO:-false}
+      - APP_BASE_URL=${APP_BASE_URL:-}
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgresql+psycopg://tracker:${POSTGRES_PASSWORD}@postgres:5432/tracker
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-smtp}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-}
+      - SMTP_USE_TLS=${SMTP_USE_TLS:-true}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
+      - B2_KEY_ID=${B2_KEY_ID:-}
+      - B2_APP_KEY=${B2_APP_KEY:-}
+      - B2_BUCKET_NAME=${B2_BUCKET_NAME:-}
+      - B2_ENDPOINT=${B2_ENDPOINT:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=tracker
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=tracker
+    volumes:
+      - tracker_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker -d tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  tracker_pgdata:

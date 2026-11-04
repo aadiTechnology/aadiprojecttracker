@@ -1,0 +1,51 @@
+1
+00:00:00,001 --> 00:00:18,931
+Welcome to Sprint one of Aadi Project Tracker. The sign in page lists test users for every role, so a reviewer can try the product without asking for credentials. Each account sees different data. These accounts exist only in the demo environment, and all data is fictional.
+
+2
+00:00:19,392 --> 00:00:35,159
+We sign in as Priya Rao, the C E O. The dashboard shows projects across the whole organization, delivery health, total budget and contract value, plus open decisions the customer still has to make, such as the revenue basis.
+
+3
+00:00:35,615 --> 00:00:49,917
+Projects are grouped into the four areas of Aadi Technology: software development of our own products, software services for customers, marketing, and sales. We filter to marketing, then to sales.
+
+4
+00:00:50,382 --> 00:01:04,609
+Opening a project shows its status, health, customer, budget, scope, team with allocation, milestones and the scope change history. Every scope change records the requester and the approver.
+
+5
+00:01:05,060 --> 00:01:18,462
+A scope change was requested by the project manager for geofence alerts. The owner approves it, and the approval is added to the scope and to the audit log. A requester cannot approve their own change.
+
+6
+00:01:18,920 --> 00:01:34,326
+We create a new marketing project for the internal marketing unit. Every project needs a customer or internal business unit. The project starts as a draft, and the system refuses to activate it until a project manager and a scope exist.
+
+7
+00:01:34,778 --> 00:01:45,616
+The customer register holds customers and internal business units, with the account owner. Billing details are visible only to roles that manage customers or invoices.
+
+8
+00:01:46,068 --> 00:02:00,130
+Under organization admin the owner manages people and roles. Permissions are data, not code, and every change is audited. Here is the audit log, showing the scope approval and project creation we just did.
+
+9
+00:02:00,594 --> 00:02:13,152
+Now Asha Kulkarni, a project manager. Her project list contains only the projects she is assigned to, and menu items her role does not include are locked, with an explanation.
+
+10
+00:02:13,605 --> 00:02:25,052
+Kabir Sethi from sales sees only the customers he owns, and for those projects only the contract value. There is no budget, no internal cost and no effort estimate.
+
+11
+00:02:25,514 --> 00:02:39,001
+An employee, Meera Nair, has no project list. This is enforced by the server, not just hidden in the menu. A direct call to the projects service is refused with a forbidden status.
+
+12
+00:02:39,464 --> 00:02:52,615
+The SaaS platform administrator manages organizations and module entitlements only. Direct calls for projects or customers are refused, so tenant business data is not exposed to the platform.
+
+13
+00:02:53,078 --> 00:03:16,164
+Sprint one delivers the foundation: sign in, roles and permissions, organizations and entitlements, customers, projects, scope changes and audit. Sprint two adds sprints, tasks, handover and timesheets, together with the first version of the mobile app. Revenue targets, expenses and invoices follow in sprint three.

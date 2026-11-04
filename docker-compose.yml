@@ -1,0 +1,19 @@
+# Local PostgreSQL for development and demo recording. Credentials are demo-only.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tracker-postgres
+    environment:
+      POSTGRES_USER: tracker
+      POSTGRES_PASSWORD: tracker_dev
+      POSTGRES_DB: postgres
+    ports:
+      - "15434:5432"
+    volumes:
+      - tracker_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker"]
+      interval: 3s
+      retries: 20
+volumes:
+  tracker_pgdata:
