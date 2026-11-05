@@ -19,7 +19,7 @@ EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 VIEWS = {
     "dash": (None, 1), "customers": ("customers.view", 1), "projects": ("projects.view", 1), "sprint": ("sprint.view", 2),
     "handover": ("handover.view", 2), "timesheets": ("timesheet.own", 2), "perf": ("perf.view", 4),
-    "employees": ("employees.view", 3), "allocation": ("allocation.view", 3), "costing": ("costing.effort", 3), "profit": ("costing.cost", 3),
+    "insights": ("costing.effort", 3), "employees": ("employees.view", 3), "allocation": ("allocation.view", 3), "costing": ("costing.effort", 3), "profit": ("costing.cost", 3),
     "revenue": ("targets.view", 3), "costset": ("costing.settings", 3), "expenses": ("expenses.view", 4), "invoices": ("invoices.view", 4),
     "admin": ("org.users.view", 1), "matrix": (None, 1), "workflow": (None, 1), "assumptions": (None, 1),
 }

@@ -13,6 +13,7 @@ import Timesheets from './pages/Timesheets'
 import Employees from './pages/Employees'
 import Allocation from './pages/Allocation'
 import Costing from './pages/Costing'
+import Insights from './pages/Insights'
 import CostSettings from './pages/CostSettings'
 import Profitability from './pages/Profitability'
 import Targets from './pages/Targets'
@@ -28,7 +29,8 @@ const NAV: { key: string; label: string; icon: string; path: string; group?: str
   { key: 'sprint', label: 'Sprint Planning', icon: '🗓', path: '/sprint' },
   { key: 'handover', label: 'Team Handover', icon: '⇄', path: '/handover' },
   { key: 'timesheets', label: 'Timesheets', icon: '⏱', path: '/timesheets' },
-  { key: 'employees', label: 'Employees & Departments', icon: '👥', path: '/employees', group: 'Costing & Profitability' },
+  { key: 'insights', label: 'Decision Insights', icon: '🎯', path: '/insights', group: 'Costing & Profitability' },
+  { key: 'employees', label: 'Employees & Departments', icon: '👥', path: '/employees' },
   { key: 'allocation', label: 'Employee Allocation', icon: '🧩', path: '/allocation' },
   { key: 'costing', label: 'Effort & Cost', icon: '🧮', path: '/costing' },
   { key: 'profit', label: 'Project Profitability', icon: '📈', path: '/profitability' },
@@ -125,6 +127,7 @@ export default function App() {
               else if (n.key === 'sprint') el = <SprintPage me={m} />
               else if (n.key === 'handover') el = <Handover me={m} />
               else if (n.key === 'timesheets') el = <Timesheets me={m} />
+              else if (n.key === 'insights') el = <Insights me={m} />
               else if (n.key === 'employees') el = <Employees me={m} />
               else if (n.key === 'allocation') el = <Allocation me={m} />
               else if (n.key === 'costing') el = <Costing me={m} />

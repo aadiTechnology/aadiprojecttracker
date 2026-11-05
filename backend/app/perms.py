@@ -58,6 +58,12 @@ ROLE_DEFAULTS = {
         "perf.view:assigned", "revenue.view:assigned", "expenses.request", "invoices.request", "reports.view:assigned",
         "ai.use:own", "employees.view:assigned", "projects.tag:assigned", "allocation.view:assigned", "allocation.manage:assigned",
         "costing.effort:assigned", "targets.view:assigned"]),
+    "po": ("Product Owner", [
+        "customers.view:assigned", "projects.view:assigned", "projects.manage:assigned", "projects.budget",
+        "sprint.view:assigned", "sprint.manage:assigned", "sprint.update:assigned", "handover.view:assigned",
+        "handover.manage:assigned", "handover.ack:own", "timesheet.own", "timesheet.view:assigned", "reports.view:assigned",
+        "ai.use:own", "employees.view:assigned", "projects.tag:assigned", "allocation.view:assigned",
+        "costing.effort:assigned", "targets.view:assigned"]),
     "tl": ("Team Lead", [
         "customers.view:assigned", "projects.view:assigned", "sprint.view:team", "sprint.manage:team",
         "sprint.update:team", "handover.view:team", "handover.manage:team", "handover.ack:own", "timesheet.own", "timesheet.view:team",

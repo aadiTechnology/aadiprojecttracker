@@ -545,12 +545,13 @@ def matrix(month: str | None = None, c: Ctx = Depends(ctx)):
     emp_ids, proj_ids, partial = visible(c, "costing.effort", d)
     r = k.compute(d, emp_ids, proj_ids)
     cost_ok = c.can("costing.cost") and not partial
-    order = sorted(emp_ids, key=lambda i: d["emps"][i]["name"])
+    dn = {x.id: x.name for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    order = sorted(emp_ids, key=lambda i: (dn.get(d["emps"][i]["dept_id"], "~"), d["emps"][i]["name"]))  # grouped by department, like the workbook header
     projects = []
     for pid in sorted(proj_ids, key=lambda i: d["projects"][i]["code"]):
         p = d["projects"][pid]
         cells = {u: r["cells"][(u, pid)] for u in order if (u, pid) in r["cells"]}
-        row = {"id": pid, "code": p["code"], "name": p["name"], "allocation": {u: v["pct"] for u, v in cells.items()}, "effort": {u: round(v["hours"], 2) for u, v in cells.items()},
+        row = {"id": pid, "code": p["code"], "name": p["name"], "tags": [t["name"] for t in p["tags"]], "allocation": {u: v["pct"] for u, v in cells.items()}, "effort": {u: round(v["hours"], 2) for u, v in cells.items()},
                "hours": round(r["proj"][pid]["hours"], 2)}
         if cost_ok:
             row.update(cost={u: v["cost"] for u, v in cells.items()}, cost_minor=r["proj"][pid]["cost"], value_minor=r["proj"][pid]["value"])
@@ -558,7 +559,7 @@ def matrix(month: str | None = None, c: Ctx = Depends(ctx)):
     emps = []
     for u in order:
         e, x = d["emps"][u], r["emp"][u]
-        row = {"id": u, "name": e["name"], "monthly_hours": e["hours"]}
+        row = {"id": u, "name": e["name"], "department": dn.get(e["dept_id"]), "monthly_hours": e["hours"]}
         if not partial:
             row.update(allocated_pct=x["pct"], hours=round(x["hours"], 2), status="OVER" if x["pct"] > 100 else "Full" if x["pct"] == 100 else "Bench" if x["pct"] == 0 else "Part")
         if cost_ok:

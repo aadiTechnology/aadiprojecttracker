@@ -9,6 +9,7 @@ from . import core, models as m
 from .core import hash_password
 from .seed_costing import seed_costing
 from .seed_delivery import seed_delivery
+from .seed_matrix import seed_matrix
 from .tenancy import seed_roles_and_modules
 
 DEMO_PASSWORD = "Tracker@Demo26"
@@ -96,6 +97,7 @@ def run(reset=False):
             tt = db.execute(select(m.Tenant).where(m.Tenant.slug == "aadi-technology-illustrative-demo")).scalar_one()
             added = seed_delivery(db, tt)
             added = seed_costing(db, tt) or added
+            added = seed_matrix(db) or added
             if added:
                 db.commit()
                 print("Sprint 2/3 demo data added to the existing demo organization.")
@@ -140,6 +142,7 @@ def run(reset=False):
         db.flush()
         seed_delivery(db, t)
         seed_costing(db, t)
+        seed_matrix(db)
         db.commit()
         print("Demo data loaded:", len(USERS), "users,", len(CUSTOMERS), "customers,", len(PROJECTS), "projects")
 

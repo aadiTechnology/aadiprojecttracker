@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { api, token } from '../api'
 
-interface Demo { password: string; notice: string; accounts: { name: string; role: string; title: string; email: string; hint: string }[] }
+interface Demo { password: string; notice: string; accounts: { name: string; role: string; title: string; email: string; hint: string; org?: string }[] }
 
 export default function Login({ onDone }: { onDone: (platform: boolean) => void }) {
   const [email, setEmail] = useState('')
@@ -50,9 +50,9 @@ export default function Login({ onDone }: { onDone: (platform: boolean) => void 
             <p className="sub" style={{ marginBottom: 8 }}>{demo.notice} Choose <b>Use</b> to fill the form, then press Sign in. Each role sees different data.</p>
             <div className="tw demo"><table>
               <thead><tr><th>Person</th><th>Role</th><th>What to try</th><th /></tr></thead>
-              <tbody>{byRole.map((a) => (
-                <tr key={a.email}>
-                  <td><b>{a.name}</b><br /><span className="mono">{a.email}</span></td>
+              <tbody>{byRole.map((a, i) => (
+                <tr key={a.email} style={a.org === 'matrix' && byRole[i - 1]?.org !== 'matrix' ? { borderTop: '3px solid var(--acc)' } : undefined}>
+                  <td><b>{a.name}</b>{a.org === 'matrix' && <> <span className="chip c-info">Matrix org</span></>}<br /><span className="mono">{a.email}</span></td>
                   <td>{a.role}</td><td>{a.hint}</td>
                   <td><button type="button" className="btn sm" onClick={() => { setForgot(false); setEmail(a.email); setPassword(demo.password); window.scrollTo(0, 0) }} aria-label={`Use ${a.name}`}>Use</button></td>
                 </tr>))}</tbody>

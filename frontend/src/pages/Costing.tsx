@@ -8,8 +8,8 @@ interface ProjRow { id: number; code: string; name: string; status: string; tags
 interface TagRow { tag_id: number; tag: string; projects: number; hours: number; value_minor?: number; cost_minor?: number; margin_minor?: number; project_list: { id: number; code: string; name: string; hours: number; value_minor?: number; cost_minor?: number }[] }
 interface MatrixData {
   partial: boolean
-  employees: { id: number; name: string; monthly_hours: number; allocated_pct?: number; hours?: number; status?: string; salary_minor?: number | null; cost_minor?: number | null; bench_cost_minor?: number | null }[]
-  projects: { id: number; code: string; name: string; allocation: Record<string, number>; effort: Record<string, number>; hours: number; cost?: Record<string, number | null>; cost_minor?: number; value_minor?: number }[]
+  employees: { id: number; name: string; department?: string | null; monthly_hours: number; allocated_pct?: number; hours?: number; status?: string; salary_minor?: number | null; cost_minor?: number | null; bench_cost_minor?: number | null }[]
+  projects: { id: number; code: string; name: string; tags?: string[]; allocation: Record<string, number>; effort: Record<string, number>; hours: number; cost?: Record<string, number | null>; cost_minor?: number; value_minor?: number }[]
   reconciliation?: { salary_pool_minor: number; allocated_cost_minor: number; bench_cost_minor: number; value_minor: number; hours: number; check: string }
 }
 interface Summary { hours: number; projects: number; partial: boolean; value_minor?: number; cost_minor?: number; bench_cost_minor?: number; salary_pool_minor?: number; margin_minor?: number; reconciles?: boolean; missing_salary?: string[] }
@@ -75,10 +75,11 @@ function Matrix({ d }: { d: MatrixData }) {
     <>
       <p className="sub">Same layout as the business workbook: for each project an Allocation, Efforts and Cost row, employees across the page.</p>
       <div className="card flat"><div className="tw"><table className="alloc">
-        <thead><tr><th className="nm">Project / row</th>{d.employees.map((e) => <th key={e.id} className="n">{e.name.split(' ')[0]}</th>)}<th className="n">Total</th></tr>
+        <thead><tr><th className="nm">Department</th>{d.employees.map((e) => <th key={e.id} className="n"><small>{e.department ?? ''}</small></th>)}<th /></tr>
+          <tr><th className="nm">Project / row</th>{d.employees.map((e) => <th key={e.id} className="n">{e.name.split(' ')[0]}</th>)}<th className="n">Total</th></tr>
           {costOn && <tr><th className="nm">Monthly salary</th>{d.employees.map((e) => <th key={e.id} className="n">{inr(e.salary_minor)}</th>)}<th className="n">{inr(d.reconciliation!.salary_pool_minor)}</th></tr>}</thead>
         <tbody>{d.projects.map((p) => <>
-          <tr key={p.id + 'a'}><td className="nm"><b>{p.code} {p.name}</b><br /><small>Allocation</small></td>{d.employees.map((e) => <td key={e.id} className="n">{p.allocation[e.id] ? `${p.allocation[e.id]}%` : ''}</td>)}<td className="n"></td></tr>
+          <tr key={p.id + 'a'}><td className="nm"><b>{p.code} {p.name}</b><br />{p.tags?.map((x) => <Chip key={x} text={x} tone="acc" />)} <small>Allocation</small></td>{d.employees.map((e) => <td key={e.id} className="n">{p.allocation[e.id] ? `${p.allocation[e.id]}%` : ''}</td>)}<td className="n"></td></tr>
           <tr key={p.id + 'e'}><td className="nm"><small>Efforts (h)</small></td>{d.employees.map((e) => <td key={e.id} className="n">{p.effort[e.id] ?? ''}</td>)}<td className="n"><b>{p.hours}</b></td></tr>
           {costOn && <tr key={p.id + 'c'}><td className="nm"><small>Cost</small></td>{d.employees.map((e) => <td key={e.id} className="n">{p.cost?.[e.id] ? inr(p.cost[e.id]) : ''}</td>)}<td className="n"><b>{inr(p.cost_minor)}</b><br /><small>value {inr(p.value_minor)}</small></td></tr>}</>)}</tbody>
         <tfoot><tr><td className="nm">Allocated %</td>{d.employees.map((e) => <td key={e.id} className="n">{e.allocated_pct !== undefined ? `${e.allocated_pct}%` : ''}</td>)}<td /></tr>
