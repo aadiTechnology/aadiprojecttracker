@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from . import core, models as m
 from .core import hash_password
+from .seed_delivery import seed_delivery
 from .tenancy import seed_roles_and_modules
 
 DEMO_PASSWORD = "Tracker@Demo26"
@@ -91,7 +92,12 @@ def run(reset=False):
         migrate()
     with core.SessionLocal() as db:
         if db.execute(select(m.Tenant).where(m.Tenant.slug == "aadi-technology-illustrative-demo")).scalar_one_or_none():
-            print("Demo data already present; nothing to do.")
+            tt = db.execute(select(m.Tenant).where(m.Tenant.slug == "aadi-technology-illustrative-demo")).scalar_one()
+            if seed_delivery(db, tt):
+                db.commit()
+                print("Sprint 2 demo data added to the existing demo organization.")
+            else:
+                print("Demo data already present; nothing to do.")
             return
         t = m.Tenant(name=TENANT, slug="aadi-technology-illustrative-demo", plan="growth", is_demo=True)
         db.add(t)
@@ -128,6 +134,8 @@ def run(reset=False):
             if name == "Supply Tracker":
                 db.add(m.ScopeChange(tenant_id=t.id, project_id=p.id, description="Add geofence alerts to the driver app", reason="Requested by customer after the pilot", requested_by=uid["nisha.verma"]))
         db.add(m.AuditEvent(tenant_id=t.id, action="demo.seed", detail={"note": "Illustrative demo data loaded"}))
+        db.flush()
+        seed_delivery(db, t)
         db.commit()
         print("Demo data loaded:", len(USERS), "users,", len(CUSTOMERS), "customers,", len(PROJECTS), "projects")
 

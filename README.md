@@ -15,7 +15,7 @@ Business Performance & Project Profitability platform (PRD in [docs/](docs/)). M
 | Sprint | Backend + web (+ mobile from S2) | Demo video |
 |---|---|---|
 | **S1 Foundation** (done) | Sign-in, invitations/reset by email, tenants, roles as data, entitlements, audit, customers, projects, scope changes, role-aware dashboard, demo accounts | `videos/01-sprint-1-foundation-and-projects.mp4` |
-| S2 Delivery | Sprints, tasks, handover, timesheets and approval; mobile app (my tasks, timesheet, handover) | planned |
+| S2 Delivery (**paused**) | Backend done and tested (sprints, tasks, handover + acknowledgement, timesheets + approval, notifications, seed data; 41 tests). **Remaining:** web screens (Sprint Planning, Team Handover, Timesheets, notification bell, dashboard blocks), Expo mobile app, screen check, demo video. Then set `LIVE_SPRINT=2` (default in `auth.py`). Resume from tag `sprint-2-backend-checkpoint` / branch `sprint-2`. | planned |
 | S3 Money | Revenue targets, expenses and allocation, invoices, performance matrix, attachments on Backblaze | planned |
 | S4 Hardening | AI assistant (advisory), reports/exports, accessibility, load and security pass, production cut-over | planned |
 

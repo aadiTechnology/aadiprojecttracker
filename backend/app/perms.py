@@ -47,12 +47,12 @@ ROLE_DEFAULTS = {
     "pm": ("Project Manager", [
         "customers.view:assigned", "projects.view:assigned", "projects.manage:assigned", "projects.budget",
         "sprint.view:assigned", "sprint.manage:assigned", "sprint.update:assigned", "handover.view:assigned",
-        "handover.manage:assigned", "timesheet.own", "timesheet.view:assigned", "timesheet.approve:assigned",
+        "handover.manage:assigned", "handover.ack:own", "timesheet.own", "timesheet.view:assigned", "timesheet.approve:assigned",
         "perf.view:assigned", "revenue.view:assigned", "expenses.request", "invoices.request", "reports.view:assigned",
         "ai.use:own"]),
     "tl": ("Team Lead", [
         "customers.view:assigned", "projects.view:assigned", "sprint.view:team", "sprint.manage:team",
-        "sprint.update:team", "handover.view:team", "handover.manage:team", "timesheet.own", "timesheet.view:team",
+        "sprint.update:team", "handover.view:team", "handover.manage:team", "handover.ack:own", "timesheet.own", "timesheet.view:team",
         "timesheet.approve:team", "perf.view:team", "reports.view:team", "ai.use:own"]),
     "employee": ("Employee / Contributor", [
         "sprint.view:own", "sprint.update:own", "handover.view:own", "handover.ack:own", "timesheet.own",

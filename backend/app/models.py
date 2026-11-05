@@ -174,3 +174,90 @@ class ScopeChange(Base):
     approved_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="Requested")  # Requested | Approved | Rejected
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+# ---------------- Sprint 2: delivery ----------------
+class Sprint(Base):
+    __tablename__ = "sprints"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    goal: Mapped[str] = mapped_column(Text, default="")
+    start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    status: Mapped[str] = mapped_column(String(12), default="Planned")  # Planned | Active | Closed
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    sprint_id: Mapped[int | None] = mapped_column(ForeignKey("sprints.id"), nullable=True, index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(12), default="Todo")  # Todo | In progress | Blocked | Done
+    priority: Mapped[str] = mapped_column(String(8), default="Medium")  # Low | Medium | High
+    est_hours: Mapped[float] = mapped_column(Float, default=0)
+    assignee_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class TaskAssignment(Base):
+    """History of every assignment and reassignment (who, to whom, why, via which handover)."""
+    __tablename__ = "task_assignments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"), index=True)
+    from_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    to_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    by_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    reason: Mapped[str] = mapped_column(Text, default="")
+    handover_id: Mapped[int | None] = mapped_column(nullable=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class Handover(Base):
+    __tablename__ = "handovers"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    from_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    to_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    note: Mapped[str] = mapped_column(Text, default="")
+    task_ids: Mapped[list] = mapped_column(JSON, default=list)
+    status: Mapped[str] = mapped_column(String(14), default="Pending")  # Pending | Acknowledged
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    ack_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ack_note: Mapped[str] = mapped_column(Text, default="")
+
+
+class TimeEntry(Base):
+    __tablename__ = "time_entries"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    task_id: Mapped[int | None] = mapped_column(ForeignKey("tasks.id"), nullable=True)
+    work_date: Mapped[date] = mapped_column(Date, index=True)
+    hours: Mapped[float] = mapped_column(Float)
+    note: Mapped[str] = mapped_column(String(300), default="")
+    status: Mapped[str] = mapped_column(String(12), default="Draft")  # Draft | Submitted | Approved | Rejected
+    decided_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reject_reason: Mapped[str] = mapped_column(String(300), default="")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    text: Mapped[str] = mapped_column(String(300))
+    link: Mapped[str] = mapped_column(String(60), default="")
+    read: Mapped[bool] = mapped_column(Boolean, default=False)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)

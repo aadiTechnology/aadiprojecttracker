@@ -372,6 +372,8 @@ def dashboard(c: Ctx = Depends(ctx)):
         out["customers"] = c.db.execute(select(func.count()).select_from(customer_query(c).subquery())).scalar()
     if c.has("org.admin") or c.has("org.users.view"):
         out["people"] = c.db.execute(select(func.count()).select_from(m.Membership).where(m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar()
+    from .delivery import delivery_summary  # imported here: delivery builds on this module
+    out["delivery"] = delivery_summary(c)
     out["open_decisions"] = [d for d in ["Revenue basis not yet decided" if not c.tenant.revenue_basis else None,
                                          "Meaning of the S/H planning markers not yet defined" if not c.tenant.planning_markers else None] if d] if c.has("org.admin") else []
     return out
