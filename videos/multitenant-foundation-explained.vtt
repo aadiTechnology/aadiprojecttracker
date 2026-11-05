@@ -1,0 +1,46 @@
+WEBVTT
+
+00:00:00.001 --> 00:00:25.091
+This video explains one thing: the multi tenant foundation of Aadi Project Tracker. It is built so that you can do two things. First, create a new organization, give it a subscription, and let it run on the same platform without seeing anyone else. Second, reuse the same foundation to build a different product. We start as the platform administrator.
+
+00:00:25.544 --> 00:00:47.595
+The platform administrator sees organizations, not their business data. Today there is one, the Aadi Technology demo, with thirteen people. Each organization has a status, a plan, and a set of optional modules. Those module switches are the subscription: they decide which features an organization has paid for.
+
+00:00:48.053 --> 00:01:08.474
+We create a new subscriber organization, Sunrise Software Studio, and name its owner. In production the owner receives an invitation by email. Behind the scenes the system creates the organization, its seven default roles, its module entitlements, and the first owner, all in one step.
+
+00:01:08.933 --> 00:01:27.649
+Now the subscription. For this subscriber we switch off sprint and handover, and switch on the optional sales module. These are entitlements, stored per organization and checked by the server on every request. Changes apply immediately, and each one is written to the audit log.
+
+00:01:28.110 --> 00:01:41.432
+The new owner opens the one time link from the invitation, and chooses a password. The link works once and expires. Only a hash of the token is stored, so it cannot be read from the database.
+
+00:01:41.893 --> 00:01:58.954
+Rahul signs in. This is a completely empty organization, with its own name in the sidebar. None of the Aadi Technology projects, customers or people are here. He is the owner, so he has full control inside his own organization.
+
+00:01:59.411 --> 00:02:15.692
+Every organization gets its own copy of the roles, stored as data. Rahul can edit permissions for his own roles without affecting any other organization. The modules tab shows what his subscription includes, with sprint and handover switched off.
+
+00:02:16.158 --> 00:02:35.689
+Customers and projects are empty for this organization. To prove isolation, we call the server directly for project number one, which belongs to Aadi Technology. The answer is not found, the same answer as for a project that does not exist, so nothing leaks between organizations.
+
+00:02:36.147 --> 00:02:52.583
+Sprint planning is locked in the menu. More important, the server refuses it too. A direct call for tasks returns forbidden, with the reason that the module is not enabled for this organization. A hidden button is never the only protection.
+
+00:02:53.035 --> 00:03:14.420
+Now we sign in to the Aadi Technology organization as the C E O. Eleven projects, thirteen people, all intact. Same application, same database, different organization. A call to the platform administration service is refused, because organization owners are not platform administrators.
+
+00:03:14.875 --> 00:03:28.587
+The reverse also holds. The platform administrator can manage organizations, but a direct call for projects is refused. Whoever operates the platform does not automatically read customer data.
+
+00:03:29.049 --> 00:03:43.505
+If a subscription lapses, the administrator suspends the organization. Its users lose access at once, existing sessions included, but the data is kept, so the organization can be reactivated later.
+
+00:03:43.968 --> 00:04:16.197
+Now the second goal, a different product on the same foundation. What you reuse unchanged: sign in and lockout, invitations and password reset by email, organizations, roles and permissions stored as data, module entitlements, the audit log, platform administration, the deployment setup, the test harness, and this video pipeline. What you replace is the business layer: the capability catalogue, the modules, the data tables and the screens.
+
+00:04:16.650 --> 00:04:36.726
+This is the interactive A P I documentation, available in the demo environment only. Authentication, organization administration and platform administration are the reusable parts. The work endpoints, such as projects, sprints and timesheets, are what a new product would swap out.
+
+00:04:37.181 --> 00:05:04.570
+To be honest about readiness. Today the platform administrator creates organizations by hand and the plan is only a label. Before selling subscriptions you would add self service sign up, billing and plan limits, per organization branding and domains, and data export and deletion. Database level row security would add a second layer of isolation. The foundation is ready for these, but they are not built yet.

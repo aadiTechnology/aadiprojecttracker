@@ -8,13 +8,15 @@ export const Chip = ({ text, tone }: { text: string; tone?: string }) => <span c
 
 export function Modal({ title, onClose, children, footer, wide }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
+  const close = useRef(onClose)
+  close.current = onClose // the parent may pass a new function on every render; focus must move into the dialog only once
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null
     ref.current?.focus()
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
     window.addEventListener('keydown', esc)
     return () => { window.removeEventListener('keydown', esc); prev?.focus() }
-  }, [onClose])
+  }, [])
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref}>
