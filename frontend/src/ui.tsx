@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react'
 
 export const chipTone: Record<string, string> = {
   Active: 'ok', Planned: 'info', 'On Hold': 'warn', Completed: 'ok', Draft: '', Cancelled: 'bad', Green: 'ok', Amber: 'warn', Red: 'bad',
-  Done: 'ok', 'In progress': 'info', Requested: 'warn', Approved: 'ok', Rejected: 'bad', active: 'ok', invited: 'info', suspended: 'bad', trial: 'info',
+  Done: 'ok', 'In progress': 'info', Blocked: 'bad', Pending: 'warn', Acknowledged: 'ok', Submitted: 'info', Closed: '', Requested: 'warn', Approved: 'ok', Rejected: 'bad', active: 'ok', invited: 'info', suspended: 'bad', trial: 'info',
 }
 export const Chip = ({ text, tone }: { text: string; tone?: string }) => <span className={`chip ${tone ?? chipTone[text] ? 'c-' + (tone ?? chipTone[text]) : ''}`}>{text}</span>
 

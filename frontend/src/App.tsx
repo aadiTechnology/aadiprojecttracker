@@ -7,9 +7,13 @@ import Dashboard from './pages/Dashboard'
 import Customers from './pages/Customers'
 import Projects from './pages/Projects'
 import Admin from './pages/Admin'
+import SprintPage from './pages/Sprint'
+import Handover from './pages/Handover'
+import Timesheets from './pages/Timesheets'
 import Platform from './pages/Platform'
 import { Assumptions, Matrix, Workflow } from './pages/Info'
 import { Loading, PageHead, Restricted } from './ui'
+import Bell from './Bell'
 
 const NAV: { key: string; label: string; icon: string; path: string; group?: string }[] = [
   { key: 'dash', label: 'Overview Dashboard', icon: '▦', path: '/', group: 'Workspace' },
@@ -93,6 +97,7 @@ export default function App() {
           {m.tenant.demo && <span className="banner">Illustrative demo data — not real records</span>}
           <span className="spacer" />
           {m.tenants.length > 1 && <label>Organization <select value={m.tenant.id} onChange={async (e) => { const r = await api<{ token: string }>('/api/auth/switch', { method: 'POST', body: { tenant_id: +e.target.value } }); token.set(r.token); load() }}>{m.tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>}
+          <Bell />
           <div className="who"><b>{m.user.name}</b>{m.role.name}{m.team ? ` · ${m.team}` : ''}</div>
           <button className="btn" onClick={signOut} data-testid="signout">Sign out</button>
         </header>
@@ -106,6 +111,9 @@ export default function App() {
               else if (!a.built) el = <Planned item={n} sprint={a.sprint} role={m.role.name} />
               else if (n.key === 'customers') el = <Customers me={m} />
               else if (n.key === 'projects') el = <Projects me={m} />
+              else if (n.key === 'sprint') el = <SprintPage me={m} />
+              else if (n.key === 'handover') el = <Handover me={m} />
+              else if (n.key === 'timesheets') el = <Timesheets me={m} />
               else if (n.key === 'admin') el = <Admin me={m} />
               else if (n.key === 'matrix') el = <Matrix />
               else if (n.key === 'workflow') el = <Workflow me={m} />

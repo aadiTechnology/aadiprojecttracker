@@ -22,7 +22,7 @@ VIEWS = {
     "revenue": ("revenue.view", 3), "expenses": ("expenses.view", 3), "invoices": ("invoices.view", 3),
     "admin": ("org.users.view", 1), "matrix": (None, 1), "workflow": (None, 1), "assumptions": (None, 1),
 }
-LIVE_SPRINT = int(os.environ.get("LIVE_SPRINT", "1"))  # Sprint 2 API is deployed but its screens stay labelled 'Sprint 2' until the web/mobile UI ships (set LIVE_SPRINT=2)  # raised as sprints ship; the UI labels screens of later sprints honestly instead of faking them
+LIVE_SPRINT = int(os.environ.get("LIVE_SPRINT", "2"))  # raised as sprints ship; screens of later sprints are labelled honestly instead of faked
 
 
 def tenant_list(db: Session, user: m.User):
