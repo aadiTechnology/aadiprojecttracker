@@ -702,5 +702,248 @@ document.addEventListener('change',e=>{
 document.addEventListener('input',e=>{const t=e.target;if(t.id&&/^q\d$/.test(t.id)){ui[t.id]=t.value;render()}});
 renderShell();render();
 </script>
+<style id="rev2css">
+.r2in{width:52px;text-align:right;padding:4px 5px;border:1px solid #cfd6e2;border-radius:6px;background:#fff}
+.r2in.bad{border-color:var(--bad);background:var(--bad-s)}
+.r2in.w{width:84px}
+.al td,.al th{padding:5px 6px;font-size:12.5px;white-space:nowrap}
+.al td.nm{position:sticky;left:0;background:#fff;z-index:1;min-width:150px}
+.al th.nm{position:sticky;left:0;background:#f8fafc;z-index:2}
+.al tfoot td{font-weight:700;background:#f8fafc}
+.r2f{background:#eef3ff;border:1px solid #c9d7ff;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px}
+.r2f code{background:#fff;border:1px solid #d5def5;border-radius:6px;padding:1px 7px;font-weight:600}
+.r2tag{display:inline-flex;align-items:center;gap:4px;margin:1px 3px 1px 0}
+.r2tag button{border:0;background:none;color:inherit;padding:0 2px;font-weight:700;opacity:.7}
+.chip.on{background:var(--acc);color:#fff}
+.neg{color:var(--bad);font-weight:700}.pos{color:var(--ok);font-weight:700}
+.r2new{background:#fff4d6;border:1px solid #f1d98b;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;color:#6f4a00;margin-left:6px}
+</style>
+<script id="rev2">
+"use strict";
+(function(){
+/* ===== Revision 2: salary-allocation costing, tags and profitability. FICTIONAL data that reproduces the workbook's structure and arithmetic. ===== */
+const INR=n=>(n<0?'−':'')+'₹'+Math.round(Math.abs(n)).toLocaleString('en-IN');
+const NUM=n=>Math.round(n*10)/10;
+const sumN=(n,f)=>{let t=0;for(let i=0;i<n;i++)t+=f(i);return t};
+const org={hours:160,rate:250};
+const DEPT=[{n:'Engineering',hod:'Mohan Iyer'},{n:'Marketing',hod:'Gita Joshi'},{n:'Sales',hod:'Ananya Bose'},{n:'Leadership & Consulting',hod:'Bhavesh Rane'},{n:'Operations',hod:'Neha Desai'}];
+const EM=[['Ananya Bose','Sales','Sales Lead',30000],['Bhavesh Rane','Leadership & Consulting','Head of Consulting',30000],['Chitra Pillai','Engineering','Senior Engineer',20000],['Dhruv Sharma','Engineering','Engineer',20000],['Esha Kulkarni','Engineering','Developer',10000],['Farid Khan','Sales','Business Development Executive',10000],['Gita Joshi','Marketing','Marketing Manager',20000],['Hemant Patil','Marketing','Marketing Executive',10000],['Ishaan Rao','Operations','Operations Associate',10000],['Jaya Menon','Engineering','QA Engineer',20000],['Kunal Shah','Leadership & Consulting','Delivery Consultant',20000],['Lata Nair','Marketing','Content Executive',10000],['Mohan Iyer','Engineering','Tech Lead',30000],['Neha Desai','Operations','Operations Manager',20000]]
+ .map(([n,d,t,s])=>({n,d,t,s,ho:null}));
+const PR=[
+ ['Lumen Academy Platform',['Education','Customer'],null,{infra:10000}],['Aadi Product Suite',['Product','Internal'],null,{infra:10000}],
+ ['Orbit Growth Programme',['Marketing','Internal'],null,{tp:5000,mkt:5000,sales:5000}],['Kidz Learning App',['Education','Customer'],null,{infra:2000,tp:5000,mkt:5000}],
+ ['Internship Programme',['Training','Internal'],null,{infra:2000,tp:5000,mkt:5000,sales:5000}],['Northwind Retail Portal',['Retail','Customer'],10000,{tp:5000,mkt:5000,sales:5000}],
+ ['Harbor Interiors Marketing',['Marketing','Customer'],15000,{tp:5000,mkt:5000}],['Harbor Foods Campaign',['Marketing','Customer'],null,{tp:5000,mkt:5000,sales:5000}],
+ ['Aadi Brand Relaunch',['Marketing','Internal'],null,{infra:21000,mkt:5000}],['Sunrise Clinics Portal',['Healthcare','Customer'],45000,{}],
+ ['Enterprise Pipeline',['Sales','Internal'],null,{mkt:5000,sales:5000}]
+].map(([n,tags,tgt,oc],i)=>({id:'P'+String(i+1).padStart(2,'0'),n,tags:tags.slice(),tgt,rate:null,oc}));
+const BASE={0:{1:.25,2:.5,3:.75,9:1},1:{2:.5,3:.25,4:1},2:{7:.25,8:.5,10:1},3:{7:.25},4:{1:.75,7:.25,8:.5},5:{5:.25,7:.25},6:{5:.25,6:.25},7:{5:.25,6:.25},8:{6:.25},9:{12:1},10:{5:.25,6:.25}};
+const EXCEL_COST=[52500,52500,52500,7500,45000,15000,15000,15000,7500,30000,15000];
+const A=PR.map(()=>EM.map(()=>0));
+const loadBase=()=>{A.forEach(r=>r.fill(0));Object.entries(BASE).forEach(([p,m])=>Object.entries(m).forEach(([e,v])=>A[p][e]=v))};
+loadBase();
+const TAGS=['Education','Product','Marketing','Training','Retail','Healthcare','Sales','Customer','Internal'];
+const R={tab:'By employee',tagF:[],basis:0,other:false,primary:false,q:'',dep:'All'};
+const OCCAT={infra:'Infrastructure',tp:'Third-party',mkt:'Marketing',sales:'Sales'};
+
+/* ----- calculation engine (formulas of PRD B7) ----- */
+const hrs=e=>EM[e].ho??org.hours;
+const rateOf=p=>PR[p].rate??org.rate;
+const effort=(p,e)=>A[p][e]*hrs(e);
+const cost=(p,e)=>A[p][e]*EM[e].s;
+const P=p=>{const h=sumN(EM.length,e=>effort(p,e)),c=sumN(EM.length,e=>cost(p,e)),o=sumN(1,()=>Object.values(PR[p].oc).reduce((a,b)=>a+b,0)),v=sumN(EM.length,e=>effort(p,e))*rateOf(p);return{h,c,v,o,t:PR[p].tgt}};
+const E=e=>{const al=sumN(PR.length,p=>A[p][e]),h=sumN(PR.length,p=>effort(p,e)),c=sumN(PR.length,p=>cost(p,e));return{al,h,c,bench:Math.max(0,1-al),bh:Math.max(0,1-al)*hrs(e),bc:Math.max(0,1-al)*EM[e].s}};
+const ORG=()=>({h:sumN(PR.length,p=>P(p).h),v:sumN(PR.length,p=>P(p).v),c:sumN(PR.length,p=>P(p).c),pool:sumN(EM.length,e=>EM[e].s),bench:sumN(EM.length,e=>E(e).bc)});
+const revOf=p=>R.basis===0?P(p).v:(PR[p].tgt==null?null:PR[p].tgt);
+const canCost=()=>['ceo','fin'].includes(state.role);
+const mk=v=>canCost()?INR(v):'<span class="chip">Restricted</span>';
+const canEdit=k=>['ceo','fin'].includes(state.role)||(k==='al'&&['ops','pm'].includes(state.role))||(k==='tag'&&['ops','pm'].includes(state.role));
+const pScope=()=>state.role==='pm'?[0,1,3]:PR.map((_,i)=>i);
+const eScope=()=>state.role==='tl'?[2,3,4]:EM.map((_,i)=>i);
+const mTone=m=>m>=.5?'ok':m>=.25?'warn':'bad';
+const tagRows=()=>{if(R.primary){const g={};PR.forEach((p,i)=>(g[p.tags[0]]=g[p.tags[0]]||[]).push(i));return Object.entries(g)}return TAGS.map(t=>[t,PR.map((p,i)=>p.tags.includes(t)?i:-1).filter(i=>i>=0)]).filter(([,a])=>a.length)};
+const agg=ids=>{const o={n:ids.length,h:0,c:0,v:0,oc:0,tg:0,tn:0};ids.forEach(p=>{const x=P(p);o.h+=x.h;o.c+=x.c;o.v+=x.v;o.oc+=x.o;if(x.t!=null){o.tg+=x.t;o.tn++}});return o};
+const empStatus=al=>al>1.0001?chip('Over-allocated','bad'):al>=.999?chip('Fully allocated','ok'):al<=.001?chip('Bench','warn'):chip(Math.round(al*100)+'% allocated','info');
+
+/* ----- navigation, access and role text ----- */
+const NEWV=[['emp2','Employees & Departments','👥'],['pm2','Project Master & Tags','🏷'],['al2','Employee Allocation','🧩'],['set2','Costing Settings','⚙'],['cost2','Effort & Cost','🧮'],['rev2','Revenue Targets (Rev 2)','🎯'],['prof2','Project Profitability','📈'],['tag2','Tag-wise Analysis','🔖'],['chk2','Excel Check','✅']];
+V.splice(V.findIndex(v=>v[0]==='matrix'),0,...NEWV);
+const ACC={ceo:{emp2:'Full',pm2:'Full',al2:'Full',set2:'Full',cost2:'Full',rev2:'Full',prof2:'Full',tag2:'Full',chk2:'View'},
+ fin:{emp2:'Full',pm2:'View',al2:'View',set2:'Manage',cost2:'Full',rev2:'Manage',prof2:'Full',tag2:'Full',chk2:'View'},
+ ops:{emp2:'View',pm2:'Manage',al2:'Manage',set2:'View',cost2:'View'},pm:{pm2:'Delegated',al2:'Delegated',cost2:'Delegated'},tl:{al2:'View'}};
+const CAN={
+ emp2:{ceo:['Create and edit employees, departments and Heads of Department','See and change salaries (restricted capability)'],fin:['See and maintain salaries','Review cost per hour and bench cost'],ops:['See employees, departments and allocation','Salary and cost are not shown to this role']},
+ pm2:{ceo:['Create tags and assign them to projects','Filter any report by tag'],fin:['Filter financial reports by tag'],ops:['Create tags and assign them to projects'],pm:['Tag assigned projects only']},
+ al2:{ceo:['Allocate employees to projects per month','Over-allocation above 100% is rejected'],fin:['View allocation (read-only)'],ops:['Allocate employees to projects','See hours; salary cost is hidden'],pm:['Allocate people on assigned projects only'],tl:['See allocation of your team (read-only)']},
+ set2:{ceo:['Set monthly hours and standard hourly rate; override per employee / project'],fin:['Maintain costing settings (audited)'],ops:['Read-only view of the settings']},
+ cost2:{ceo:['Effort and cost by employee, project and tag'],fin:['Effort and cost by employee, project and tag'],ops:['Effort hours only; cost and value are restricted'],pm:['Effort hours for assigned projects only; no salary data']},
+ rev2:{ceo:['Define revenue targets per project and see them against standard value and cost'],fin:['Define and maintain revenue targets']},
+ prof2:{ceo:['Project profitability from salary cost and revenue basis'],fin:['Project profitability from salary cost and revenue basis']},
+ tag2:{ceo:['Financial analysis by project tag with drill-down'],fin:['Financial analysis by project tag with drill-down']},
+ chk2:{ceo:['Compare the workbook totals with the corrected calculation'],fin:['Compare the workbook totals with the corrected calculation']}};
+ROLES.forEach(r=>{Object.assign(r.acc,ACC[r.id]||{});Object.keys(CAN).forEach(k=>{if(CAN[k][r.id])r.can[k]=CAN[k][r.id]})});
+window.renderShell=function(){
+ const r=rr();
+ $('#roles').innerHTML=ROLES.map(x=>`<button type="button" class="rp" data-role="${x.id}" aria-pressed="${x.id===state.role}">${esc(x.short)}${x.tag?`<span class="tag">${x.tag}</span>`:''}</button>`).join('');
+ $('#roleSel').innerHTML=ROLES.map(x=>`<option value="${x.id}" ${x.id===state.role?'selected':''}>Previewing as: ${esc(x.name)}</option>`).join('');
+ $('#who').innerHTML=`<b>${esc(r.name)}</b>${esc(r.user)} · ${esc(r.scope)}`;
+ const G={emp2:'Costing & Profitability · Revision 2',matrix:'Product'};
+ $('#nav').innerHTML=V.map(([k,l,i])=>{const ok=!!access(k);
+  return (G[k]?`<div class="navh">${G[k]}</div>`:'')+`<button type="button" class="nav" data-view="${k}" ${state.view===k?'aria-current="page"':''} ${ok?'':'aria-disabled="true" title="Access restricted for this role"'}><span class="ic" aria-hidden="true">${i}</span>${l}${NEWV.some(n=>n[0]===k)?'<span class="r2new">NEW</span>':''}${ok?'':'<span class="lk" aria-hidden="true">🔒</span>'}</button>`}).join('');
+};
+document.querySelector('.banner').textContent='Revision 2 Proposal · Salary-allocation costing · Fictional data';
+
+/* ----- screens ----- */
+const note=t=>`<div class="note mb">${t}</div>`;
+const formula=()=>`<div class="r2f"><b>Rules in use:</b> effort = <code>allocation % × ${org.hours} h</code> · cost = <code>allocation % × monthly salary</code> · standard value = <code>hours × ₹${org.rate}</code> · margin = <code>revenue basis − salary cost</code></div>`;
+
+VIEWS.emp2=()=>{
+ const rows=EM.map((x,i)=>i).filter(i=>(R.dep==='All'||EM[i].d===R.dep)&&(!R.q||EM[i].n.toLowerCase().includes(R.q.toLowerCase())));
+ const o=ORG(),benchN=EM.filter((_,i)=>E(i).al<=.001).length;
+ return head('Employees & Departments','Employee master: department, Head of Department and monthly salary. Salary is a restricted field.')+
+ `<div class="grid g4 mb">${kpi('Employees',EM.length,'Active, one department each')}${kpi('Departments',DEPT.length,'Each with one Head of Department')}${kpi('Monthly salary pool',mk(o.pool),'All employees, restricted')}${kpi('On bench',benchN,'0% allocated this month')}</div>`+
+ `<div class="tools"><input id="r2_q" type="search" placeholder="Search employee…" value="${esc(R.q)}" aria-label="Search employee"><label>Department <select id="r2_dep"><option>All</option>${DEPT.map(d=>`<option ${R.dep===d.n?'selected':''}>${esc(d.n)}</option>`).join('')}</select></label><span class="spacer"></span>${canEdit('emp')?'<button class="btn pri" data-r2="addEmp">+ Add employee</button>':''}</div>`+
+ `<div class="card flat"><div class="tw"><table><thead><tr><th>Employee</th><th>Title</th><th>Department</th><th>Head of Department</th><th class="n">Monthly salary</th><th class="n">Cost / hour</th><th>Allocation</th><th></th></tr></thead><tbody>${rows.map(i=>{const x=EM[i],e=E(i),d=DEPT.find(d=>d.n===x.d);return `<tr><td><b>${esc(x.n)}</b></td><td>${esc(x.t)}</td><td>${esc(x.d)}</td><td>${esc(d.hod)}${d.hod===x.n?' '+chip('HoD','acc'):''}</td><td class="n">${mk(x.s)}</td><td class="n">${canCost()?INR(x.s/hrs(i))+'/h':'<span class="chip">Restricted</span>'}</td><td>${empStatus(e.al)}</td><td>${canEdit('emp')?`<button class="btn sm" data-r2="editEmp:${i}">Edit</button>`:''}</td></tr>`}).join('')}</tbody></table></div></div>`+
+ `<h2 style="margin-top:20px">Departments and Heads of Department</h2><div class="card flat"><div class="tw"><table><thead><tr><th>Department</th><th>Head of Department</th><th class="n">Headcount</th><th class="n">Salary pool</th></tr></thead><tbody>${DEPT.map((d,di)=>`<tr><td><b>${esc(d.n)}</b></td><td>${canEdit('emp')?`<select data-r2hod="${di}" aria-label="Head of ${esc(d.n)}">${EM.filter(x=>x.d===d.n).map(x=>`<option ${x.n===d.hod?'selected':''}>${esc(x.n)}</option>`).join('')}</select>`:esc(d.hod)}</td><td class="n">${EM.filter(x=>x.d===d.n).length}</td><td class="n">${mk(sumN(EM.length,i=>EM[i].d===d.n?EM[i].s:0))}</td></tr>`).join('')}</tbody></table></div></div>`+
+ note('A Head of Department must belong to the department. Proposed: HoD can view their department’s effort, not salaries, unless granted (decision D-R2-09).');
+};
+
+VIEWS.pm2=()=>{
+ const sc=pScope(),ids=sc.filter(i=>!R.tagF.length||R.tagF.every(t=>PR[i].tags.includes(t))),a=agg(ids);
+ const edit=canEdit('tag');
+ return head('Project Master & Tags','Assign tags to projects, then filter any financial view by tag.')+
+ `<div class="card mb"><b>Filter by tag</b> <small>(select one or more; projects must carry all selected tags)</small><div style="margin-top:8px">${TAGS.map(t=>`<button class="chip ${R.tagF.includes(t)?'on':''}" data-r2="tagf:${t}" aria-pressed="${R.tagF.includes(t)}">${esc(t)} · ${sc.filter(i=>PR[i].tags.includes(t)).length}</button>`).join(' ')} ${R.tagF.length?'<button class="btn sm" data-r2="tagclear">Clear filter</button>':''}</div></div>`+
+ `<div class="grid g4 mb">${kpi('Projects in filter',ids.length,R.tagF.length?'Tags: '+R.tagF.join(' + '):'No tag filter')}${kpi('Effort',NUM(a.h)+' h','Planned this month')}${kpi('Salary cost',mk(a.c),'Allocation × salary')}${kpi('Standard value',mk(a.v),'Hours × hourly rate')}</div>`+
+ `<div class="card flat"><div class="tw"><table><thead><tr><th>Code</th><th>Project</th><th>Tags</th>${edit?'<th>Add tag</th>':''}<th class="n">Hours</th></tr></thead><tbody>${ids.map(i=>`<tr><td>${PR[i].id}</td><td><b>${esc(PR[i].n)}</b></td><td>${PR[i].tags.map(t=>`<span class="chip c-acc r2tag">${esc(t)}${edit?`<button data-r2="untag:${i}|${t}" aria-label="Remove tag ${esc(t)}">×</button>`:''}</span>`).join('')}</td>${edit?`<td><select data-r2addtag="${i}" aria-label="Add tag to ${esc(PR[i].n)}"><option value="">+ tag…</option>${TAGS.filter(t=>!PR[i].tags.includes(t)).map(t=>`<option>${esc(t)}</option>`).join('')}</select></td>`:''}<td class="n">${NUM(P(i).h)}</td></tr>`).join('')||'<tr><td colspan="5"><div class="empty">No project carries all selected tags.</div></td></tr>'}</tbody></table></div></div>`+
+ (edit?`<h2 style="margin-top:20px">Tag master</h2><div class="tools"><input id="r2_newtag" placeholder="New tag name" aria-label="New tag name"><button class="btn pri" data-r2="newTag">Add tag</button><small>Tag names are unique (case-insensitive). A tag in use is archived, not deleted.</small></div>`:'');
+};
+
+VIEWS.al2=()=>{
+ const ps=pScope(),es=eScope(),edit=canEdit('al');
+ return head('Employee Allocation','Percent of each employee’s month on each project. A person can work on many projects but never above 100% in total.')+formula()+
+ `<div class="tools"><label>Month <select aria-label="Month"><option>November 2026</option><option disabled>December 2026 (copy forward)</option></select></label><span class="spacer"></span>${edit?'<button class="btn" data-r2="copyfwd">Copy to next month</button><button class="btn" data-r2="reset">Reset to workbook baseline</button><button class="btn" data-r2="clear">Clear all</button>':''}</div>`+
+ `<div class="card flat"><div class="tw"><table class="al"><thead><tr><th class="nm">Employee</th>${ps.map(p=>`<th class="n" title="${esc(PR[p].n)}">${PR[p].id}</th>`).join('')}<th class="n">Total</th><th class="n">Hours</th><th class="n">Bench</th></tr></thead><tbody>${es.map(e=>{const x=E(e);return `<tr><td class="nm"><b>${esc(EM[e].n)}</b><br><small>${esc(EM[e].d)}</small></td>${ps.map(p=>`<td class="n">${edit?`<input class="r2in" id="r2a_${p}_${e}" data-r2al="${p},${e}" inputmode="numeric" value="${A[p][e]?Math.round(A[p][e]*100):''}" placeholder="–" aria-label="${esc(EM[e].n)} on ${esc(PR[p].n)} percent">`:(A[p][e]?Math.round(A[p][e]*100)+'%':'–')}</td>`).join('')}<td class="n"><b class="${x.al>1.0001?'neg':''}">${Math.round(x.al*100)}%</b></td><td class="n">${NUM(x.h)}</td><td class="n">${x.bench>.001?chip(Math.round(x.bench*100)+'% free','warn'):'–'}</td></tr>`}).join('')}</tbody><tfoot><tr><td class="nm">Project hours</td>${ps.map(p=>`<td class="n">${NUM(P(p).h)}</td>`).join('')}<td class="n">${NUM(sumN(ps.length,i=>P(ps[i]).h))}</td><td></td><td></td></tr><tr><td class="nm">Salary cost</td>${ps.map(p=>`<td class="n">${canCost()?INR(P(p).c).replace('₹',''):'–'}</td>`).join('')}<td class="n">${canCost()?INR(sumN(ps.length,i=>P(ps[i]).c)):'–'}</td><td></td><td></td></tr></tfoot></table></div></div>`+
+ `<p class="sub" style="margin-top:10px">${ps.map(p=>`<b>${PR[p].id}</b> ${esc(PR[p].n)}`).join(' · ')}</p>`+
+ note('Try it: type 50 for Esha Kulkarni on P01. She is already 100% on P02, so the entry is rejected with a clear message (rule FR-R2-C2). Lower an existing value first, then add it elsewhere.');
+};
+
+VIEWS.set2=()=>{
+ const edit=['ceo','fin'].includes(state.role),o=ORG();
+ return head('Costing Settings','Organization defaults and where they can be overridden.')+
+ `<div class="grid g2 mb"><div class="card"><h2>Organization defaults</h2><div class="f"><label>Monthly working hours per employee<input class="r2in w" id="r2_hours" value="${org.hours}" ${edit?'':'disabled'} inputmode="numeric"></label><label>Standard hourly rate (₹) <small>internal value of effort, see D-R2-05</small><input class="r2in w" id="r2_rate" value="${org.rate}" ${edit?'':'disabled'} inputmode="numeric"></label></div><p class="sub" style="margin-top:10px">Valid hours 1–300; rate above 0. Changes apply to open months and are audited.</p></div>
+ <div class="card"><h2>What these settings do now</h2><table><tbody><tr><td>Total planned effort</td><td class="n"><b>${NUM(o.h).toLocaleString('en-IN')} h</b></td></tr><tr><td>Standard value of effort</td><td class="n"><b>${mk(o.v)}</b></td></tr><tr><td>Example: ₹30,000 salary, cost per hour</td><td class="n"><b>${canCost()?INR(30000/org.hours)+'/h':'Restricted'}</b></td></tr><tr><td>Example: 100% allocated, value − cost</td><td class="n"><b>${canCost()?INR(org.hours*org.rate-30000):'Restricted'}</b></td></tr></tbody></table></div></div>`+
+ `<div class="grid g2"><div class="card flat"><div style="padding:14px 16px 0"><h2>Hourly rate override per project</h2><small>Blank = inherit the organization rate</small></div><div class="tw"><table><thead><tr><th>Project</th><th class="n">Rate ₹/h</th></tr></thead><tbody>${PR.map((p,i)=>`<tr><td>${p.id} ${esc(p.n)}</td><td class="n"><input class="r2in w" id="r2_pr_${i}" data-r2rate="${i}" inputmode="numeric" placeholder="${org.rate}" value="${p.rate??''}" ${edit?'':'disabled'} aria-label="Rate override for ${esc(p.n)}">${p.rate!=null?' '+chip('override','warn'):''}</td></tr>`).join('')}</tbody></table></div></div>
+ <div class="card flat"><div style="padding:14px 16px 0"><h2>Monthly hours override per employee</h2><small>For part-time staff. Blank = inherit</small></div><div class="tw"><table><thead><tr><th>Employee</th><th class="n">Hours / month</th></tr></thead><tbody>${EM.map((x,i)=>`<tr><td>${esc(x.n)}</td><td class="n"><input class="r2in w" id="r2_eh_${i}" data-r2hrs="${i}" inputmode="numeric" placeholder="${org.hours}" value="${x.ho??''}" ${edit?'':'disabled'} aria-label="Hours override for ${esc(x.n)}">${x.ho!=null?' '+chip('override','warn'):''}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+};
+
+VIEWS.cost2=()=>{
+ const tabs=['By employee','By project','By tag'],ps=pScope(),es=eScope();
+ let body='';
+ if(R.tab==='By employee')body=`<div class="tw"><table><thead><tr><th>Employee</th><th>Department</th><th class="n">Allocated</th><th class="n">Hours</th><th class="n">Salary cost</th><th class="n">Cost / hour</th><th class="n">Bench hours</th><th class="n">Bench cost</th></tr></thead><tbody>${es.map(e=>{const x=E(e);return `<tr><td><button class="btn sm" style="border:0;font-weight:700" data-r2="emp:${e}">${esc(EM[e].n)}</button></td><td>${esc(EM[e].d)}</td><td class="n">${Math.round(x.al*100)}%</td><td class="n">${NUM(x.h)}</td><td class="n">${mk(x.c)}</td><td class="n">${canCost()?INR(EM[e].s/hrs(e)):'–'}</td><td class="n">${NUM(x.bh)}</td><td class="n">${mk(x.bc)}</td></tr>`}).join('')}</tbody></table></div>`;
+ if(R.tab==='By project')body=`<div class="tw"><table><thead><tr><th>Project</th><th>Tags</th><th class="n">People</th><th class="n">Hours</th><th class="n">Standard value</th><th class="n">Salary cost</th></tr></thead><tbody>${ps.map(p=>{const x=P(p);return `<tr><td><button class="btn sm" style="border:0;font-weight:700" data-r2="prj:${p}">${esc(PR[p].n)}</button></td><td>${PR[p].tags.map(t=>chip(t,'acc')).join(' ')}</td><td class="n">${EM.filter((_,e)=>A[p][e]>0).length}</td><td class="n">${NUM(x.h)}</td><td class="n">${mk(x.v)}</td><td class="n">${mk(x.c)}</td></tr>`}).join('')}</tbody></table></div>`;
+ if(R.tab==='By tag')body=`<div class="tw"><table><thead><tr><th>Tag</th><th class="n">Projects</th><th class="n">Hours</th><th class="n">Standard value</th><th class="n">Salary cost</th></tr></thead><tbody>${tagRows().map(([t,ids])=>{const a=agg(ids.filter(i=>ps.includes(i)));return `<tr><td>${chip(t,'acc')}</td><td class="n">${a.n}</td><td class="n">${NUM(a.h)}</td><td class="n">${mk(a.v)}</td><td class="n">${mk(a.c)}</td></tr>`}).join('')}</tbody></table></div><p class="sub" style="margin:10px 14px">Projects can carry several tags, so tag rows overlap and must not be added together.</p>`;
+ return head('Effort & Cost','Effort and cost computed from allocation, salary, monthly hours and hourly rate.')+formula()+`<div class="tabs" role="tablist">${tabs.map(t=>`<button class="tab" role="tab" aria-selected="${R.tab===t}" data-r2="tab:${t}">${t}</button>`).join('')}</div><div class="card flat">${body}</div>`+note('Click a name to see the step-by-step calculation.');
+};
+
+VIEWS.rev2=()=>{
+ const ps=pScope(),edit=['ceo','fin'].includes(state.role);
+ const tg=ps.filter(p=>PR[p].tgt!=null),tsum=sumN(tg.length,i=>PR[tg[i]].tgt),vsum=sumN(tg.length,i=>P(tg[i]).v);
+ return head('Revenue Targets · Revision 2','Define a monthly revenue target per project and compare it with the standard value of planned effort and with cost.')+
+ `<div class="grid g4 mb">${kpi('Projects with a target',tg.length+' of '+ps.length,'Others show “Not set”')}${kpi('Sum of project targets',INR(tsum),'November 2026')}${kpi('Standard value on those projects',INR(vsum),'Hours × rate')}${kpi('Gap to target',INR(vsum-tsum),vsum>=tsum?'Planned effort covers the targets':'Planned effort falls short')}</div>`+
+ `<div class="card flat"><div class="tw"><table><thead><tr><th>Project</th><th>Tags</th><th class="n">Target (₹)</th><th class="n">Standard value</th><th class="n">Value − target</th><th>Planned value vs target</th><th class="n">Salary cost</th><th class="n">Margin at target</th></tr></thead><tbody>${ps.map(p=>{const x=P(p),t=PR[p].tgt;return `<tr><td><b>${esc(PR[p].n)}</b></td><td>${PR[p].tags.map(g=>chip(g)).join(' ')}</td><td class="n">${edit?`<input class="r2in w" id="r2_t_${p}" data-r2tgt="${p}" inputmode="numeric" placeholder="Not set" value="${t??''}" aria-label="Target for ${esc(PR[p].n)}">`:(t==null?'Not set':INR(t))}</td><td class="n">${mk(x.v)}</td><td class="n">${t==null?'–':`<span class="${x.v>=t?'pos':'neg'}">${INR(x.v-t)}</span>`}</td><td>${t==null?chip('No target set','warn'):bar(pct(x.v,t),tone(pct(x.v,t)))+` <small>${pct(x.v,t)}%</small>`}</td><td class="n">${mk(x.c)}</td><td class="n">${t==null?'–':mk(t-x.c)}</td></tr>`}).join('')}</tbody></table></div></div>`+
+ note('Targets are planning values. “Revenue achieved” (invoiced or collected) is added when invoicing exists; the revenue basis is decision D-R2-01. Missing targets show a warning instead of a misleading zero.');
+};
+
+VIEWS.prof2=()=>{
+ const ps=pScope(),rows=ps.map(p=>{const x=P(p),rv=revOf(p),oc=R.other?x.o:0;return{p,x,rv,oc,m:rv==null?null:rv-x.c-oc}});
+ const ok=rows.filter(r=>r.m!=null),o=ORG(),rev=sumN(ok.length,i=>ok[i].rv),c=sumN(ok.length,i=>ok[i].x.c),oc=sumN(ok.length,i=>ok[i].oc),m=rev-c-oc;
+ return head('Project Profitability','Revenue basis minus salary cost for each project, with the unallocated salary shown separately.')+
+ `<div class="tools"><label>Revenue basis <select id="r2_basis"><option ${R.basis===0?'selected':''}>Standard value (hours × rate)</option><option ${R.basis===1?'selected':''}>Revenue target (where set)</option></select></label><label style="display:inline-flex;gap:6px"><input type="checkbox" id="r2_other" ${R.other?'checked':''}> Include non-salary budget categories <small>(optional, D-R2-06)</small></label></div>`+
+ `<div class="grid g4 mb">${kpi('Revenue basis',mk(rev),`${ok.length} of ${rows.length} projects`)}${kpi('Salary cost',mk(c),R.other?'plus '+INR(oc)+' other':'Allocation × salary')}${kpi('Margin',canCost()?`<span class="${m>=0?'pos':'neg'}">${INR(m)}</span>`:mk(m),canCost()&&rev?Math.round(m/rev*1000)/10+'% of revenue basis':'')}${kpi('Unallocated salary (bench)',mk(o.bench),'Not charged to any project')}</div>`+
+ `<div class="card flat"><div class="tw"><table><thead><tr><th>Project</th><th class="n">Revenue basis</th><th class="n">Salary cost</th>${R.other?'<th class="n">Other direct</th>':''}<th class="n">Margin</th><th>Margin %</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(PR[r.p].n)}</b></td><td class="n">${r.rv==null?'–':mk(r.rv)}</td><td class="n">${mk(r.x.c)}</td>${R.other?`<td class="n">${mk(r.oc)}</td>`:''}<td class="n">${r.m==null||!canCost()?(r.m==null?'–':mk(r.m)):`<span class="${r.m>=0?'pos':'neg'}">${INR(r.m)}</span>`}</td><td>${r.m==null||!canCost()||!r.rv?'–':bar(Math.max(0,Math.round(r.m/r.rv*100)),mTone(r.m/r.rv))+' <small>'+Math.round(r.m/r.rv*100)+'%</small>'}</td><td>${r.rv==null?chip('Target not set','warn'):r.m<0?chip('Loss','bad'):chip('Profit','ok')}</td></tr>`).join('')}</tbody><tfoot><tr><td><b>Allocated work</b></td><td class="n">${mk(rev)}</td><td class="n">${mk(c)}</td>${R.other?`<td class="n">${mk(oc)}</td>`:''}<td class="n">${mk(m)}</td><td></td><td></td></tr><tr><td>Unallocated salary (bench)</td><td></td><td class="n">${mk(o.bench)}</td>${R.other?'<td></td>':''}<td class="n">${canCost()?`<span class="neg">${INR(-o.bench)}</span>`:mk(0)}</td><td></td><td></td></tr><tr><td><b>Result after bench</b></td><td></td><td></td>${R.other?'<td></td>':''}<td class="n"><b>${mk(m-o.bench)}</b></td><td></td><td></td></tr></tfoot></table></div></div>`+
+ note('Revenue basis is an open decision (D-R2-01). “Standard value” is hours × rate, not invoiced revenue. Projects with no target are excluded when the target basis is selected, and the count is shown.');
+};
+
+VIEWS.tag2=()=>{
+ const rows=tagRows().map(([t,ids])=>({t,ids,a:agg(ids)})),max=Math.max(...rows.map(r=>r.a.v),1);
+ return head('Tag-wise Analysis','Financial analysis by project tag with drill-down to projects.')+
+ `<div class="tools"><label style="display:inline-flex;gap:6px"><input type="checkbox" id="r2_primary" ${R.primary?'checked':''}> Use primary tag only (additive view)</label></div>`+
+ (R.primary?note('Each project is counted once, under its first tag, so the rows add up to the organization total.'):`<div class="note w mb">Projects can carry several tags, so tag rows overlap. Do not add them together. Switch on “primary tag only” for an additive view.</div>`)+
+ `<div class="grid g2"><div class="card flat"><div class="tw"><table><thead><tr><th>Tag</th><th class="n">Projects</th><th class="n">Hours</th><th class="n">Standard value</th><th class="n">Salary cost</th><th class="n">Margin</th><th class="n">%</th><th></th></tr></thead><tbody>${rows.map(r=>{const m=r.a.v-r.a.c;return `<tr><td>${chip(r.t,'acc')}</td><td class="n">${r.a.n}</td><td class="n">${NUM(r.a.h)}</td><td class="n">${mk(r.a.v)}</td><td class="n">${mk(r.a.c)}</td><td class="n">${canCost()?`<span class="${m>=0?'pos':'neg'}">${INR(m)}</span>`:mk(m)}</td><td class="n">${canCost()&&r.a.v?Math.round(m/r.a.v*100)+'%':'–'}</td><td><button class="btn sm" data-r2="tagdrill:${r.t}">Projects</button></td></tr>`}).join('')}</tbody>${R.primary?`<tfoot><tr><td>Total</td><td class="n">${sumN(rows.length,i=>rows[i].a.n)}</td><td class="n">${NUM(sumN(rows.length,i=>rows[i].a.h))}</td><td class="n">${mk(sumN(rows.length,i=>rows[i].a.v))}</td><td class="n">${mk(sumN(rows.length,i=>rows[i].a.c))}</td><td class="n">${mk(sumN(rows.length,i=>rows[i].a.v-rows[i].a.c))}</td><td></td><td></td></tr></tfoot>`:''}</table></div></div>
+ <div class="card"><h2>Margin by tag</h2>${canCost()?hbars(rows.map(r=>({n:r.t,v:Math.max(0,r.a.v-r.a.c),t:mTone((r.a.v-r.a.c)/(r.a.v||1))})),v=>INR(v)):'<div class="empty">Financial values are restricted for this role.</div>'}</div></div>`;
+};
+
+VIEWS.chk2=()=>{
+ const base={};PR.forEach((_,p)=>{base[p]=Object.entries(BASE[p]||{}).reduce((s,[e,v])=>s+v*EM[e].s,0)});
+ const cc=PR.map((_,p)=>base[p]),exc=EXCEL_COST,tc=cc.reduce((a,b)=>a+b,0),te=exc.reduce((a,b)=>a+b,0);
+ return head('Excel Check','The workbook’s allocation model compared with the corrected calculation (baseline allocations, independent of edits above).')+
+ `<div class="grid g4 mb">${kpi('Effort hours','1,760 h','Workbook and system agree')}${kpi('Standard value','₹4,40,000','Workbook and system agree')}${kpi('Salary cost, workbook',INR(te),'Formula error')}${kpi('Salary cost, corrected',INR(tc),'Each person’s own salary')}</div>`+
+ `<div class="card flat"><div class="tw"><table><thead><tr><th>Project</th><th class="n">Workbook cost</th><th class="n">Corrected cost</th><th class="n">Difference</th><th>Result</th></tr></thead><tbody>${PR.map((p,i)=>`<tr><td>${p.id} ${esc(p.n)}</td><td class="n">${INR(exc[i])}</td><td class="n">${INR(cc[i])}</td><td class="n">${exc[i]-cc[i]?`<span class="neg">${INR(exc[i]-cc[i])}</span>`:'–'}</td><td>${exc[i]===cc[i]?chip('Matches','ok'):chip('Overstated','bad')}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td class="n">${INR(te)}</td><td class="n">${INR(tc)}</td><td class="n"><span class="neg">${INR(te-tc)}</span></td><td></td></tr></tfoot></table></div></div>`+
+ `<div class="card mb" style="margin-top:14px"><h2>Why the totals differ</h2><ul class="can"><li>On projects 2 to 11 the workbook multiplies every allocation by one fixed salary cell (₹30,000) instead of each employee’s own salary. Project 1 is correct.</li><li>Three employees are at 0% (₹60,000 of monthly salary) and are not reported anywhere in the workbook. The system shows them as bench cost.</li><li>The workbook’s “Revenue” is hours × ₹250: a standard value of effort, not invoiced revenue. Only three projects have a real revenue target.</li></ul></div>`+note('Decision D-R2-02: confirm that the corrected cost of ₹2,00,000 is the intended result.');
+};
+
+/* ----- dashboard snapshot and cross references on older screens ----- */
+const dash0=VIEWS.dash;
+VIEWS.dash=()=>{let h=dash0();if(!canCost())return h;const o=ORG();return h+`<h2 style="margin-top:20px">Revision 2 snapshot · November 2026 <span class="r2new">NEW</span></h2><div class="grid g4 mb">${kpi('Planned effort',NUM(o.h).toLocaleString('en-IN')+' h','14 employees, 11 projects')}${kpi('Standard value',INR(o.v),'Hours × ₹'+org.rate)}${kpi('Salary cost (allocated)',INR(o.c),'Unallocated '+INR(o.bench))}${kpi('Margin',`<span class="${o.v-o.c>=0?'pos':'neg'}">${INR(o.v-o.c)}</span>`,Math.round((o.v-o.c)/o.v*100)+'% of standard value')}</div><div class="tools"><button class="btn" data-view="al2">Open allocation</button><button class="btn" data-view="prof2">Open profitability</button><button class="btn" data-view="tag2">Open tag analysis</button></div>`};
+['revenue','expenses'].forEach(k=>{const f=VIEWS[k];VIEWS[k]=()=>f()+`<div class="note w" style="margin-top:14px"><b>Revision 2:</b> salary-allocation costing, tags and project profitability are specified in PRD Part B and shown under “Costing &amp; Profitability”. This screen is retained and will be aligned after review.</div>`});
+
+/* ----- decisions, matrix rows ----- */
+ASSUME.push(
+ ['Revision 2 · Revenue basis for profitability (D-R2-01)','Workbook “Revenue” is hours × ₹250 (a standard value), not actual revenue. Only 3 of 11 projects have a target.','Show standard value as planned value, targets separately; add actual revenue when invoicing exists.','Open'],
+ ['Revision 2 · Corrected workbook totals (D-R2-02)','Workbook cost ₹3,07,500 results from one salary cell used for all employees; corrected cost is ₹2,00,000.','Adopt the corrected formula; confirm with the business owner.','Open'],
+ ['Revision 2 · S / H markers (D-R2-04)','S falls on every Sunday of Nov 2026; H on four other days.','Treat as weekly off and holiday, configurable, pending confirmation.','Open'],
+ ['Revision 2 · Monthly hours and hourly rate (D-R2-05, D-R2-13)','160 h and ₹250 given. November calendar implies about 168 working hours.','Flat 160 default; organization default with per-employee hours and per-project rate overrides.','Open'],
+ ['Revision 2 · Tags, Head of Department, over-allocation (D-R2-08, 09, 11)','Not defined in the workbook.','Managed tag list with many tags per project; HoD sees effort not salary; allocation above 100% is blocked.','Open']);
+MX.push(['Employee, Department & Salary (Rev 2)',1,'P0',['Full','Full','View',N,N,N,N,N,'Manage']],['Project Tags (Rev 2)',1,'P0',['Full','View','Full','Delegated',N,N,N,N,N]],['Employee Allocation (Rev 2)',1,'P0',['Full','View','Manage','Delegated','View',N,N,N,N]],['Costing Settings (Rev 2)',1,'P0',['Full','Manage','View',N,N,N,N,N,N]],['Effort, Cost & Profitability (Rev 2)',1,'P0',['Full','Full','View','Delegated',N,N,N,N,N]]);
+
+/* ----- events ----- */
+function openCalc(kind,i){
+ if(kind==='emp'){const x=EM[i];const rows=PR.map((p,pi)=>[p,pi]).filter(([,pi])=>A[pi][i]>0);
+  return modal(x.n+' · calculation',`<p class="sub">${esc(x.t)}, ${esc(x.d)}. Monthly hours ${hrs(i)}; salary ${canCost()?INR(x.s):'restricted'}.</p><table><thead><tr><th>Project</th><th class="n">Allocation</th><th class="n">Effort</th><th class="n">Cost</th></tr></thead><tbody>${rows.map(([p,pi])=>`<tr><td>${esc(p.n)}</td><td class="n">${Math.round(A[pi][i]*100)}%</td><td class="n">${Math.round(A[pi][i]*100)}% × ${hrs(i)} = <b>${NUM(effort(pi,i))} h</b></td><td class="n">${canCost()?`${Math.round(A[pi][i]*100)}% × ${INR(x.s)} = <b>${INR(cost(pi,i))}</b>`:'Restricted'}</td></tr>`).join('')||'<tr><td colspan="4">On the bench: no allocation this month.</td></tr>'}</tbody></table>`)}
+ const p=PR[i],x=P(i),rows=EM.map((e,ei)=>ei).filter(ei=>A[i][ei]>0);
+ modal(p.n+' · calculation',`<p>${p.tags.map(t=>chip(t,'acc')).join(' ')} · rate ₹${rateOf(i)}/h${p.rate!=null?' (override)':''}</p><table><thead><tr><th>Employee</th><th class="n">Allocation</th><th class="n">Hours</th><th class="n">Cost</th></tr></thead><tbody>${rows.map(ei=>`<tr><td>${esc(EM[ei].n)}</td><td class="n">${Math.round(A[i][ei]*100)}%</td><td class="n">${NUM(effort(i,ei))}</td><td class="n">${canCost()?`${Math.round(A[i][ei]*100)}% × ${INR(EM[ei].s)} = ${INR(cost(i,ei))}`:'Restricted'}</td></tr>`).join('')}</tbody><tfoot><tr><td>Total</td><td></td><td class="n"><b>${NUM(x.h)} h</b></td><td class="n"><b>${mk(x.c)}</b></td></tr></tfoot></table><p style="margin-top:10px">Standard value = ${NUM(x.h)} h × ₹${rateOf(i)} = <b>${mk(x.v)}</b>${canCost()?` · Margin = ${INR(x.v)} − ${INR(x.c)} = <b>${INR(x.v-x.c)}</b>`:''}</p>`);
+}
+document.addEventListener('click',ev=>{
+ const t=ev.target.closest('[data-r2]');if(!t)return;const [a,arg]=t.dataset.r2.split(/:(.*)/s);
+ if(a==='tagf'){R.tagF=R.tagF.includes(arg)?R.tagF.filter(x=>x!==arg):[...R.tagF,arg];return render()}
+ if(a==='tagclear'){R.tagF=[];return render()}
+ if(a==='untag'){const [i,tg]=arg.split('|');if(PR[i].tags.length<2){toast('A project keeps at least one tag (validation example).');return}PR[i].tags=PR[i].tags.filter(x=>x!==tg);toast('Tag removed (illustrative; the change would be audited).');return render()}
+ if(a==='newTag'){const v=($('#r2_newtag').value||'').trim();if(!v||v.length>40)return toast('Enter a tag name of 1–40 characters.');if(TAGS.some(x=>x.toLowerCase()===v.toLowerCase()))return toast('That tag already exists (names are unique, case-insensitive).');TAGS.push(v);toast('Tag “'+v+'” added.');return render()}
+ if(a==='tab'){R.tab=arg;return render()}
+ if(a==='reset'){loadBase();toast('Allocations reset to the workbook baseline.');return render()}
+ if(a==='clear'){A.forEach(r=>r.fill(0));toast('All allocations cleared. Everyone is on the bench.');return render()}
+ if(a==='copyfwd')return toast('Illustrative: November allocations would be copied to December for review.');
+ if(a==='emp')return openCalc('emp',+arg);
+ if(a==='prj')return openCalc('prj',+arg);
+ if(a==='tagdrill'){const r=tagRows().find(([n])=>n===arg);return modal('Projects tagged “'+arg+'”',`<table><thead><tr><th>Project</th><th class="n">Hours</th><th class="n">Value</th><th class="n">Cost</th></tr></thead><tbody>${r[1].map(i=>`<tr><td>${esc(PR[i].n)}</td><td class="n">${NUM(P(i).h)}</td><td class="n">${mk(P(i).v)}</td><td class="n">${mk(P(i).c)}</td></tr>`).join('')}</tbody></table>`)}
+ if(a==='addEmp'||a==='editEmp'){const x=a==='editEmp'?EM[+arg]:{n:'',d:'Engineering',t:'',s:''};
+  return modal(a==='addEmp'?'Add employee':'Edit employee',`<div class="f"><label>Name<input id="m_n" value="${esc(x.n)}"></label><label>Title<input id="m_t" value="${esc(x.t)}"></label><label>Department<select id="m_d">${DEPT.map(d=>`<option ${d.n===x.d?'selected':''}>${esc(d.n)}</option>`).join('')}</select></label>${canCost()?`<label>Monthly salary (₹, cost-to-company)<input id="m_s" inputmode="numeric" value="${x.s}"></label>`:''}</div>`,'Save',()=>{
+   const n=$('#m_n').value.trim(),s=+($('#m_s')?.value||x.s||0);if(!n||!(s>0)){toast('Enter a name and a salary above 0 (validation example).');return false}
+   if(a==='addEmp'){EM.push({n,d:$('#m_d').value,t:$('#m_t').value,s,ho:null});A.forEach(r=>r.push(0))}else{Object.assign(EM[+arg],{n,d:$('#m_d').value,t:$('#m_t').value,s})}
+   toast('Saved (illustrative). A salary change is effective-dated and audited.');render()})}
+});
+document.addEventListener('change',ev=>{const t=ev.target,d=t.dataset;
+ if(t.id==='r2_dep'){R.dep=t.value;return render()}
+ if(t.id==='r2_basis'){R.basis=t.selectedIndex;return render()}
+ if(t.id==='r2_other'){R.other=t.checked;return render()}
+ if(t.id==='r2_primary'){R.primary=t.checked;return render()}
+ if(d.r2hod!==undefined){DEPT[+d.r2hod].hod=t.value;return toast('Head of Department changed to '+t.value+' (audited).')}
+ if(d.r2addtag!==undefined&&t.value){PR[+d.r2addtag].tags.push(t.value);toast('Tag added to project.');return render()}
+});
+document.addEventListener('input',ev=>{const t=ev.target,d=t.dataset;
+ if(t.id==='r2_q'){R.q=t.value;return render()}
+ if(d.r2al){const [p,e]=d.r2al.split(',').map(Number),raw=t.value.trim(),v=raw===''?0:Number(raw);
+  if(!Number.isFinite(v)||v<0||v>100){toast('Allocation must be between 0 and 100 percent.');return render()}
+  const others=E(e).al-A[p][e];if(others+v/100>1.0001){toast(EM[e].n+' would be at '+Math.round((others+v/100)*100)+'%. The limit is 100%, so the entry is rejected.');return render()}
+  A[p][e]=v/100;return render()}
+ if(t.id==='r2_hours'||t.id==='r2_rate'){const v=Number(t.value);const lo=t.id==='r2_hours'?1:0.01,hi=t.id==='r2_hours'?300:1e6;if(!(v>=lo&&v<=hi)){toast(t.id==='r2_hours'?'Monthly hours must be between 1 and 300.':'The hourly rate must be above 0.');return}org[t.id==='r2_hours'?'hours':'rate']=v;return render()}
+ if(d.r2rate!==undefined){const v=t.value.trim();PR[+d.r2rate].rate=v===''?null:(Number(v)>0?Number(v):null);return render()}
+ if(d.r2hrs!==undefined){const v=t.value.trim();EM[+d.r2hrs].ho=v===''?null:(Number(v)>=1&&Number(v)<=300?Number(v):null);return render()}
+ if(d.r2tgt!==undefined){const v=t.value.trim();PR[+d.r2tgt].tgt=v===''?null:(Number(v)>=0?Number(v):null);return render()}
+});
+renderShell();render();
+})();
+</script>
+
 </body>
 </html>
