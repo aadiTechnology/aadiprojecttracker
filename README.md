@@ -15,7 +15,7 @@ Business Performance & Project Profitability platform (PRD in [docs/](docs/)). M
 | Sprint | Backend + web (+ mobile from S2) | Demo video |
 |---|---|---|
 | **S1 Foundation** (done) | Sign-in, invitations/reset by email, tenants, roles as data, entitlements, audit, customers, projects, scope changes, role-aware dashboard, demo accounts | `videos/01-sprint-1-foundation-and-projects.mp4` |
-| S2 Delivery (**paused**) | Backend done and tested (sprints, tasks, handover + acknowledgement, timesheets + approval, notifications, seed data; 41 tests). **Remaining:** web screens (Sprint Planning, Team Handover, Timesheets, notification bell, dashboard blocks), Expo mobile app, screen check, demo video. Then set `LIVE_SPRINT=2` (default in `auth.py`). Resume from tag `sprint-2-backend-checkpoint` / branch `sprint-2`. | planned |
+| **S2 Delivery** (done) | Sprints, tasks with assignment history, handover + acknowledgement, timesheets + approval, notification bell, role dashboards (web); Expo mobile app (my tasks, timesheet, handover, alerts) | `videos/02-sprint-2-delivery-web.mp4`, `videos/02-sprint-2-mobile-app.mp4` |
 | S3 Money | Revenue targets, expenses and allocation, invoices, performance matrix, attachments on Backblaze | planned |
 | S4 Hardening | AI assistant (advisory), reports/exports, accessibility, load and security pass, production cut-over | planned |
 
@@ -28,6 +28,14 @@ python -m uvicorn app.main:app --port 8000             # serves the API and the 
 cd ../frontend && npm install && npm run build         # or npm run dev (port 5173, proxies /api)
 ```
 Demo sign-ins are listed under the Sign in button (shared disposable password, demo environment only). All data is fictional.
+
+## Mobile app (Expo)
+```
+cd mobile && npm install
+EXPO_PUBLIC_API_URL=http://localhost:8000 npx expo start      # scan with Expo Go; default API is the demo deployment
+npx tsc --noEmit && npx expo export --platform web             # the checks used in CI here
+```
+The token is kept in memory only; use expo-secure-store before a store release.
 
 ## Tests
 ```

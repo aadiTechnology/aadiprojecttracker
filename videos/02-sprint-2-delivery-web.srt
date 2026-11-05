@@ -1,0 +1,51 @@
+1
+00:00:00,001 --> 00:00:21,391
+Welcome to Sprint two of Aadi Project Tracker: delivery. We sign in as Meera Nair, a software engineer. Last sprint her dashboard was almost empty. Now it shows her open tasks, her hours this week against the target, and any handover waiting for her. Everything is limited to her own work.
+
+2
+00:00:21,843 --> 00:00:36,800
+In Sprint Planning she sees only tasks assigned to her. She cannot see other engineers work. She is stuck on the sprint and task board, so she marks it Blocked. The project manager is notified immediately.
+
+3
+00:00:37,263 --> 00:00:57,414
+Next, her timesheet. She adds two hours for today against the Project Tracker product, choosing the task she worked on. The system only lets her log time on projects she is assigned to, never in the future, and never more than twenty four hours a day. Then she submits the week for approval.
+
+4
+00:00:57,879 --> 00:01:06,521
+An employee cannot approve time. A direct call to the approvals service is refused by the server, not just hidden in the screen.
+
+5
+00:01:06,988 --> 00:01:25,189
+Rohan Mehta is the team lead. His dashboard counts the timesheet entries waiting for him. On the approvals tab he sees only his own team, never his own time. He selects everything and approves. Rejecting needs a written reason, which the employee sees.
+
+6
+00:01:25,653 --> 00:01:38,415
+Asha Kulkarni is a project manager. The bell shows what needs her attention, including the blocked task from Meera. Notifications are private to each person and are marked as read when opened.
+
+7
+00:01:38,871 --> 00:01:50,889
+Asha plans work. She creates a task in the active Retail Portal sprint. The assignee list contains only the project team. She assigns it to Dev Patel.
+
+8
+00:01:51,353 --> 00:02:02,806
+Plans change, so she reassigns the task to Isha Kapoor and records why. Every assignment is kept in the task history: who, to whom, by whom and the reason.
+
+9
+00:02:03,260 --> 00:02:24,840
+When a person moves to other work, the project manager creates a handover. She chooses the project, who hands over and who receives, selects the open tasks, and writes a note with context and next steps. The note is mandatory. Ownership of the tasks moves to the receiver, and the receiver is notified.
+
+10
+00:02:25,303 --> 00:02:41,734
+Isha Kapoor receives two handovers. A handover stays pending until the receiver acknowledges it. Only the receiver can do that, not the manager and not the sender. She reads the note and acknowledges, and the project manager is told.
+
+11
+00:02:42,195 --> 00:02:50,918
+Isha also has time that was rejected, with the reason shown right next to it. She can correct the entry and submit the week again.
+
+12
+00:02:51,382 --> 00:03:05,380
+Finally, role limits. Kabir Sethi from sales has no access to sprints, tasks or timesheet approvals. The menu locks them, and the server refuses direct calls to the task service.
+
+13
+00:03:05,832 --> 00:03:24,353
+Sprint two delivers sprints, tasks, assignment history, handover with acknowledgement, timesheets with approval and notifications, with a companion mobile app shown in the next video. Sprint three adds revenue targets, expenses, invoices and the performance matrix.
