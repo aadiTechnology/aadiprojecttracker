@@ -1,0 +1,40 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:25.815
+Welcome to Sprint three of Aadi Project Tracker: costing and profitability, built from the Aadi Technology matrix workbook. We sign in as Priya Rao, the CEO. Employees and Departments holds the employee master. Each employee belongs to one department, and each department has one head of department. Salary is shown only to roles that hold salary access.
+
+00:00:26.278 --> 00:00:47.979
+Costing Settings holds the two organization defaults. A month has one hundred and sixty working hours, and the standard hourly rate is two hundred and fifty rupees. Part time employees can have their own monthly hours, and any project can have its own rate. This rate values the effort. It is not an invoice rate.
+
+00:00:48.440 --> 00:01:02.007
+Allocation is the heart of the workbook. Each cell is the percentage of an employee month spent on a project. Totals per employee appear on the right, and anything under one hundred percent is bench capacity.
+
+00:01:02.470 --> 00:01:15.347
+The server enforces the rule that nobody can be above one hundred percent in a month. We try to give an already busy employee a full one hundred percent on another project, and the change is rejected with the reason.
+
+00:01:15.803 --> 00:01:31.580
+Effort and Cost turns allocation into numbers. By employee, the hours are allocation times monthly hours, and the salary cost is allocation times that employee own salary. Unallocated salary is shown as bench cost.
+
+00:01:32.043 --> 00:01:54.723
+By project shows hours, standard value and salary cost for each project. Projects can carry tags, and we can filter by one or more of them. By tag adds up all projects under a tag. A project can have several tags, so tag totals can overlap, and one switch counts each project once under its primary tag.
+
+00:01:55.183 --> 00:02:19.568
+The workbook matrix mirrors the Excel layout, with employees across the top and projects down the side. The problem in the original sheet was that every cost cell used one fixed salary, so project cost did not match the salary total. Here each cell uses its own employee salary, and a reconciliation proves that allocated cost plus bench cost equals the salary pool exactly.
+
+00:02:20.030 --> 00:02:36.646
+Project Profitability shows revenue basis minus salary cost for each project. Unallocated salary is shown on its own line below, so the result after bench is honest. You can switch the revenue basis between standard value and revenue targets.
+
+00:02:37.110 --> 00:02:45.703
+The tag-wise tab compares groups of projects, for example by service line, and lets us open the projects behind any tag.
+
+00:02:46.168 --> 00:03:00.560
+Revenue Targets lets finance and leadership set a monthly target per project, per tag and for the whole organization, and compares each with planned value and cost. Projects without a target say Not set instead of showing zero.
+
+00:03:01.013 --> 00:03:14.815
+Money is protected on the server. Asha Kulkarni is a project manager. She can plan allocation and see effort for her own projects, but no salary, cost or profit figures reach her screen.
+
+00:03:15.278 --> 00:03:24.716
+An employee has no access to costing at all. The menu entry is locked, and a direct call to the costing service is refused by the server.
+
+00:03:25.270 --> 00:03:43.311
+Sprint three delivers the employee and department master, allocation, effort and cost, tag analysis, profitability and revenue targets. Sprint four adds the performance matrix, expenses, shared costs, invoices and planned versus actual from timesheets.
