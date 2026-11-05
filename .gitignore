@@ -14,3 +14,7 @@ videos/*.log
 mobile/.expo/
 mobile/dist/
 *.log
+
+# Real salary data: never commit (public repo)
+docs/*Matrix*.xlsx
+*.xlsx
