@@ -1,0 +1,35 @@
+1
+00:00:00,000 --> 00:00:32,939
+This video shows a second demo organization built from the structure of the Aadi Technology matrix workbook. All people and clients are fictional. Departments are functions: management, software development, marketing and sales. Tags are industries, such as education, security and e-commerce. We sign in as Rhea Kulkarni, the CEO, and open Decision Insights. The headline numbers are planned value, salary cost on projects, margin and bench salary.
+
+2
+00:00:33,398 --> 00:00:54,324
+The departments table shows how busy each function is, who heads it, and what its salary and bench cost. Next to it, each industry shows planned value against salary cost, its margin, and its target where one is set. Every project counts once, under its first tag, so industries add up to the total.
+
+3
+00:00:54,781 --> 00:01:10,718
+The heat map crosses departments with industries. Darker cells mean more effort. Here we see that education work is carried mostly by software development and sales. Switch to salary cost and the same grid shows where the money goes.
+
+4
+00:01:11,168 --> 00:01:31,304
+Projects are ranked by margin, with flags for thin margins, projects below target and projects that depend on one person. At the bottom, what to act on lists the decisions for the CEO: a project with nobody allocated, an organization target not covered, free people, and a fully booked department.
+
+5
+00:01:31,755 --> 00:01:49,971
+The effort and cost screen keeps the workbook layout. Employees run across the top, grouped under their department, and every project has allocation, effort and cost rows with its industry tag. The reconciliation proves that allocated cost plus bench equals the salary pool.
+
+6
+00:01:50,430 --> 00:02:11,721
+Tanvi Joshi is a product owner. She sees only her own products, in hours, with no salary or margin. For each product the bar shows who builds, markets and sells it. The signals tell her that the platform product has no marketing or sales effort, and that one growth product has no engineering effort.
+
+7
+00:02:12,184 --> 00:02:32,670
+Anil Deshpande is a project manager. His view shows the people and the department mix on his projects, which projects depend on a single person, and projects with nobody allocated. He also sees free capacity, so he knows whom to ask to fill a gap. Still no salary figures reach his screen.
+
+8
+00:02:33,134 --> 00:02:41,457
+Employees have no access to these views. A direct call to the insights service is refused by the server with a forbidden error.
+
+9
+00:02:43,084 --> 00:02:59,666
+In short: functional departments, industry tags, a workbook-style matrix, and three decision views with the money hidden from roles that should not see it. Next, expenses and shared costs from the workbook targets sheet will join in sprint four.
