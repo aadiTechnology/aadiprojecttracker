@@ -10,6 +10,12 @@ import Admin from './pages/Admin'
 import SprintPage from './pages/Sprint'
 import Handover from './pages/Handover'
 import Timesheets from './pages/Timesheets'
+import Employees from './pages/Employees'
+import Allocation from './pages/Allocation'
+import Costing from './pages/Costing'
+import CostSettings from './pages/CostSettings'
+import Profitability from './pages/Profitability'
+import Targets from './pages/Targets'
 import Platform from './pages/Platform'
 import { Assumptions, Matrix, Workflow } from './pages/Info'
 import { Loading, PageHead, Restricted } from './ui'
@@ -22,8 +28,13 @@ const NAV: { key: string; label: string; icon: string; path: string; group?: str
   { key: 'sprint', label: 'Sprint Planning', icon: '🗓', path: '/sprint' },
   { key: 'handover', label: 'Team Handover', icon: '⇄', path: '/handover' },
   { key: 'timesheets', label: 'Timesheets', icon: '⏱', path: '/timesheets' },
-  { key: 'perf', label: 'Employee Performance', icon: '★', path: '/performance' },
+  { key: 'employees', label: 'Employees & Departments', icon: '👥', path: '/employees', group: 'Costing & Profitability' },
+  { key: 'allocation', label: 'Employee Allocation', icon: '🧩', path: '/allocation' },
+  { key: 'costing', label: 'Effort & Cost', icon: '🧮', path: '/costing' },
+  { key: 'profit', label: 'Project Profitability', icon: '📈', path: '/profitability' },
   { key: 'revenue', label: 'Revenue Targets', icon: '◎', path: '/revenue' },
+  { key: 'costset', label: 'Costing Settings', icon: '⚙', path: '/costing-settings' },
+  { key: 'perf', label: 'Employee Performance', icon: '★', path: '/performance', group: 'Finance & Performance' },
   { key: 'expenses', label: 'Expenses & Cost', icon: '₹', path: '/expenses' },
   { key: 'invoices', label: 'Invoices', icon: '🧾', path: '/invoices' },
   { key: 'admin', label: 'Organization Admin', icon: '⚙', path: '/admin', group: 'Administration' },
@@ -114,6 +125,12 @@ export default function App() {
               else if (n.key === 'sprint') el = <SprintPage me={m} />
               else if (n.key === 'handover') el = <Handover me={m} />
               else if (n.key === 'timesheets') el = <Timesheets me={m} />
+              else if (n.key === 'employees') el = <Employees me={m} />
+              else if (n.key === 'allocation') el = <Allocation me={m} />
+              else if (n.key === 'costing') el = <Costing me={m} />
+              else if (n.key === 'profit') el = <Profitability me={m} />
+              else if (n.key === 'revenue') el = <Targets me={m} />
+              else if (n.key === 'costset') el = <CostSettings me={m} />
               else if (n.key === 'admin') el = <Admin me={m} />
               else if (n.key === 'matrix') el = <Matrix />
               else if (n.key === 'workflow') el = <Workflow me={m} />

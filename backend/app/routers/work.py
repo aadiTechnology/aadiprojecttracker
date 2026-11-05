@@ -54,6 +54,13 @@ def customer_query(c: Ctx):
     return q.where(or_(m.Customer.owner_user_id == c.user.id, m.Customer.id.in_(cust or {-1})))
 
 
+def _tags_of(c: Ctx, pids) -> dict:
+    out = {}
+    for pt, tg in c.db.execute(select(m.ProjectTag, m.Tag).join(m.Tag, m.Tag.id == m.ProjectTag.tag_id).where(m.ProjectTag.tenant_id == c.tid, m.ProjectTag.project_id.in_(pids or [-1])).order_by(m.ProjectTag.position)).all():
+        out.setdefault(pt.project_id, []).append({"id": tg.id, "name": tg.name})
+    return out
+
+
 def _names(c: Ctx) -> dict:
     return {u.id: u.name for u in c.db.execute(select(m.User).join(m.Membership, m.Membership.user_id == m.User.id).where(m.Membership.tenant_id == c.tid)).scalars()}
 
@@ -120,7 +127,7 @@ def edit_customer(cid: int, b: CustomerIn, c: Ctx = Depends(ctx)):
 
 
 # ---------------- projects ----------------
-def project_out(c: Ctx, p: m.Project, names: dict, cust: dict, detail=False):
+def project_out(c: Ctx, p: m.Project, names: dict, cust: dict, detail=False, tagmap=None):
     d = {"id": p.id, "code": p.code, "name": p.name, "customer_id": p.customer_id, "customer": cust.get(p.customer_id, ""),
          "pm": names.get(p.pm_user_id), "pm_user_id": p.pm_user_id, "status": p.status, "category": p.category}
     delivery = c.has("projects.view") and not (c.has("projects.contract") and not c.has("projects.budget") and not c.has("projects.finance"))
@@ -130,6 +137,7 @@ def project_out(c: Ctx, p: m.Project, names: dict, cust: dict, detail=False):
         d["budget_minor"] = p.budget_minor
     if c.has("projects.finance") or c.has("projects.contract"):
         d["contract_value_minor"] = p.contract_value_minor  # expected revenue, not recognized revenue
+    d["tags"] = (tagmap or {}).get(p.id, [])
     if detail:
         d["scope"] = p.scope
     return d
@@ -167,8 +175,10 @@ def _validate_project(c: Ctx, b: ProjectIn):
 
 
 @router.get("/projects")
-def projects(q: str = "", status: str = "", category: str = "", c: Ctx = Depends(ctx)):
+def projects(q: str = "", status: str = "", category: str = "", tags: str = "", c: Ctx = Depends(ctx)):
     qq = project_query(c)
+    for tid in [int(x) for x in tags.split(",") if x.strip().isdigit()]:  # every selected tag must be on the project
+        qq = qq.where(m.Project.id.in_(select(m.ProjectTag.project_id).where(m.ProjectTag.tenant_id == c.tid, m.ProjectTag.tag_id == tid)))
     if q:
         qq = qq.where(or_(m.Project.name.ilike(f"%{q}%"), m.Project.code.ilike(f"%{q}%")))
     if status:
@@ -178,7 +188,7 @@ def projects(q: str = "", status: str = "", category: str = "", c: Ctx = Depends
     rows = c.db.execute(qq.order_by(m.Project.code)).scalars().all()
     n = _names(c)
     cust = {x.id: x.name for x in c.db.execute(select(m.Customer).where(m.Customer.tenant_id == c.tid)).scalars()}
-    return [project_out(c, p, n, cust) for p in rows]
+    return [project_out(c, p, n, cust, tagmap=_tags_of(c, [p.id for p in rows])) for p in rows]
 
 
 @router.post("/projects")
@@ -203,7 +213,7 @@ def project_detail(pid: int, c: Ctx = Depends(ctx)):
     p = get_project(c, pid)
     n = _names(c)
     cust = {x.id: x.name for x in c.db.execute(select(m.Customer).where(m.Customer.tenant_id == c.tid)).scalars()}
-    d = project_out(c, p, n, cust, True)
+    d = project_out(c, p, n, cust, True, _tags_of(c, [p.id]))
     d["members"] = [{"user_id": x.user_id, "name": n.get(x.user_id), "allocation_pct": x.allocation_pct, "role_label": x.role_label}
                     for x in c.db.execute(select(m.ProjectMember).where(m.ProjectMember.project_id == p.id)).scalars()]
     d["milestones"] = [{"id": x.id, "name": x.name, "due_date": x.due_date, "status": x.status,
@@ -374,6 +384,8 @@ def dashboard(c: Ctx = Depends(ctx)):
         out["people"] = c.db.execute(select(func.count()).select_from(m.Membership).where(m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar()
     from .delivery import delivery_summary  # imported here: delivery builds on this module
     out["delivery"] = delivery_summary(c)
+    from .costing import org_summary
+    out["costing"] = org_summary(c)
     out["open_decisions"] = [d for d in ["Revenue basis not yet decided" if not c.tenant.revenue_basis else None,
                                          "Meaning of the S/H planning markers not yet defined" if not c.tenant.planning_markers else None] if d] if c.has("org.admin") else []
     return out

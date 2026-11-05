@@ -1,7 +1,7 @@
 # Aadi Technology — Business Performance & Project Profitability Platform
 ## Product Requirements Document (PRD)
 
-> **Revision 2 (November 2026):** salary-allocation costing, tags and project profitability were added. See **Part B** at the end of this document. Where Part B and Parts 1–22 differ, Part B governs the changed items; everything else stays in force. Sections 7 (MOD-007, MOD-008), 9 (BR-015), 13 and 19 carry short cross-references.
+> **Revision 2 (November 2026):** salary-allocation costing, tags and project profitability. Only the sections marked *(Rev 2)* were changed (MOD-001, 003, 007, 008, 010, WF-001, WF-005, BR-016 to BR-021, §10 roles, §11 screens, §12 entities, §13 formulas, §14 delivery plan, §19 decisions, §20 acceptance). Everything else in this document continues unchanged. The appendix (Part B) holds the workbook analysis and the decision register.
 
 **Version:** 0.2 — Revision 2 (salary-allocation costing, tags, profitability) added as Part B; 0.1 content retained  
 **Reference period:** November 2026  
@@ -183,6 +183,9 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - Tenant-scoped users, invitations, activation/suspension.
 - Configurable roles and permission assignment.
 - Department/team and reporting-manager mapping where enabled.
+- *(Rev 2)* **Employee master:** every employee has one department, a title, an active status and a monthly salary (cost-to-company, effective-dated, restricted to `salary.view`/`salary.manage`).
+- *(Rev 2)* **Departments** with exactly one Head of Department, who must be an active employee of that department; changes are audited.
+- *(Rev 2)* **Costing settings** per organization: monthly working hours per employee (default 160) and standard hourly rate (default ₹250), with optional per-employee hours override and per-project rate override.
 - Tenant-level module entitlements.
 - Audit log for access and configuration changes.
 
@@ -197,7 +200,8 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - Create projects linked to a customer/business unit.
 - Project manager, team, start/end dates, status, billing model and currency.
 - Capture available scope, details, milestones and deliverables.
-- Allocate employees and define planned effort.
+- Allocate employees and define planned effort. *(Rev 2: allocation is a monthly percentage per employee per project, an employee's total in a month may not exceed 100%, and under-allocation is reported as bench.)*
+- *(Rev 2)* **Project tags:** a managed tag list; a project can carry several tags; every report can be filtered by tags; the existing project category remains.
 - Track project budget, expected revenue and delivery cost.
 - Project status: Draft, Planned, Active, On Hold, Completed, Cancelled.
 - Scope changes must be recorded with date, reason, requester and approver.
@@ -235,8 +239,7 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - No opaque automated employee ranking or punitive AI scoring.
 
 ### MOD-007 — Revenue Targets and Forecasting
-- *Revision 2: targets by project, tag and organization per month are detailed in Part B (FR-R2-F1).*
-- Set targets by organization, period, customer, project and optionally sales owner.
+- Set targets by organization, period, customer, project and optionally sales owner. *(Rev 2: first release supports project, tag and organization targets per month; customer and sales-owner levels follow..)*
 - Target period: monthly initially; configurable quarterly/yearly later.
 - Record target amount, currency, owner, baseline and approval.
 - Track actual revenue, expected revenue and variance.
@@ -244,6 +247,7 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - Revenue recognition basis must be configurable/confirmed (invoice date, payment date, milestone or accounting entry); do not assume.
 - Prevent double-counting revenue across customer/project/organization rollups.
 - Forecasting is based on explicit pipeline/probability rules if enabled.
+- *(Rev 2)* Until invoicing exists, the screen compares each target with the **standard value of planned effort** (hours × hourly rate) and with salary cost. Projects without a target show a warning, not zero.
 
 ### MOD-008 — Expense, Cost Allocation and Profitability
 - Expense categories based on supplied matrix: Infrastructure, Third Party Solutions, Software, Marketing, Sales, Consulting, Salary and configurable additional categories.
@@ -251,11 +255,14 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - Support direct project costs and shared overhead.
 - Configurable allocation methods for shared expenses: equal share, percentage, headcount, usage, hours or manual allocation.
 - Salary cost may be calculated from approved cost rates and allocated effort; salary rates must be restricted to authorized finance/management roles.
+- *(Rev 2)* **Salary cost = allocation % × the employee's own monthly salary** (planned basis, as in the business owner's workbook); effort = allocation % × monthly hours; standard value = hours × hourly rate. See §13. Calculations are available **by employee, by project and by tag**.
+- *(Rev 2)* **Project profitability** = revenue basis − salary cost. **Unallocated (bench) salary** is reported as its own line and never hidden.
+- *(Rev 2)* Non-salary categories (infrastructure, third-party, software, marketing, sales, consulting) and shared costs remain in this module as a later layer; they are not part of the first Revision 2 release (decisions D-R2-06, D-R2-07).
 - Avoid double-counting direct costs and allocated overhead.
 - Calculate revenue, direct cost, allocated overhead, gross contribution and contribution margin with clearly disclosed formulas.
 - Show unallocated costs and incomplete financial data warnings.
 - Do not treat the source workbook's displayed ₹290,000 as validated actual cost without reconciliation.
-- *Revision 2:* salary cost by allocation, tags and project profitability are specified in Part B (B6, B7). The workbook's allocation model reports ₹3,07,500 cost, which is a formula error; the corrected figure is ₹2,00,000 (B3.2).
+- *(Rev 2)* The business owner's workbook once reported ₹3,07,500 total cost because one salary cell was used for every employee; the corrected figure is ₹2,00,000 (Part B, B3).
 
 ### MOD-009 — Invoice Management
 - Create draft invoice from customer/project, milestones or approved billable timesheets.
@@ -272,7 +279,8 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - Delivery dashboard: sprint progress, estimate vs actual, blocked work, overdue tasks.
 - Employee dashboard: assigned work, timesheet status, workload and personal performance indicators.
 - Project dashboard: scope, budget, effort, progress, team and profitability.
-- Filters by period, customer, project, team and employee, subject to permissions.
+- Filters by period, customer, project, team and employee, subject to permissions. *(Rev 2: also by project tag and department.)*
+- *(Rev 2)* **Costing reports:** organization costing summary; effort and cost by employee, project and tag; cost matrix mirroring the workbook (per-project allocation, effort and cost rows); bench and capacity; project profitability; tag-wise financial analysis. Role-masked: users without `costing.cost` never receive ₹ cost, value or profit. 
 - Export authorized reports to CSV/XLSX/PDF.
 
 ### MOD-011 — Notifications and Audit
@@ -295,7 +303,7 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 1. Authorized user creates customer and project.
 2. Adds scope, milestones, budget and target revenue.
 3. Adds sprint/work items and estimates.
-4. Assigns employees and confirms availability.
+4. Assigns employees and confirms availability. *(Rev 2: allocation % per month; over 100% is rejected; project tags are chosen.)*
 5. Employees see only authorized assigned work.
 6. Project manager reviews plan and activates project.
 
@@ -326,7 +334,7 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 1. Finance records direct and shared expenses.
 2. Expenses are assigned to a customer/project or marked shared.
 3. Shared costs are allocated using configured methods.
-4. Salary cost allocation uses approved rates and approved effort.
+4. Salary cost allocation uses approved rates and approved effort. *(Rev 2: first release uses planned allocation % × monthly salary; approved timesheet hours become a comparison basis, D-R2-03.)*
 5. Dashboard calculates contribution and flags missing data.
 6. Finance reconciles results before external reporting.
 
@@ -354,6 +362,12 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 - BR-013: Tenant and resource authorization is enforced by backend APIs.
 - BR-014: AI outputs are advisory and cannot perform high-impact actions without human authorization.
 - BR-015: Source workbook daily markers S/H must remain undefined until the customer confirms their meaning. *(Revision 2: the workbook pattern suggests S = weekly off and H = holiday; still unconfirmed, see Part B D-R2-04. The meaning stays configurable and is not hard-coded.)*
+- BR-016 *(Rev 2)*: An employee's total allocation in a month must not exceed 100%; allocation to a project requires membership of the project team.
+- BR-017 *(Rev 2)*: Salary cost of a project = Σ allocation % × that employee's own monthly salary. A single salary value must never be applied to several employees.
+- BR-018 *(Rev 2)*: Unallocated salary (bench) is reported separately and is never silently charged to a project.
+- BR-019 *(Rev 2)*: Salary, cost, value and profit are visible only with `salary.view` / `costing.cost`; the API omits them for other roles; the platform administrator never sees them.
+- BR-020 *(Rev 2)*: Tag totals overlap when projects carry several tags and must not be added; an additive view uses the first (primary) tag.
+- BR-021 *(Rev 2)*: Salary changes are effective-dated and audited; earlier months keep the salary valid at that time.
 
 ## 10. Roles and Permission Model
 
@@ -374,6 +388,22 @@ Do not build a full CRM by default. Assess the smallest useful commercial workfl
 | Create/issue invoices | Full | Full | No | Draft request only | No | No | No |
 | Reports | Full | Finance | Delivery | Assigned projects | Team | Own | Sales |
 | Audit logs | Full | Financial scope | Operational scope | Assigned scope | Team scope | Own activity | Sales scope |
+
+*(Rev 2)* Additional capabilities for employees, costing and targets:
+
+| Capability | Owner | Finance | Operations | Project Manager | Team Lead | Employee / Sales |
+|---|---:|---:|---:|---:|---:|---:|
+| `employees.view` (name, department, title) | All | All | All | Assigned | Team | No |
+| `employees.manage`, `departments.manage` | Full | No | Departments only | No | No | No |
+| `salary.view` / `salary.manage` | Full | Full | No | No | No | No |
+| `tags.manage` / `projects.tag` | Full | Full | Full | Tag assigned projects | No | No |
+| `allocation.view` / `allocation.manage` | Full | View | Full | Assigned | View team | No |
+| `costing.settings` | Full | Full | No | No | No | No |
+| `costing.effort` (hours only) | All | All | All | Assigned | Team | No |
+| `costing.cost` (₹ cost, value, profit) | Full | Full | No | No | No | No |
+| `targets.manage` / `targets.view` | Full | Full | View | View assigned | No | No |
+
+Head of Department is a data relationship (department head) in the first release, not a role; its authority is decision D-R2-09.
 
 This is a proposed starting matrix. Final role names and delegation rules require customer approval. Use permission capabilities rather than hardcoded role-name checks.
 
@@ -397,6 +427,12 @@ This is a proposed starting matrix. Final role names and delegation rules requir
 | UI-014 | Invoice list and detail | Owner, Finance |
 | UI-015 | Executive/finance/delivery reports | Authorized roles |
 | UI-016 | Notifications and audit | All (scoped); audit admins |
+| UI-017 *(Rev 2)* | Employees and departments (with restricted salary) | Owner, Finance, Operations (no salary) |
+| UI-018 *(Rev 2)* | Project tags and tag filter (inside the project portfolio) | Owner, Finance, Operations, PM |
+| UI-019 *(Rev 2)* | Monthly allocation matrix and bench | Owner, Operations, PM; Finance/Team Lead read-only |
+| UI-020 *(Rev 2)* | Costing settings (hours, rate, overrides) | Owner, Finance |
+| UI-021 *(Rev 2)* | Effort and cost: by employee, project, tag and workbook-style matrix | Owner, Finance (₹); Operations/PM/Team Lead (hours) |
+| UI-022 *(Rev 2)* | Project profitability and tag-wise analysis | Owner, Finance |
 
 ## 12. Data Entity Inventory
 
@@ -425,7 +461,11 @@ This is a proposed starting matrix. Final role names and delegation rules requir
 - Expense
 - ExpenseCategory
 - CostAllocation
-- CostRate (restricted)
+- CostRate (restricted) *(Rev 2: stored as effective-dated EmployeeSalary)*
+- *(Rev 2)* EmployeeSalary (tenant, employee, amount in minor units, effective-from) — restricted
+- *(Rev 2)* Tag, ProjectTag
+- *(Rev 2)* Allocation (tenant, employee, project, month, percent)
+- *(Rev 2)* CostingSettings (tenant monthly hours and hourly rate; employee hours override; project rate override)
 - Invoice
 - InvoiceLine
 - Payment
@@ -452,6 +492,24 @@ All formulas below are proposed and must be validated with the customer/accounta
 - Contribution margin (%) = project contribution / recognized project revenue × 100; handle zero revenue.
 - Invoice outstanding = invoice total − recorded payments − credits/adjustments.
 
+**Revision 2 formulas (planned basis).** `a(e,p)` = allocation fraction of employee *e* on project *p* in the month; `H(e)` = monthly hours (organization default 160 unless overridden); `S(e)` = monthly salary valid in that month; `R(p)` = hourly rate (organization default ₹250 unless overridden for *p*).
+
+| Measure | Formula |
+|---|---|
+| Effort hours (e, p) | `a(e,p) × H(e)` |
+| Salary cost (e, p) | `a(e,p) × S(e)` |
+| Project effort / cost | sum over employees |
+| Standard value of effort (p) | `Σ effort(e,p) × R(p)` |
+| Project margin (p) | `revenue basis(p) − salary cost(p)` |
+| Margin % | `margin ÷ revenue basis`; blank when the basis is 0 |
+| Employee allocated % | `Σ_p a(e,p)`, at most 100% |
+| Bench (e) | `(1 − Σ_p a(e,p))`; bench hours `× H(e)`; bench cost `× S(e)` |
+| Cost per hour (e) | `S(e) ÷ H(e)` (informational) |
+| Tag totals | sum over projects carrying the tag; overlapping, not additive |
+| Organization | sums over projects **plus** an unallocated-salary line; salary pool = allocated cost + bench cost |
+
+Worked example (reproduces the workbook's first project): allocations 25%, 50%, 75%, 100% of employees earning ₹30,000, ₹20,000, ₹20,000, ₹20,000 → 400 h, standard value ₹1,00,000, cost ₹52,500, margin ₹47,500 (47.5%). Baseline of the workbook: 14 employees, 11 projects, 1,760 h, standard value ₹4,40,000, cost ₹2,00,000, bench ₹60,000, salary pool ₹2,60,000.
+
 Clearly label estimated, accrued, invoiced, collected and recognized revenue separately. The application must not conflate these financial states.
 
 ## 14. Three-Pillar Module Mapping and Roadmap
@@ -469,6 +527,20 @@ Clearly label estimated, accrued, invoiced, collected and recognized revenue sep
 | Lightweight opportunity tracking | P2 | P2 |
 | AI management summaries | P3 | P2 pilot after data quality |
 | Predictive delivery/revenue forecasts | P3 | P3 |
+
+### Delivery plan (updated for Revision 2)
+
+Sprints ship web and API together, with tests, an updated demo and a demo video. Mobile is added where the audience is field or employee facing.
+
+| Sprint | Scope | Status |
+|---|---|---|
+| S1 Foundation | Tenant/user/role foundation, customers, projects, scope changes, audit, dashboards | Done |
+| S2 Delivery | Sprints and tasks with ownership history, handover with acknowledgement, timesheets and approval, notifications, mobile app | Done |
+| **S3 Costing and Profitability** *(Rev 2)* | Employee master and departments, salary (restricted), project tags, costing settings, monthly allocation with bench, effort and cost by employee/project/tag and workbook-style matrix, revenue targets, project profitability, tag analysis | In progress |
+| S4 Finance and performance | Employee performance matrix, invoice draft/approval/payment tracking, non-salary and shared costs as an optional profitability layer, planned-versus-actual using approved timesheets, Backblaze attachments | Planned |
+| S5 Intelligence and hardening | Advisory AI assistant, exports and advanced reports, accessibility, security and load pass, production cut-over | Planned |
+
+Revision 2 affects only S3 and the optional layers moved into S4. The earlier module priorities below still apply.
 
 ### MVP release boundary
 
@@ -496,6 +568,7 @@ Clearly label estimated, accrued, invoiced, collected and recognized revenue sep
 - Predictive forecasts
 - Accounting/payroll integrations
 - Advanced resource capacity planning
+
 
 ## 15. Web and Mobile Scope
 
@@ -577,6 +650,8 @@ API request/response schemas, pagination, idempotency and versioning are to be f
 11. Which approval hierarchy applies to timesheets, expenses and invoices?
 12. Is mobile/native app required for MVP?
 
+*(Rev 2)* Decisions D-R2-01 to D-R2-15 (Part B, B12) refine items 3, 4, 5, 6 and 9 above. Sprint 3 is built on the **recommended** interpretation of each, kept configurable or flagged in the product, and is revisable after review.
+
 ### Key risks
 - Incomplete financial values may produce misleading profitability reports.
 - Inconsistent timesheet capture will undermine employee cost and utilization metrics.
@@ -596,6 +671,10 @@ API request/response schemas, pagination, idempotency and versioning are to be f
 - Given shared expenses, when a cost allocation run is performed, then the selected method and allocation period are visible and totals reconcile to the source expense.
 - Given an invoice draft, when an unauthorized user attempts to issue it, then the operation is denied and audited.
 - Given a user from another tenant, when they query any tenant-owned resource, then no data is disclosed.
+- *(Rev 2)* Given allocations of 25%, 50%, 75% and 100% for four employees of ₹30,000/20,000/20,000/20,000, when project cost is calculated, then effort is 400 h, standard value ₹1,00,000, cost ₹52,500 and margin ₹47,500.
+- *(Rev 2)* Given an employee at 100% in a month, when another allocation is added for that employee, then the API rejects it with a clear message.
+- *(Rev 2)* Given a user without `costing.cost`, when any costing report is requested, then no salary, cost, value or profit figure is returned.
+- *(Rev 2)* Given the workbook baseline, when the organization view is opened, then salary pool = allocated cost + bench cost (₹2,60,000 = ₹2,00,000 + ₹60,000).
 - Given an employee, when they open their performance view, then they can see their own permitted metrics but not other employees' restricted salary or review data.
 
 ## 21. Product Owner Review and Readiness
@@ -607,7 +686,7 @@ API request/response schemas, pagination, idempotency and versioning are to be f
 | Three-pillar assessment | Initial assessment complete |
 | MVP module boundaries | Proposed |
 | Detailed revenue recognition rules | Requires decision |
-| Salary/cost allocation rules | Requires decision |
+| Salary/cost allocation rules | Rev 2: planned allocation × salary adopted as the working default; confirmation requested (D-R2-02, D-R2-03) |
 | Invoice/GST requirements | Requires decision |
 | Daily S/H marker meanings | Requires decision |
 | Final role hierarchy | Requires decision |
@@ -637,260 +716,72 @@ The PRD is a product definition draft, not authorization for production deployme
 
 ---
 
-# PART B — REVISION 2: Salary-Allocation Costing, Tags and Project Profitability
+# PART B — Revision 2 Appendix: Workbook Analysis and Decision Register
 
-> **Status:** Proposed for business review. Nothing in Part B is approved scope until the business owner confirms the items in section B12.
-> **Sprint hold:** Former Sprint 3 and 4 content is paused and will be re-planned in iterations after this revision is reviewed (see B14).
-> **Data handling:** The business owner's Excel workbook (`Aadi Technology Matrix.xlsx`) contains real employee names and salaries. It is **not** stored in this repository. All names, salaries and project names in the prototype and in this document are **fictional stand-ins** that reproduce the workbook's structure, allocation percentages and arithmetic, so that totals can be reconciled.
+> The requirements themselves now live in the sections marked *(Rev 2)* above. This appendix keeps the evidence and the open decisions.
+> **Data handling:** the business owner's workbook (`Aadi Technology Matrix.xlsx`) contains real names and salaries. It is not committed (the repository is public; `*.xlsx` is git-ignored). Names, salaries and projects in the prototype, demo data and tests are **fictional stand-ins** that reproduce the workbook's structure, percentages and arithmetic.
 
-## B1. Business Objective and Expected Outcomes
+## B1. Business objectives preserved from the input
 
-Aadi Technology wants one place to answer: *what does each project cost us in people, what is that effort worth, and are we making or losing money — by employee, by project and by project tag?*
-
-| # | Objective (preserved from the business input) | Expected outcome |
+| # | Objective | Where it is specified |
 |---|---|---|
-| A | Employee master: employee list, department, Head of Department, salary | One governed list; salary visible only to authorised roles |
-| B | Project master: project list, tags, filtering and financial reporting by tag | Any report can be sliced by tag (e.g. Marketing, Education, Internal) |
-| C | Employee allocation: % of an employee's month per project, across several projects | Planned effort and cost per employee-project pair |
-| D | Configuration: monthly working hours (160) and standard hourly rate (₹250) | Values set once at organization level, overridable where it makes sense |
-| E | Effort and cost by employee, project and tag | Calculations match the Excel model (after correcting its formula errors, B3) |
-| F | Revenue target definition and project-wise profitability from salary and allocation cost | Target vs value vs cost vs profit for every project and tag |
+| A | Employee master: list, department, Head of Department, salary | MOD-001, UI-017 |
+| B | Project master: list, tags, filtering and financial reporting by tag | MOD-003, UI-018, §13 |
+| C | Employee allocation % per project, across several projects | MOD-003, BR-016, UI-019 |
+| D | Configurable monthly hours (160) and hourly rate (₹250) | MOD-001, UI-020 |
+| E | Effort and cost by employee, project and tag | MOD-008, §13, UI-021 |
+| F | Revenue targets and project/tag profitability from salary and allocation | MOD-007, MOD-008, UI-022 |
 
-## B2. Existing System Analysis (what the code actually has)
+## B2. Existing system at the start of Revision 2 (verified in code)
 
-Verified against the repository (`backend/app/models.py`, `perms.py`, `routers/*.py`, `frontend/src`, `mobile/`), not assumed.
-
-| Area | What exists today | Relevance to Revision 2 |
+| Area | Found | Revision 2 consequence |
 |---|---|---|
-| Multi-tenancy | Every row has `tenant_id`; roles stored per tenant; module entitlements (`revenue`, `expenses`, `performance` already defined, screens marked "Sprint 3") | Reuse unchanged. New features sit behind existing `expenses`/`revenue` entitlements |
-| Employee | `User` + `Membership` (title, `team` free text, `manager_user_id`, status). **No salary, no department entity, no Head of Department** | Gap: add department master, HoD, salary |
-| Salary permission | Capability `salary.view` exists for Owner and Finance; area `salary` maps to the `expenses` module; **no salary data is stored** | Reuse the capability; add storage and masking |
-| Project | `Project`: code, name, customer, PM, `category` (Software Development / Services / Marketing / Sales), status, health, dates, scope, `budget_minor`, `contract_value_minor`, `est_hours`. **No tags** | Gap: tags. `category` stays and is complementary |
-| Allocation | `ProjectMember.allocation_pct` (1–100) per project, no period, **no check that an employee's total across projects is ≤ 100%**, used for team display only | Modify: add period (month) and cross-project validation; feed calculations |
-| Actual effort | `TimeEntry` with approval workflow (Sprint 2), hours per project/task/day | Reuse later for planned-vs-actual comparison |
-| Org settings | `Tenant.week_hours` (40), `currency`, `timezone`, `revenue_basis` (null = undecided), `planning_markers` (undecided) | Modify: add monthly hours (160) and standard hourly rate (₹250); resolves part of two open decisions |
-| Money | Integer paise everywhere; INR default | Reuse; hourly rate and salary stored as paise |
-| Revenue, cost, profitability | Not built (planned Sprint 3). Dashboard shows only sums of budget and contract value | New |
-| Reports | None beyond dashboard | New |
-| Web screens | Customers, Projects, Sprint Planning, Handover, Timesheets, Organization Admin, matrix/workflow/assumptions | Reuse shell, tables, modals, role masking pattern |
-| Mobile | Tasks, timesheet, handover, alerts | No change required; Revision 2 is management-facing (web) |
-| Role permissions | Roles as data, scopes all/team/assigned/own, server-side field masking (budget, contract value) | Reuse the masking pattern for salary and cost |
+| Multi-tenancy, roles, entitlements, audit | Complete (S1) | Reused unchanged |
+| Employee data | `Membership` has title, free-text `team`, manager; no salary or department entity | Add department, Head of Department, salary |
+| Salary permission | `salary.view` existed but nothing stored salary | Reuse capability; add storage and masking |
+| Project | Category, budget, contract value, est. hours; no tags | Add tags and rate override |
+| Allocation | `ProjectMember.allocation_pct`, no month, no per-employee limit | New monthly allocation with the 100% rule; team percentage stays for display |
+| Actual effort | Approved timesheets (S2) | Comparison basis in a later sprint |
+| Money | Integer paise | Reused |
 
-## B3. What the Excel workbook contains (analysis)
+## B3. The workbook (analysis)
 
-| Sheet | Content | How Revision 2 uses it |
+| Sheet | Content | Use |
 |---|---|---|
-| **Targets** | 11 businesses/projects; columns: Revenue (only 3 filled), Infrastructure, Third-party, Software, Marketing, Sales, Consulting, Salary, Total; shared-cost list ("Cursor Accounts": AI API, ChatGPT, Azure, Contabo, rent, Wi-Fi) | Revenue targets (F) and optional non-salary cost layer (decision D-R2-06, D-R2-07) |
-| **Novemeber** (main model) | 14 employees with monthly salary; per project an *Allocation* row (% per employee), an *Efforts* row (= allocation × 160) and a *Budget* row (= allocation × salary). Column C = cost (sum of Budget row); column D = "Revenue" = total effort hours × ₹250 | Source of calculation expectations (C, D, E) |
-| **Sheet1** | Earlier version of the same allocation model with per-project hours/cost blocks | Confirms the model; contains the same anchoring error |
-| **November 2026** | Monthly plan: project × scope item × owner, estimated hours, spend, day columns 1–30 with `S`/`H` markers, % complete, remaining hours | Resolves part of the S/H question (D-R2-04); scope-item planning stays in Sprint Planning |
+| Targets (earlier version) | 11 businesses; revenue (3 filled); infrastructure, third-party, software, marketing, sales, consulting, salary; shared-cost list | Targets and optional later cost layer |
+| Allocation model (`Novemeber`) | 14 employees with salary in rows 3 and 4; per project an Allocation, Efforts and Budget row; column C cost, column D revenue = hours × ₹250 | Source of the calculation rules |
+| November planning grid | project × scope item × owner × days 1–30 with `S`/`H` | Informs D-R2-04 and D-R2-13 |
 
-### B3.1 Expected totals when the model is computed correctly
+**Corrected baseline:** salary pool ₹2,60,000; allocated cost ₹2,00,000; bench ₹60,000 (three employees at 0%); 1,760 h; standard value ₹4,40,000; margin ₹2,40,000 (54.5%).
 
-Employee cost = allocation % × monthly salary. Effort hours = allocation % × 160. Standard value = hours × ₹250.
+**Defects found and fixed in the owner's workbook (not to be reproduced in the product):**
+1. Cost formulas on projects 2 to 11 multiplied every allocation by one fixed salary cell (₹30,000): reported cost ₹3,07,500 instead of ₹2,00,000.
+2. The hourly rate (250) was typed inside every revenue formula.
+3. Cost totals summed `E:P` and skipped the last two employee columns; the first employee column had no formulas.
+4. No reconciliation of salary against allocated cost; bench cost was invisible.
 
-| Measure | Value |
-|---|---|
-| Employees / projects | 14 / 11 |
-| Total salary pool (all 14 employees) | ₹2,60,000 |
-| Allocated effort | 1,760 hours |
-| Standard value of effort (hours × ₹250) | ₹4,40,000 |
-| Allocated salary cost | ₹2,00,000 |
-| Unallocated salary (3 employees on bench) | ₹60,000 |
-| Margin on allocated work (value − cost) | ₹2,40,000 (54.5%) |
+The fixed workbook now has an input cell for the rate and a reconciliation block (salary, allocated cost, bench, per-employee status). The product reproduces those rules.
 
-### B3.2 Defects found in the workbook (must not be copied into the product)
+## B4. Decision register (recommended interpretation is what Sprint 3 implements)
 
-1. **Cost formula anchored to one salary cell.** On projects 2–11 the cost row multiplies *every* employee's allocation by a single fixed salary cell (`$F$4`, ₹30,000) instead of each employee's own salary; project 1 is correct. Result: the sheet reports total cost **₹3,07,500**; the correct figure is **₹2,00,000** (overstated by ₹1,07,500). Sheet1 has the same pattern (`$C$3`).
-2. **Fragile ranges.** Several cost totals sum `E:P` and omit the last two employee columns; they happen to be zero today.
-3. **Revenue column is derived, not actual.** "Revenue" = hours × ₹250 is a *standard value of effort*, not invoiced or collected revenue. Real revenue targets exist for only 3 of 11 projects.
-4. **Unallocated capacity** is not reported (3 employees are at 0%).
-5. **Targets sheet** total (₹2,90,000) mixes budgeted categories and has one row without a total; treat as planning data.
-
-The prototype's "Excel Check" screen shows this reconciliation side by side. **Business confirmation of the corrected totals is required (D-R2-02).**
-
-## B4. Scope Classification
-
-| Class | Item |
-|---|---|
-| **Retain** | Multi-tenant platform, authentication, roles/permissions engine, module entitlements, audit log, customers, projects, sprints/tasks, handover, timesheets and approval, notifications, mobile app, demo and deployment setup |
-| **Modify** | `Membership` (add department link, salary); `Project` (add tags, optional hourly-rate override); `ProjectMember.allocation_pct` (add month, enforce ≤100% per employee per month); organization settings (add monthly hours, standard hourly rate); dashboards (add cost and profit widgets for authorised roles); role matrix (new capabilities); former Sprint 3 revenue/expense scope (re-planned around this revision) |
-| **New** | Department master and Head of Department; employee salary (effective-dated, restricted); tag master and project tagging; monthly allocation matrix with bench view; effort/cost engine; revenue target by project/tag/organization; project profitability; tag-wise financial analysis; export |
-| **Needs confirmation** | Items D-R2-01 to D-R2-15 (B12). Notably: revenue basis, planned vs actual cost basis, S/H meaning, non-salary and shared costs, tag governance, HoD authority |
-
-## B5. Roles and Permissions (proposed)
-
-Capabilities follow the existing pattern `<area>.<action>[:scope]`. **Code must check capabilities, never role names.**
-
-| Capability (new) | Owner | Finance | Operations | Project Manager | Team Lead | HoD (scope of role) | Employee / Sales |
-|---|---|---|---|---|---|---|---|
-| `employees.view` (name, department, title) | all | all | all | assigned | team | team/department | — |
-| `employees.manage` (create/edit, department, HoD) | all | — | — | — | — | — | — |
-| `salary.view` (existing) / `salary.manage` | view+manage | view+manage | — | — | — | not by default | — |
-| `departments.manage` | all | — | all | — | — | — | — |
-| `tags.manage` | all | all | all | — | — | — | — |
-| `projects.tag` (assign tags) | all | all | all | assigned | — | — | — |
-| `allocation.view` | all | all | all | assigned | team | department | own (read) |
-| `allocation.manage` | all | — | all | assigned | — | — | — |
-| `settings.costing` (hours, hourly rate) | all | all | view | — | — | — | — |
-| `cost.view` (₹ cost, profit) | all | all | — | — | — | — | — |
-| `effort.view` (hours only, no ₹) | all | all | all | assigned | team | department | own |
-| `revenue.target.manage` | all | all | — | — | — | — | — |
-| `revenue.target.view` | all | all | view | assigned | — | — | — |
-| `reports.profitability` | all | all | — | — | — | — | — |
-
-Rules: users without `salary.view` or `cost.view` never receive salary, cost or profit values from the API (server-side masking, not just hidden columns). The platform administrator has no access to any of this data.
-
-## B6. Functional Requirements and Acceptance Criteria
-
-### A. Employee and department management
-| ID | Requirement | Acceptance criteria |
+| ID | Decision | Recommended / implemented default |
 |---|---|---|
-| FR-R2-A1 | Maintain employees (name, email, title, department, status, monthly salary) | Authorised user can create/edit; salary field absent in API responses for others |
-| FR-R2-A2 | Maintain departments with one Head of Department | HoD must be an active employee; changing HoD is audited |
-| FR-R2-A3 | Each employee belongs to exactly one department | Saving without a department is refused |
-| FR-R2-A4 | Salary changes are effective-dated and audited | Changing salary never alters previously closed months |
-| FR-R2-A5 | Employee list shows total allocation % and bench status | Allocation 0% → "Bench"; 100% → "Fully allocated"; >100% impossible |
+| D-R2-01 | Revenue basis for profitability | Standard value (hours × rate) as planned value; targets separate; actual revenue when invoicing exists |
+| D-R2-02 | Accept corrected totals | Yes |
+| D-R2-03 | Planned vs actual cost basis | Planned (allocation × salary); actual from approved timesheets later |
+| D-R2-04 | Meaning of S and H markers (observed: S on every Sunday of Nov 2026, H on four other days) | Weekly off / holiday, unconfirmed; not hard-coded |
+| D-R2-05 | Nature of the ₹250 rate | Standard internal rate of effort |
+| D-R2-06 | Non-salary categories in profitability | Optional layer, later sprint |
+| D-R2-07 | Shared-cost allocation method | Deferred |
+| D-R2-08 | Tag governance | Managed list, many tags, primary tag for additive roll-ups |
+| D-R2-09 | Head of Department authority and salary visibility | Data relationship only; no salary access |
+| D-R2-10 | Multiple departments per person | No |
+| D-R2-11 | Over-allocation above 100% | Rejected |
+| D-R2-12 | Salary meaning | Monthly cost-to-company, effective-dated |
+| D-R2-13 | Flat 160 h or working-day calendar (November implies about 168 h) | Flat 160, per-employee override |
+| D-R2-14 | Target levels and period | Project, tag, organization; monthly |
+| D-R2-15 | Department-level profitability | Not in this revision |
 
-### B. Project and tag management
-| ID | Requirement | Acceptance criteria |
-|---|---|---|
-| FR-R2-B1 | Maintain tag master (name, optional type) | Duplicate names refused (case-insensitive) |
-| FR-R2-B2 | Assign one or more tags to a project | Tags editable by `projects.tag`; change audited |
-| FR-R2-B3 | Filter projects and every financial report by one or more tags | Filter result totals equal the sum of the listed projects |
-| FR-R2-B4 | Tag totals are *not additive* when projects carry several tags | Report shows a note; optional "primary tag" gives an additive roll-up |
-| FR-R2-B5 | Existing project `category` remains | Category and tags can be combined in filters |
+## B5. Handoff
 
-### C. Employee–project allocation
-| ID | Requirement | Acceptance criteria |
-|---|---|---|
-| FR-R2-C1 | Allocate % of an employee's month to each project; an employee may be on many projects | Matrix of employees × projects per month |
-| FR-R2-C2 | An employee's total in a month must not exceed 100% | Entry over 100% is rejected with a clear message |
-| FR-R2-C3 | Under-allocation is reported as bench capacity (hours and salary) | Bench report lists employee, free %, free hours, unabsorbed salary |
-| FR-R2-C4 | Allocation is per month and can be copied forward | New month starts from previous month on request |
-| FR-R2-C5 | Allocation to a project requires the employee to be an active member of the project team | Adding allocation adds the person to the team |
-
-### D. Organization and project configuration
-| ID | Requirement | Acceptance criteria |
-|---|---|---|
-| FR-R2-D1 | Organization default **monthly working hours** = 160 | Editable by `settings.costing`; change audited; affects open months only |
-| FR-R2-D2 | Organization default **standard hourly rate** = ₹250 | Stored in paise; currency shown |
-| FR-R2-D3 | **Hourly rate** may be overridden per project (recommended interpretation) | Override shown with an indicator; blank = inherit |
-| FR-R2-D4 | **Monthly hours** may be overridden per employee (part-time) (recommended interpretation) | Override shown; effort uses the override |
-| FR-R2-D5 | Settings are versioned by month | Past months are not recalculated silently |
-
-### E. Effort and cost calculation — see B7. Acceptance criteria use the corrected baseline (B3.1):
-- With the baseline allocations, total effort is **1,760 h**, standard value **₹4,40,000**, allocated salary cost **₹2,00,000**, unallocated **₹60,000**.
-- Changing one allocation updates employee, project and tag views consistently.
-- Calculations are available **by employee, by project and by tag**.
-
-### F. Revenue and profitability
-| ID | Requirement | Acceptance criteria |
-|---|---|---|
-| FR-R2-F1 | Define revenue target per project, per tag and for the organization, per month | Target optional per project; organization total = sum of project targets unless an organization target is set separately |
-| FR-R2-F2 | Show target vs standard value vs cost vs profit per project | Matches B7 formulas |
-| FR-R2-F3 | Project profitability = revenue basis − salary cost (− optional other direct costs) | Revenue basis selectable (D-R2-01); shown on every report |
-| FR-R2-F4 | Tag-wise analysis with drill-down to projects | Drill-down rows sum to the tag total |
-| FR-R2-F5 | Unallocated salary cost shown separately and never hidden | Appears as its own line on the organization view |
-| FR-R2-F6 | Missing data warnings (no target, no allocation, no salary) | Warning chip instead of a misleading zero |
-| FR-R2-F7 | Export to CSV/Excel with formulas disclosed | Export respects the caller's masking |
-
-## B7. Calculation Rules and Formulas (proposed; validate with the accountant)
-
-Definitions per month *m*. `a(e,p)` = allocation fraction of employee *e* on project *p*. `H(e)` = monthly hours of *e* (org default 160 unless overridden). `S(e)` = monthly salary. `R(p)` = hourly rate (org default ₹250 unless overridden for *p*).
-
-| Measure | Formula |
-|---|---|
-| Effort hours (e, p) | `a(e,p) × H(e)` |
-| Salary cost (e, p) | `a(e,p) × S(e)` |
-| Project effort / cost | sum over employees |
-| Standard value of effort (p) | `Σ_e effort(e,p) × R(p)` |
-| Project margin (p) | `revenue basis(p) − salary cost(p) − other direct cost(p)` (other direct cost optional) |
-| Margin % | `margin ÷ revenue basis` (blank when revenue basis is 0) |
-| Employee allocated % | `Σ_p a(e,p)` (must be ≤ 100%) |
-| Bench (e) | `(1 − Σ_p a(e,p))`; bench hours = `bench × H(e)`; bench cost = `bench × S(e)` |
-| Cost per hour (e) | `S(e) ÷ H(e)` (informational) |
-| Tag totals (t) | sum over projects carrying tag *t* (overlap allowed; non-additive) |
-| Organization totals | sums over projects **plus** a separate "unallocated salary" line |
-| Target achievement | `standard value ÷ revenue target` (planned view); later `actual revenue ÷ target` |
-
-**Worked example (fictional "Lumen Academy Platform", reproduces workbook project 1):** allocations 25%, 50%, 75% and 100% of four employees earning ₹30,000, ₹20,000, ₹20,000 and ₹20,000. Effort = 40 + 80 + 120 + 160 = **400 h**. Value = 400 × ₹250 = **₹1,00,000**. Cost = 7,500 + 10,000 + 15,000 + 20,000 = **₹52,500**. Margin = **₹47,500 (47.5%)**.
-
-## B8. Data Requirements (logical; Cursor decides the physical design from the code)
-
-| Entity | Key fields | Reuse / change |
-|---|---|---|
-| Department | id, tenant, name, head_employee, status | New |
-| Employee (extends Membership) | department, monthly_salary_minor (restricted), salary_effective_from, hours_override | Extend existing `Membership`; salary history table recommended |
-| Tag, ProjectTag | tag id, name, type; project–tag link | New |
-| Project | + rate_override_minor (nullable) | Extend existing `Project` |
-| Allocation | tenant, employee, project, month, percent | Extend/replace use of `ProjectMember.allocation_pct` (add month) |
-| Costing settings | tenant, month, monthly_hours, hourly_rate_minor | Extend tenant settings; versioned by month |
-| RevenueTarget | tenant, level (organization/project/tag), reference, month, amount_minor, owner | New (planned in the earlier roadmap) |
-| Other cost (optional layer) | tenant, project, category, month, amount_minor | Decision D-R2-06; categories per the Targets sheet |
-
-All money in integer minor units (paise); every amount carries a currency.
-
-## B9. Validation Rules
-
-- Allocation per cell 0–100 (steps of 1); employee total per month ≤ 100%.
-- Salary > 0 and ≤ configured ceiling; hours 1–300 per month; hourly rate > 0.
-- Department and Head of Department must be active; HoD must belong to that department.
-- Tag name 1–40 characters, unique per tenant (case-insensitive); a tag in use cannot be deleted, only archived.
-- Revenue target ≥ 0; one target per level, reference and month.
-- Closed months are read-only except through an audited reopen.
-- Calculations never divide by zero: show "—" and a data-quality note.
-
-## B10. Dashboards and Reports
-
-| Report | Audience | Content |
-|---|---|---|
-| Organization costing summary | Owner, Finance | Hours, standard value, allocated cost, bench cost, margin, % |
-| Employee effort and cost | Owner, Finance (₹); Ops/PM/TL (hours only) | Allocation %, hours, cost, cost per hour, bench |
-| Project profitability | Owner, Finance | Target, value, cost, margin, warnings |
-| Tag-wise financial analysis | Owner, Finance | Projects, hours, cost, value, margin per tag; drill-down |
-| Bench / capacity | Owner, Finance, Operations | Free % and hours per employee |
-| Excel reconciliation (one-time) | Owner, Finance | Workbook vs system totals |
-
-## B11. Dependencies and Assumptions
-
-- Revision 2 relies on the existing multi-tenant, role and entitlement engine (no change).
-- Sprint 2 timesheets provide *actual* hours; the planned cost model does not depend on them.
-- Assumed single currency (INR) and a monthly period.
-- Employee names, salaries, department membership and project tags in the prototype are illustrative; the business owner supplies real data at implementation.
-- No payroll integration, tax or statutory cost (PF, bonus) is included unless confirmed (D-R2-12).
-
-## B12. Open Business Decisions (recommended interpretation shown; approval needed)
-
-| ID | Question | Recommended interpretation |
-|---|---|---|
-| D-R2-01 | What is "revenue" for profitability: standard value (hours × rate), revenue target, or actual invoiced/collected? (links to earlier decision 4) | Show **standard value** as "Planned value" and **targets** separately; add actual revenue when invoicing is built |
-| D-R2-02 | Confirm the corrected workbook totals (cost ₹2,00,000, not ₹3,07,500) | Accept the corrected formula (B3.2) |
-| D-R2-03 | Cost basis: planned (allocation × salary, as in Excel) or actual (approved hours × hourly cost) | Planned by default; actual shown as comparison once timesheets exist |
-| D-R2-04 | Meaning of `S` and `H` day markers (earlier decision 3). Observed: `S` falls on every Sunday of November 2026; `H` on four other days | Treat as `S` = weekly off, `H` = holiday, **pending confirmation**; configurable |
-| D-R2-05 | Is ₹250 a customer billing rate, an internal charge-out rate or a cost rate? | Label as "Standard hourly rate (internal value of effort)" |
-| D-R2-06 | Are non-salary cost categories (infrastructure, third-party, software, marketing, sales, consulting) part of profitability? | Optional layer, off by default |
-| D-R2-07 | Allocation method for shared costs (rent, Wi-Fi, AI tools, hosting) | Defer; proposed equal share or by effort hours |
-| D-R2-08 | Tag governance: free text or managed list; one or many tags per project | Managed list; many tags; non-additive totals plus optional primary tag |
-| D-R2-09 | Authority of Head of Department: view only, or approve allocations/timesheets? Can HoD see salaries? | View only; no salary unless granted |
-| D-R2-10 | Can an employee belong to more than one department? | No |
-| D-R2-11 | Over-allocation above 100%: block or allow with approval? | Block |
-| D-R2-12 | Salary meaning: gross monthly salary or cost-to-company (incl. benefits)? | Monthly cost-to-company, effective-dated |
-| D-R2-13 | Is 160 hours flat for every month or derived from working days (the workbook's November calendar implies 21 working days ≈ 168 h)? | Flat 160 default; calendar option later |
-| D-R2-14 | Revenue targets: which levels and period? | Project, tag and organization; monthly |
-| D-R2-15 | Should department-level profitability be reported (department vs project cost)? | Not in this revision; can be added |
-
-## B13. Handoff to Cursor
-
-See `docs/Cursor_Handoff_Revision2.md`. Cursor must analyze this PRD against the actual codebase, make technical decisions from the code, reuse existing architecture, identify migration and backward-compatibility needs, avoid unnecessary refactoring and preserve working functionality unless this PRD requires a change.
-
-## B14. Impact on the Iteration Plan (indicative; confirm after review)
-
-Earlier Sprint 3 (money) and Sprint 4 (hardening) are **on hold**. Proposed re-plan, each iteration shipping web screens, API, tests and a demo video:
-
-| Iteration | Scope | Depends on |
-|---|---|---|
-| R2-I1 Masters | Departments and HoD, employee salary (restricted), tags, costing settings | Approval of D-R2-09/10/12 |
-| R2-I2 Allocation and cost | Monthly allocation matrix, over-allocation rule, bench, effort/cost by employee, project and tag | R2-I1; D-R2-03/05/13 |
-| R2-I3 Targets and profitability | Revenue targets, project profitability, tag analysis, exports, workbook reconciliation | R2-I2; D-R2-01/02/14 |
-| Later (re-planned) | Non-salary and shared costs, actual-vs-planned using timesheets, invoices, performance matrix, Backblaze attachments, AI assistant, hardening | Decisions D-R2-06/07 and business priorities |
+See `docs/Cursor_Handoff_Revision2.md` and `docs/Revision2_Assumptions_and_Decisions.md`.

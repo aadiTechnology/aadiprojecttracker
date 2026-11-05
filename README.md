@@ -11,13 +11,14 @@ Business Performance & Project Profitability platform (PRD in [docs/](docs/)). M
 | Email | SMTP (Brevo relay) |
 | Files | S3-compatible object storage, Backblaze B2 (Sprint 3) |
 
-## Sprints (4)
+## Sprints (5)
 | Sprint | Backend + web (+ mobile from S2) | Demo video |
 |---|---|---|
 | **S1 Foundation** (done) | Sign-in, invitations/reset by email, tenants, roles as data, entitlements, audit, customers, projects, scope changes, role-aware dashboard, demo accounts | `videos/01-sprint-1-foundation-and-projects.mp4` |
 | **S2 Delivery** (done) | Sprints, tasks with assignment history, handover + acknowledgement, timesheets + approval, notification bell, role dashboards (web); Expo mobile app (my tasks, timesheet, handover, alerts) | `videos/02-sprint-2-delivery-web.mp4`, `videos/02-sprint-2-mobile-app.mp4` |
-| S3 Money, S4 Hardening | **On hold.** Scope is being redefined: see PRD Part B (Revision 2) and its iteration plan (B14) | pending business review |
-| **Revision 2** (proposal) | Salary-allocation costing, tags, revenue targets, project and tag profitability. PRD Part B, interactive prototype `docs/Aadi_Role_Based_Feature_Proposal.html`, Cursor handoff `docs/Cursor_Handoff_Revision2.md`, decisions `docs/Revision2_Assumptions_and_Decisions.md` | `videos/03-revision-2-prd-and-prototype.mp4` |
+| **S3 Costing & Profitability** (code complete; video pending) | PRD Revision 2: employees, departments and salary (restricted), project tags, monthly allocation (max 100%), costing settings (160 h, ₹250), effort and cost by employee/project/tag and workbook-style matrix, revenue targets, project profitability, tag analysis. 72 backend tests | planned |
+| S4 Finance & performance | Performance matrix, invoices, non-salary and shared costs (optional profitability layer), planned vs actual from timesheets, Backblaze attachments | planned |
+| S5 Intelligence & hardening | Advisory AI assistant, exports and advanced reports, accessibility, security and load pass, production cut-over | planned |
 
 ## Run locally
 ```

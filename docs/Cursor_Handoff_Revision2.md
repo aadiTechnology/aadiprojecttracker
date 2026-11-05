@@ -1,5 +1,7 @@
 # Cursor Handoff Notes — PRD Revision 2
 
+> **Status (Sprint 3):** the recommended defaults have been implemented: `backend/app/costing.py` (calculation engine), `backend/app/routers/costing.py` (API), `alembic/versions/0003_sprint_3_costing.py`, `seed_costing.py`, `tests/test_sprint3.py` (72 tests in total pass) and web screens `frontend/src/pages/{Employees,Allocation,Costing,Profitability,Targets,CostSettings}.tsx`. Review those before changing anything. Open decisions D-R2-* remain open; the code follows the recommended interpretation and keeps each one configurable or documented. Not yet built: non-salary/shared cost layer (D-R2-06/07), planned-vs-actual from timesheets (D-R2-03), month closing and per-month settings versions, department-level profitability (D-R2-15).
+
 **Read first:** `docs/Aadi_Business_Performance_Project_Profitability_PRD.md`, **Part B**. Prototype for behaviour: `docs/Aadi_Role_Based_Feature_Proposal.html` (section "Costing & Profitability · Revision 2"). Explanation video: `videos/03-revision-2-prd-and-prototype.mp4`.
 
 You (Cursor) are the implementation decision-maker. This note does not prescribe a design; it states what to verify and what must not break.

@@ -4,6 +4,7 @@ import { Chip, ErrorBox, Loading, Modal, PageHead, toast, useDebounced } from '.
 
 interface P {
   id: number; code: string; name: string; category: string; customer_id: number; customer: string; pm: string | null; pm_user_id: number | null; status: string
+  tags: { id: number; name: string }[]
   health?: string; billing_model?: string; start_date?: string | null; end_date?: string | null; est_hours?: number; budget_minor?: number; contract_value_minor?: number
 }
 interface Detail extends P {
@@ -17,8 +18,10 @@ type Person = { id: number; name: string; title: string }
 
 export default function Projects({ me }: { me: Me }) {
   const [q, setQ] = useState(''); const [status, setStatus] = useState(''); const [cat, setCat] = useState('')
+  const [tagIds, setTagIds] = useState<number[]>([])
+  const allTags = useApi<{ id: number; name: string; archived: boolean }[]>('/api/tags')
   const dq = useDebounced(q)
-  const { data, error, loading, reload } = useApi<P[]>(`/api/projects?q=${encodeURIComponent(dq)}&status=${status}&category=${encodeURIComponent(cat)}`)
+  const { data, error, loading, reload } = useApi<P[]>(`/api/projects?q=${encodeURIComponent(dq)}&status=${status}&category=${encodeURIComponent(cat)}&tags=${tagIds.join(',')}`)
   const canCreate = me.perms.includes('projects.manage:all')
   const [open, setOpen] = useState<number | null>(null)
   const [creating, setCreating] = useState(false)
@@ -34,15 +37,16 @@ export default function Projects({ me }: { me: Me }) {
         <label>Status <select value={status} onChange={(e) => setStatus(e.target.value)}><option value="">All</option>{['Draft', 'Planned', 'Active', 'On Hold', 'Completed', 'Cancelled'].map((c) => <option key={c}>{c}</option>)}</select></label>
         {canCreate && <button className="btn pri" onClick={() => setCreating(true)}>+ New project</button>}
       </div>
+      {allTags.data && allTags.data.length > 0 && <div className="tools" role="group" aria-label="Filter by tag"><b>Tags</b>{allTags.data.filter((t) => !t.archived).map((t) => <button key={t.id} type="button" className={`chip ${tagIds.includes(t.id) ? 'on' : ''}`} aria-pressed={tagIds.includes(t.id)} onClick={() => setTagIds((s) => s.includes(t.id) ? s.filter((x) => x !== t.id) : [...s, t.id])}>{t.name}</button>)}{tagIds.length > 0 && <button className="btn sm" onClick={() => setTagIds([])}>Clear tags</button>}</div>}
       {loading ? <Loading /> : error ? <ErrorBox msg={error} /> : (
         <div className="card flat"><div className="tw"><table>
-          <thead><tr><th>Project</th><th>Category</th><th>Customer / unit</th><th>PM</th><th>Status</th>{hasDelivery && <th>Health</th>}{hasBudget && <th className="n">Budget</th>}{hasContract && <th className="n">Contract value</th>}{hasDelivery && <th className="n">Est. hours</th>}</tr></thead>
-          <tbody>{data!.length === 0 ? <tr><td colSpan={9}><div className="empty">No projects match the filters, or none are assigned to you.</div></td></tr> : data!.map((p) => (
+          <thead><tr><th>Project</th><th>Category</th><th>Customer / unit</th><th>Tags</th><th>PM</th><th>Status</th>{hasDelivery && <th>Health</th>}{hasBudget && <th className="n">Budget</th>}{hasContract && <th className="n">Contract value</th>}{hasDelivery && <th className="n">Est. hours</th>}</tr></thead>
+          <tbody>{data!.length === 0 ? <tr><td colSpan={10}><div className="empty">No projects match the filters, or none are assigned to you.</div></td></tr> : data!.map((p) => (
             <tr key={p.id} className="click" onClick={() => setOpen(p.id)}>
               <td><button className="btn sm" style={{ border: 0, padding: 0, fontWeight: 700, color: 'var(--acc)' }} onClick={(e) => { e.stopPropagation(); setOpen(p.id) }}>{p.name}</button><br /><small>{p.code}</small></td>
-              <td>{p.category}</td><td>{p.customer}</td><td>{p.pm ?? '—'}</td><td><Chip text={p.status} /></td>
+              <td>{p.category}</td><td>{p.customer}</td><td>{p.tags.map((t) => <Chip key={t.id} text={t.name} tone="acc" />)}</td><td>{p.pm ?? '—'}</td><td><Chip text={p.status} /></td>
               {hasDelivery && <td><Chip text={p.health!} /></td>}{hasBudget && <td className="n">{money(p.budget_minor)}</td>}{hasContract && <td className="n">{money(p.contract_value_minor)}</td>}{hasDelivery && <td className="n">{p.est_hours}</td>}</tr>))}</tbody></table></div></div>)}
-      {hasContract && <p className="note" style={{ marginTop: 12 }}>Contract value is expected revenue. Recognized revenue arrives with revenue tracking in Sprint 3 and depends on the customer’s revenue-basis decision.</p>}
+      {hasContract && <p className="note" style={{ marginTop: 12 }}>Contract value is expected revenue. Recognized revenue arrives with invoicing in Sprint 4 and depends on the customer’s revenue-basis decision.</p>}
       {open !== null && <ProjectModal id={open} me={me} onClose={() => setOpen(null)} onChanged={reload} />}
       {creating && <ProjectForm onClose={() => setCreating(false)} onSaved={() => { setCreating(false); reload() }} />}
     </>
@@ -103,6 +107,7 @@ function ProjectModal({ id, me, onClose, onChanged }: { id: number; me: Me; onCl
       {err && <div className="err" role="alert">{err}</div>}
       {tab === 'Overview' && <div>
         <p><Chip text={d.status} /> {d.health && <Chip text={`Health: ${d.health}`} tone={d.health === 'Green' ? 'ok' : d.health === 'Amber' ? 'warn' : 'bad'} />} <Chip text={d.category} tone="acc" /></p>
+        <TagEditor id={id} tags={d.tags} canTag={me.perms.some((x) => x.startsWith('projects.tag'))} onChanged={() => { reload(); onChanged() }} />
         <p><b>Customer / unit:</b> {d.customer} · <b>Project manager:</b> {d.pm ?? 'not assigned'}</p>
         {d.billing_model && <p><b>Billing:</b> {d.billing_model.replace(/_/g, ' ')} · <b>Dates:</b> {d.start_date ?? '—'} to {d.end_date ?? '—'} · <b>Estimate:</b> {d.est_hours} h</p>}
         {money_ && <p>{d.budget_minor !== undefined && <><b>Budget:</b> {money(d.budget_minor)} </>}{d.contract_value_minor !== undefined && <>· <b>Contract value (expected):</b> {money(d.contract_value_minor)}</>}</p>}
@@ -137,5 +142,22 @@ function ProjectModal({ id, me, onClose, onChanged }: { id: number; me: Me; onCl
       </div>}
       {!d.can_manage && <p className="note" style={{ marginTop: 10 }}>{me.role.name}: view only for this project.</p>}
     </Modal>
+  )
+}
+
+function TagEditor({ id, tags, canTag, onChanged }: { id: number; tags: { id: number; name: string }[]; canTag: boolean; onChanged: () => void }) {
+  const all = useApi<{ id: number; name: string; archived: boolean }[]>(canTag ? '/api/tags' : null)
+  const [editing, setEditing] = useState(false)
+  const [sel, setSel] = useState<number[]>([])
+  async function save() {
+    try { await api(`/api/projects/${id}/tags`, { method: 'PUT', body: { tag_ids: sel } }); toast('Tags saved'); setEditing(false); onChanged() } catch (x) { toast((x as Error).message) }
+  }
+  return (
+    <div className="tools" style={{ marginBottom: 6 }}><b>Tags</b>
+      {!editing && (tags.length ? tags.map((t, i) => <Chip key={t.id} text={i === 0 ? `${t.name} (primary)` : t.name} tone="acc" />) : <small>No tags yet</small>)}
+      {canTag && !editing && <button className="btn sm" onClick={() => { setSel(tags.map((t) => t.id)); setEditing(true) }}>Edit tags</button>}
+      {editing && <>{all.data?.filter((t) => !t.archived).map((t) => <label key={t.id} style={{ display: 'inline-flex', gap: 4 }}><input type="checkbox" checked={sel.includes(t.id)} onChange={(e) => setSel((s) => e.target.checked ? [...s, t.id] : s.filter((x) => x !== t.id))} />{t.name}</label>)}
+        <button className="btn sm pri" onClick={save}>Save tags</button><button className="btn sm" onClick={() => setEditing(false)}>Cancel</button><small>The first tag selected is the primary tag.</small></>}
+    </div>
   )
 }

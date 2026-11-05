@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Me, money, useApi } from '../api'
+import { Me, inr, money, useApi } from '../api'
 import { Chip, ErrorBox, Kpi, Loading, PageHead } from '../ui'
 
 interface D {
@@ -7,6 +7,7 @@ interface D {
   projects?: { total: number; by_status: Record<string, number>; health: Record<string, number> }
   project_list?: { id: number; code: string; name: string; status: string; health: string }[]
   delivery?: { tasks?: { total: number; Todo: number; 'In progress': number; Blocked: number; Done: number; mine_open: number; overdue: number }; my_week_hours?: number; week_target?: number; pending_approvals?: number; pending_handovers?: number }
+  costing?: { month: string; hours: number; value_minor: number; cost_minor: number; bench_cost_minor: number; margin_minor: number; salary_pool_minor: number } | null
   budget_minor?: number; contract_value_minor?: number; customers?: number; people?: number; open_decisions: string[]
 }
 
@@ -26,6 +27,12 @@ export default function Dashboard({ me }: { me: Me }) {
         {data.customers !== undefined && <Kpi label="Customers & business units" value={data.customers} sub="In your scope" />}
         {data.people !== undefined && <Kpi label="Active people" value={data.people} sub="Members of this organization" />}
       </div>
+      {data.costing && <div className="grid g4 mb">
+        <Kpi label={`Planned effort · ${data.costing.month}`} value={`${data.costing.hours.toLocaleString('en-IN')} h`} sub="From monthly allocation" />
+        <Kpi label="Standard value" value={inr(data.costing.value_minor)} sub="Hours × hourly rate, not invoiced revenue" />
+        <Kpi label="Salary cost (allocated)" value={inr(data.costing.cost_minor)} sub={`Bench ${inr(data.costing.bench_cost_minor)} · pool ${inr(data.costing.salary_pool_minor)}`} />
+        <Kpi label="Margin" value={<Link to="/profitability">{inr(data.costing.margin_minor)}</Link>} sub="Value − salary cost" />
+      </div>}
       {data.delivery && (data.delivery.tasks || data.delivery.my_week_hours !== undefined) && <div className="grid g4 mb">
         {data.delivery.tasks && <Kpi label="My open tasks" value={<Link to="/sprint">{data.delivery.tasks.mine_open}</Link>} sub={`${data.delivery.tasks.total} in your scope · ${data.delivery.tasks.overdue} overdue`} />}
         {data.delivery.tasks && <Kpi label="Blocked tasks" value={data.delivery.tasks.Blocked} sub={`${data.delivery.tasks['In progress']} in progress · ${data.delivery.tasks.Done} done`} />}

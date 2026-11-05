@@ -145,8 +145,8 @@ def set_role(rid: int, b: RolePerms, c: Ctx = Depends(ctx)):
         base = p.split(":")[0]
         if base not in CAPABILITY_CATALOG or (":" in p and p.split(":")[1] not in ("all", "team", "assigned", "own")):
             raise err(422, "VALIDATION", f"Unknown capability: {p}")
-    if "salary.view" in b.perms and r.key not in ("finance",):
-        raise err(422, "RESTRICTED", "Salary visibility is restricted to the Finance role and the Owner in this release.")
+    if any(x in b.perms for x in ("salary.view", "salary.manage", "costing.cost")) and r.key not in ("finance",):
+        raise err(422, "RESTRICTED", "Salary and cost visibility is restricted to the Finance role and the Owner in this release.")
     before = list(r.perms)
     r.perms = sorted(set(b.perms))
     audit(c.db, c.tid, c.user.id, "role.permissions", "role", r.id, before=before, after=r.perms)
@@ -204,7 +204,10 @@ MATRIX_ROWS = [("Organization & user administration", "org.admin"), ("Customer /
                ("Sprint & task planning", "sprint.view"), ("Team transition / handover", "handover.view"), ("Timesheet entry", "timesheet.own"),
                ("Timesheet approval", "timesheet.approve"), ("Employee performance", "perf.view"), ("Revenue targets", "revenue.view"),
                ("Expense & cost allocation", "expenses.view"), ("Salary / cost rates (restricted)", "salary.view"), ("Invoice management", "invoices.view"),
-               ("Reports", "reports.view"), ("Audit log", "audit.view"), ("AI management assistant", "ai.use")]
+               ("Reports", "reports.view"), ("Audit log", "audit.view"), ("AI management assistant", "ai.use"),
+               ("Employees & departments", "employees.view"), ("Salary management (restricted)", "salary.manage"), ("Project tags", "projects.tag"),
+               ("Employee allocation", "allocation.view"), ("Costing settings", "costing.settings"), ("Effort (hours)", "costing.effort"),
+               ("Cost, value & profit (restricted)", "costing.cost"), ("Revenue targets (planning)", "targets.view")]
 
 
 @router.get("/matrix")

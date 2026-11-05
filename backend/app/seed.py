@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from . import core, models as m
 from .core import hash_password
+from .seed_costing import seed_costing
 from .seed_delivery import seed_delivery
 from .tenancy import seed_roles_and_modules
 
@@ -93,9 +94,11 @@ def run(reset=False):
     with core.SessionLocal() as db:
         if db.execute(select(m.Tenant).where(m.Tenant.slug == "aadi-technology-illustrative-demo")).scalar_one_or_none():
             tt = db.execute(select(m.Tenant).where(m.Tenant.slug == "aadi-technology-illustrative-demo")).scalar_one()
-            if seed_delivery(db, tt):
+            added = seed_delivery(db, tt)
+            added = seed_costing(db, tt) or added
+            if added:
                 db.commit()
-                print("Sprint 2 demo data added to the existing demo organization.")
+                print("Sprint 2/3 demo data added to the existing demo organization.")
             else:
                 print("Demo data already present; nothing to do.")
             return
@@ -136,6 +139,7 @@ def run(reset=False):
         db.add(m.AuditEvent(tenant_id=t.id, action="demo.seed", detail={"note": "Illustrative demo data loaded"}))
         db.flush()
         seed_delivery(db, t)
+        seed_costing(db, t)
         db.commit()
         print("Demo data loaded:", len(USERS), "users,", len(CUSTOMERS), "customers,", len(PROJECTS), "projects")
 

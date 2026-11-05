@@ -24,6 +24,8 @@ class Tenant(Base):
     currency: Mapped[str] = mapped_column(String(3), default="INR")
     timezone: Mapped[str] = mapped_column(String(60), default="Asia/Kolkata")
     week_hours: Mapped[int] = mapped_column(Integer, default=40)
+    monthly_hours: Mapped[int] = mapped_column(Integer, default=160)  # costing default; per-employee override on Membership
+    hourly_rate_minor: Mapped[int] = mapped_column(BigInteger, default=25000)  # standard hourly rate in paise (Rs 250); per-project override on Project
     # OPEN DECISIONS (PRD s19): left undefined until the customer decides. Never silently defaulted.
     revenue_basis: Mapped[str | None] = mapped_column(String(20), nullable=True)   # invoiced|collected|recognized|milestone
     planning_markers: Mapped[dict] = mapped_column(JSON, default=dict)             # meaning of S/H markers: unset
@@ -66,6 +68,8 @@ class Membership(Base):
     title: Mapped[str] = mapped_column(String(120), default="")
     team: Mapped[str] = mapped_column(String(80), default="")
     manager_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"), nullable=True)
+    hours_override: Mapped[int | None] = mapped_column(Integer, nullable=True)  # monthly hours when different from the organization default
     status: Mapped[str] = mapped_column(String(20), default="active")  # active | suspended
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
@@ -137,6 +141,7 @@ class Project(Base):
     budget_minor: Mapped[int] = mapped_column(BigInteger, default=0)
     contract_value_minor: Mapped[int] = mapped_column(BigInteger, default=0)  # expected revenue; NOT recognized revenue
     est_hours: Mapped[float] = mapped_column(Float, default=0)
+    rate_override_minor: Mapped[int | None] = mapped_column(BigInteger, nullable=True)  # hourly rate override in paise
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -261,3 +266,69 @@ class Notification(Base):
     link: Mapped[str] = mapped_column(String(60), default="")
     read: Mapped[bool] = mapped_column(Boolean, default=False)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+# ---------------- Sprint 3: costing and profitability (Revision 2) ----------------
+class Department(Base):
+    __tablename__ = "departments"
+    __table_args__ = (UniqueConstraint("tenant_id", "name"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    head_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # Head of Department
+
+
+class EmployeeSalary(Base):
+    """Effective-dated monthly salary (cost to company) in paise. Restricted: only salary.view / salary.manage ever see it."""
+    __tablename__ = "employee_salaries"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    amount_minor: Mapped[int] = mapped_column(BigInteger)
+    effective_from: Mapped[date] = mapped_column(Date)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+    __table_args__ = (UniqueConstraint("tenant_id", "name"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    name: Mapped[str] = mapped_column(String(40))
+    archived: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class ProjectTag(Base):
+    __tablename__ = "project_tags"
+    __table_args__ = (UniqueConstraint("project_id", "tag_id"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    tag_id: Mapped[int] = mapped_column(ForeignKey("tags.id"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)  # 0 = primary tag (additive roll-ups)
+
+
+class Allocation(Base):
+    """Percent (0-100) of an employee's month spent on a project. An employee's rows for one month add up to at most 100."""
+    __tablename__ = "allocations"
+    __table_args__ = (UniqueConstraint("user_id", "project_id", "month"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    month: Mapped[date] = mapped_column(Date, index=True)  # first day of the month
+    percent: Mapped[int] = mapped_column(Integer)
+
+
+class RevenueTarget(Base):
+    """Planning target (not actual revenue) per project, tag or whole organization for a month."""
+    __tablename__ = "revenue_targets"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    level: Mapped[str] = mapped_column(String(10))  # project | tag | org
+    project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True)
+    tag_id: Mapped[int | None] = mapped_column(ForeignKey("tags.id"), nullable=True)
+    month: Mapped[date] = mapped_column(Date, index=True)
+    amount_minor: Mapped[int] = mapped_column(BigInteger)
+    updated_by: Mapped[int] = mapped_column(ForeignKey("users.id"))

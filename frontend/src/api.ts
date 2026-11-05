@@ -62,3 +62,7 @@ export function money(minor: number | undefined | null): string {
   return `₹${rupees.toLocaleString('en-IN')}`
 }
 export const toMinor = (rupees: string) => Math.round(parseFloat(rupees || '0') * 100)
+
+/** Full rupees with Indian digit grouping (costing screens show exact amounts, not lakh/crore). */
+export const inr = (minor: number | undefined | null) => (minor === undefined || minor === null ? '—' : `${minor < 0 ? '−' : ''}₹${Math.abs(Math.round(minor / 100)).toLocaleString('en-IN')}`)
+export const thisMonth = () => new Date().toISOString().slice(0, 7)

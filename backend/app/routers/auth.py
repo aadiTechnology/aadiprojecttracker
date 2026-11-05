@@ -18,11 +18,12 @@ EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # view -> (capability that grants it, sprint in which the screen is delivered)
 VIEWS = {
     "dash": (None, 1), "customers": ("customers.view", 1), "projects": ("projects.view", 1), "sprint": ("sprint.view", 2),
-    "handover": ("handover.view", 2), "timesheets": ("timesheet.own", 2), "perf": ("perf.view", 3),
-    "revenue": ("revenue.view", 3), "expenses": ("expenses.view", 3), "invoices": ("invoices.view", 3),
+    "handover": ("handover.view", 2), "timesheets": ("timesheet.own", 2), "perf": ("perf.view", 4),
+    "employees": ("employees.view", 3), "allocation": ("allocation.view", 3), "costing": ("costing.effort", 3), "profit": ("costing.cost", 3),
+    "revenue": ("targets.view", 3), "costset": ("costing.settings", 3), "expenses": ("expenses.view", 4), "invoices": ("invoices.view", 4),
     "admin": ("org.users.view", 1), "matrix": (None, 1), "workflow": (None, 1), "assumptions": (None, 1),
 }
-LIVE_SPRINT = int(os.environ.get("LIVE_SPRINT", "2"))  # raised as sprints ship; screens of later sprints are labelled honestly instead of faked
+LIVE_SPRINT = int(os.environ.get("LIVE_SPRINT", "3"))  # raised as sprints ship; screens of later sprints are labelled honestly instead of faked
 
 
 def tenant_list(db: Session, user: m.User):
