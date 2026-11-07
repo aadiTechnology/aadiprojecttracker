@@ -169,3 +169,9 @@ def test_menu_flags_sprint_4(client, H):
     assert a["expenses"]["built"] and a["invoices"]["built"] and a["perf"]["built"] and a["plannedactual"]["built"]
     e = client.get("/api/me", headers=mx(client, "omkar.pawar")).json()["access"]
     assert e["perf"]["level"] == "own" and not e["invoices"]["level"] and not e["expenses"]["level"]
+
+
+def test_estimate_accuracy_has_data(client, H):
+    rows = client.get("/api/performance", headers=H("priya.rao")).json()["rows"]
+    got = [r for r in rows if r["estimates"]["accuracy_pct"] is not None]
+    assert got and all(r["estimates"]["tasks_compared"] > 0 and r["estimates"]["approved_hours"] > 0 for r in got)

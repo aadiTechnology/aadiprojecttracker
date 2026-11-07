@@ -106,3 +106,17 @@ def seed_finance(db, t) -> bool:
         db.add(m.PerfReview(tenant_id=t.id, user_id=uid, reviewer_id=owner, month=month, dimension=texts[i][0], comment=texts[i][1],
                             ack_at=datetime.now(timezone.utc) if i == 0 else None, ack_note="Thanks, noted." if i == 0 else ""))
     return True
+
+
+def seed_task_hours(db, t) -> bool:
+    """Approved hours (last month) on finished tasks, so estimate accuracy has data. Own guard, so existing demo databases receive it too."""
+    if db.execute(select(m.TimeEntry).where(m.TimeEntry.tenant_id == t.id, m.TimeEntry.note == "Demo estimate sample")).first():
+        return False
+    month = costing.month_start()
+    when = (month - timedelta(days=1)).replace(day=15)
+    boss = db.execute(select(m.Membership).join(m.Role, m.Role.id == m.Membership.role_id).where(m.Membership.tenant_id == t.id, m.Role.key == "owner")).scalars().first()
+    done = db.execute(select(m.Task).where(m.Task.tenant_id == t.id, m.Task.status == "Done", m.Task.est_hours > 0, m.Task.assignee_id.is_not(None)).order_by(m.Task.id)).scalars().all()
+    for i, task in enumerate(done):
+        db.add(m.TimeEntry(tenant_id=t.id, user_id=task.assignee_id, project_id=task.project_id, task_id=task.id, work_date=when, hours=round(task.est_hours * (0.8, 1.0, 1.3, 1.1)[i % 4] * 2) / 2 or 0.5,
+                           note="Demo estimate sample", status="Approved", decided_by=boss.user_id if boss else None, decided_at=datetime.now(timezone.utc)))
+    return bool(done)
