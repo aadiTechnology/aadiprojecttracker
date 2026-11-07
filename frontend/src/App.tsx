@@ -83,7 +83,7 @@ export default function App() {
 
   const m = me!
   const acc = (k: string) => m.access[k]
-  let lastGroup = ''
+  let lastGroup = '', curGroup = ''
   return (
     <div className="app">
       <a className="skip" href="#main">Skip to content</a>
@@ -92,17 +92,18 @@ export default function App() {
         <nav aria-label="Main navigation">
           {NAV.map((n) => {
             const a = acc(n.key)
-            const ok = !!a?.level
-            const head = n.group && n.group !== lastGroup ? <div className="navh" key={'h' + n.key}>{n.group}</div> : null
-            if (n.group) lastGroup = n.group
+            if (n.group) curGroup = n.group // a group heading shows at its first visible item, even when the item that carried it is hidden
+            if (!a?.level) return null // screens the role cannot open are hidden, not shown disabled (the API still enforces access)
+            const head = curGroup !== lastGroup ? <div className="navh" key={'h' + n.key}>{curGroup}</div> : null
+            lastGroup = curGroup
             return <Fragment key={n.key}>{head}
-              <NavLink to={n.path} end={n.path === '/'} className={({ isActive }) => `nav ${isActive ? 'active' : ''} ${ok ? '' : 'off'}`} aria-disabled={!ok} title={ok ? undefined : 'Access restricted for your role'}>
+              <NavLink to={n.path} end={n.path === '/'} className={({ isActive }) => `nav ${isActive ? 'active' : ''}`}>
                 <span className="ic" aria-hidden="true">{n.icon}</span>{n.label}
-                {!ok ? <span className="tag" aria-hidden="true">🔒</span> : !a.built ? <span className="tag">Sprint {a.sprint}</span> : null}
+                {!a.built ? <span className="tag">Sprint {a.sprint}</span> : null}
               </NavLink></Fragment>
           })}
         </nav>
-        <div className="sbfoot">Menu shows what your role is proposed to access. Permissions are enforced by the API.</div>
+        <div className="sbfoot">Menu lists only what your role can open. Permissions are enforced by the API.</div>
       </aside>
       <main id="main" tabIndex={-1}>
         <header className="top">

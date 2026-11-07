@@ -30,6 +30,14 @@ for (const key of people) {
       if (l.off) { if (!text.includes('Access restricted')) problems.push(`${l.href}: restricted page not shown`); locked++ }
       else { shown++; if (alerts.length) problems.push(`${l.href}: ${alerts.join(' | ')}`) }
     }
+    // screens hidden from the menu must still be refused when the address is typed in
+    for (const path of ['/profitability', '/costing-settings', '/admin']) {
+      if (links.some((l) => l.href === path)) continue
+      await page.goto(origin + path)
+      await page.getByRole('heading', { level: 1 }).first().waitFor()
+      if (!(await page.locator('main').innerText()).includes('Access restricted')) problems.push(`${path}: hidden screen not refused`)
+      locked++
+    }
   }
   console.log(`${problems.length ? 'FAIL' : 'ok  '} ${key.padEnd(15)} screens=${shown} restricted=${locked}${problems.length ? '\n   ' + problems.join('\n   ') : ''}`)
   failures += problems.length
