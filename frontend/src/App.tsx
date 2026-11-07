@@ -14,6 +14,7 @@ import Employees from './pages/Employees'
 import Allocation from './pages/Allocation'
 import Costing from './pages/Costing'
 import Insights from './pages/Insights'
+import Assistant from './pages/Assistant'
 import Expenses from './pages/Expenses'
 import Invoices from './pages/Invoices'
 import Performance from './pages/Performance'
@@ -44,6 +45,7 @@ const NAV: { key: string; label: string; icon: string; path: string; group?: str
   { key: 'plannedactual', label: 'Planned vs Actual', icon: '⚖', path: '/planned-actual' },
   { key: 'expenses', label: 'Expenses & Cost', icon: '₹', path: '/expenses' },
   { key: 'invoices', label: 'Invoices', icon: '🧾', path: '/invoices' },
+  { key: 'assistant', label: 'AI Assistant', icon: '✨', path: '/assistant', group: 'Intelligence' },
   { key: 'admin', label: 'Organization Admin', icon: '⚙', path: '/admin', group: 'Administration' },
   { key: 'matrix', label: 'Role & Permission Matrix', icon: '🔐', path: '/matrix', group: 'Product' },
   { key: 'workflow', label: 'Product Workflow', icon: '➜', path: '/workflow' },
@@ -134,6 +136,7 @@ export default function App() {
               else if (n.key === 'handover') el = <Handover me={m} />
               else if (n.key === 'timesheets') el = <Timesheets me={m} />
               else if (n.key === 'insights') el = <Insights me={m} />
+              else if (n.key === 'assistant') el = <Assistant me={m} />
               else if (n.key === 'perf') el = <Performance me={m} />
               else if (n.key === 'plannedactual') el = <PlannedActual me={m} />
               else if (n.key === 'expenses') el = <Expenses me={m} />

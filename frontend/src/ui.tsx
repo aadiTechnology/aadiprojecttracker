@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
+import { download } from './api'
 
 export const chipTone: Record<string, string> = {
   Active: 'ok', Planned: 'info', 'On Hold': 'warn', Completed: 'ok', Draft: '', Cancelled: 'bad', Green: 'ok', Amber: 'warn', Red: 'bad',
@@ -61,4 +62,12 @@ export function useDebounced<T>(v: T, ms = 250) {
   const [d, setD] = useState(v)
   useEffect(() => { const t = setTimeout(() => setD(v), ms); return () => clearTimeout(t) }, [v, ms])
   return d
+}
+
+export function ExportButton({ report, month }: { report: string; month?: string }) {
+  const [busy, setBusy] = useState(false)
+  return <button className="btn" disabled={busy} title={`Download ${report} as a CSV file`} onClick={async () => {
+    setBusy(true)
+    try { await download(`/api/export/${report}${month ? `?month=${month}` : ''}`, `${report}.csv`); toast('CSV downloaded') } catch (x) { toast((x as Error).message) } finally { setBusy(false) }
+  }}><span aria-hidden="true">⬇</span> Export CSV</button>
 }

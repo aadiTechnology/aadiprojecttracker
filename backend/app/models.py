@@ -398,3 +398,19 @@ class PerfReview(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     ack_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ack_note: Mapped[str] = mapped_column(String(300), default="")
+
+
+# ---------------- Sprint 5: advisory assistant usage log ----------------
+class AIUsageLog(Base):
+    """One row per assistant question. Cost controls: a daily per-user limit counts these rows. No language model is called by default, so tokens and cost stay 0."""
+    __tablename__ = "ai_usage_log"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    question: Mapped[str] = mapped_column(String(300))
+    intent: Mapped[str] = mapped_column(String(30), default="")
+    provider: Mapped[str] = mapped_column(String(20), default="rules")
+    tokens_in: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_out: Mapped[int] = mapped_column(Integer, default=0)
+    cost_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, index=True)

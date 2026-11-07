@@ -51,7 +51,7 @@ export default function SprintPage({ me }: { me: Me }) {
           <div className="card" key={s.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><b>{s.name}</b><Chip text={s.status} tone={s.status === 'Active' ? 'ok' : s.status === 'Planned' ? 'info' : ''} /></div>
             <small>{s.project}</small>
-            <div className="bar" style={{ margin: '8px 0 4px' }} aria-label={`${s.done} of ${s.total} tasks done`}><i style={{ width: `${s.total ? (100 * s.done) / s.total : 0}%` }} /></div>
+            <div className="bar" style={{ margin: '8px 0 4px' }} role="img" aria-label={`${s.done} of ${s.total} tasks done`}><i style={{ width: `${s.total ? (100 * s.done) / s.total : 0}%` }} /></div>
             <small>{s.done}/{s.total} done · {s.hours.toFixed(0)} h planned · {s.start_date ?? '—'} to {s.end_date ?? '—'}</small>
             {s.can_manage && s.status !== 'Closed' && <div style={{ marginTop: 8 }}>
               <button className="btn sm" onClick={() => run(() => api(`/api/sprints/${s.id}/status`, { method: 'POST', body: { status: s.status === 'Planned' ? 'Active' : 'Closed' } }), s.status === 'Planned' ? 'Sprint started' : 'Sprint closed')}>{s.status === 'Planned' ? 'Start sprint' : 'Close sprint'}</button></div>}

@@ -9,7 +9,7 @@ from . import core, models as m
 from .core import hash_password
 from .seed_costing import seed_costing
 from .seed_delivery import seed_delivery
-from .seed_finance import seed_finance, seed_task_hours
+from .seed_finance import enable_assistant, seed_finance, seed_task_hours
 from .seed_matrix import seed_matrix
 from .tenancy import seed_roles_and_modules
 
@@ -90,6 +90,7 @@ def seed_finance_all(db) -> bool:
     for t in db.execute(select(m.Tenant).where(m.Tenant.is_demo.is_(True))).scalars().all():
         added = seed_finance(db, t) or added
         added = seed_task_hours(db, t) or added
+        added = enable_assistant(db, t) or added
     return added
 
 

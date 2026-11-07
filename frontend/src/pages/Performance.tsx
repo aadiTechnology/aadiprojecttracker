@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Me, api, thisMonth, useApi } from '../api'
-import { Chip, ErrorBox, Kpi, Loading, Modal, PageHead, toast } from '../ui'
+import { Chip, ErrorBox, ExportButton, Kpi, Loading, Modal, PageHead, toast } from '../ui'
 
 interface Row {
   user_id: number; name: string; title: string; team: string
@@ -27,7 +27,7 @@ export default function Performance({ me }: { me: Me }) {
   return (
     <>
       <PageHead title="Employee Performance" sub={data.scope === 'own' ? 'Your own delivery measures and review comments.' : 'Transparent delivery measures per person, with evidence-based review comments. There is no score and no ranking.'} />
-      <div className="tools"><label>Month <input type="month" value={month} onChange={(e) => setMonth(e.target.value || thisMonth())} /></label></div>
+      <div className="tools"><label>Month <input type="month" value={month} onChange={(e) => setMonth(e.target.value || thisMonth())} /></label><span style={{ flex: 1 }} /><ExportButton report="performance" month={month} /></div>
       <div className="grid g4 mb">
         <Kpi label="People shown" value={rows.length} sub={`Scope: ${data.scope}`} />
         <Kpi label="Tasks done" value={`${sum((r) => r.tasks.done)} of ${sum((r) => r.tasks.assigned)}`} sub={`${sum((r) => r.tasks.overdue)} overdue · ${sum((r) => r.tasks.blocked)} blocked`} />

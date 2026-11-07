@@ -1,4 +1,4 @@
-:root{--bg:#f5f7fa;--panel:#fff;--ink:#1c2433;--mute:#5a667a;--line:#e3e8ef;--acc:#2f5bea;--acc-s:#e9eefd;--ok:#12805c;--ok-s:#e3f6ee;--warn:#8a5a00;--warn-s:#fff4d6;--bad:#b42318;--bad-s:#fde8e6;--info:#0b6e99;--info-s:#e1f3fa;--sb:#111a2e}
+:root{--bg:#f5f7fa;--panel:#fff;--ink:#1c2433;--mute:#5a667a;--line:#e3e8ef;--acc:#2f5bea;--acc-s:#e9eefd;--ok:#0c6446;--ok-s:#e3f6ee;--warn:#8a5a00;--warn-s:#fff4d6;--bad:#b42318;--bad-s:#fde8e6;--info:#0b6e99;--info-s:#e1f3fa;--sb:#111a2e}
 *{box-sizing:border-box}
 body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 button,select,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
@@ -54,7 +54,7 @@ input,select,textarea{border:1px solid #cbd3e0;background:#fff;border-radius:8px
 .demo td,.demo th{padding:7px 10px}.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
 .bar{height:8px;background:#e9edf3;border-radius:99px;overflow:hidden;min-width:70px}.bar>i{display:block;height:100%;background:var(--acc)}
 .pv{display:inline-block;min-width:74px;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:600;text-align:center}
-.v-All{background:#d6f1e5;color:#0b6a49}.v-Yes{background:#d6f1e5;color:#0b6a49}.v-Team{background:#dbe7ff;color:#1c43b8}.v-Assigned{background:#efe3fd;color:#5b2da8}.v-Own{background:#fff0c9;color:#7a5400}.v-No{background:#f3f4f6;color:#8a93a3}
+.v-All{background:#d6f1e5;color:#0b6a49}.v-Yes{background:#d6f1e5;color:#0b6a49}.v-Team{background:#dbe7ff;color:#1c43b8}.v-Assigned{background:#efe3fd;color:#5b2da8}.v-Own{background:#fff0c9;color:#7a5400}.v-No{background:#f3f4f6;color:#566175}
 .mx td,.mx th{text-align:center}.mx td:first-child,.mx th:first-child{text-align:left;position:sticky;left:0;background:#fff;min-width:210px}.mx th:first-child{background:#f8fafc}.mx .sel{background:var(--acc-s)}
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
 .step .no{width:24px;height:24px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;margin-bottom:6px}

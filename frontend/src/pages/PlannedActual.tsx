@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Me, inr, thisMonth, useApi } from '../api'
-import { Chip, ErrorBox, Kpi, Loading, PageHead } from '../ui'
+import { Chip, ErrorBox, ExportButton, Kpi, Loading, PageHead } from '../ui'
 
 interface PA {
   month: string; elapsed_pct: number; money: boolean; partial: boolean; note: string
@@ -22,7 +22,7 @@ export default function PlannedActual({ me }: { me: Me }) {
   return (
     <>
       <PageHead title="Planned vs Actual" sub="Compare the monthly allocation with approved timesheet hours. Finance roles also see the full cost and invoice picture per project." />
-      <div className="tools"><label>Month <input type="month" value={month} onChange={(e) => setMonth(e.target.value || thisMonth())} /></label></div>
+      <div className="tools"><label>Month <input type="month" value={month} onChange={(e) => setMonth(e.target.value || thisMonth())} /></label><span style={{ flex: 1 }} /><ExportButton report={tab === 'Planned vs actual' ? 'planned-actual' : 'contribution'} month={month} /></div>
       {fin && <div className="tabs" role="tablist">{['Planned vs actual', 'Project contribution'].map((t) => <button key={t} role="tab" aria-selected={tab === t} className="tab" onClick={() => setTab(t)}>{t}</button>)}</div>}
       {tab === 'Planned vs actual' ? <Hours month={month} /> : <Contribution month={month} />}
     </>

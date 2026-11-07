@@ -120,3 +120,15 @@ def seed_task_hours(db, t) -> bool:
         db.add(m.TimeEntry(tenant_id=t.id, user_id=task.assignee_id, project_id=task.project_id, task_id=task.id, work_date=when, hours=round(task.est_hours * (0.8, 1.0, 1.3, 1.1)[i % 4] * 2) / 2 or 0.5,
                            note="Demo estimate sample", status="Approved", decided_by=boss.user_id if boss else None, decided_at=datetime.now(timezone.utc)))
     return bool(done)
+
+
+def enable_assistant(db, t) -> bool:
+    """Demo organizations get the advisory assistant switched on; real organizations opt in per tenant (module entitlement, off by default)."""
+    e = db.execute(select(m.Entitlement).where(m.Entitlement.tenant_id == t.id, m.Entitlement.module == "ai")).scalar_one_or_none()
+    if e is None:
+        db.add(m.Entitlement(tenant_id=t.id, module="ai", enabled=True))
+        return True
+    if not e.enabled:
+        e.enabled = True
+        return True
+    return False

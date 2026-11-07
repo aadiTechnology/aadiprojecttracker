@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Me, api, inr, thisMonth, toMinor, useApi } from '../api'
-import { Chip, ErrorBox, Kpi, Loading, Modal, PageHead, toast } from '../ui'
+import { Chip, ErrorBox, ExportButton, Kpi, Loading, Modal, PageHead, toast } from '../ui'
 
 interface Row { id: number; category: string; vendor: string; description: string; amount_minor: number; spent_on: string; project: string | null; shared: boolean; alloc_method: string | null; status: string }
 interface D {
@@ -24,7 +24,7 @@ export default function Expenses({ me }: { me: Me }) {
     <>
       <PageHead title="Expenses & Cost Allocation" sub={`Non-salary costs for ${me.tenant.name}. Direct costs belong to one project; shared costs are split between projects with the method you pick.`} />
       <div className="tools"><label>Month <input type="month" value={month} onChange={(e) => setMonth(e.target.value || thisMonth())} /></label><span style={{ flex: 1 }} />
-        {data.can_manage && <button className="btn pri" onClick={() => setAdding(true)}>+ Add expense</button>}</div>
+        <ExportButton report="expenses" month={month} />{data.can_manage && <button className="btn pri" onClick={() => setAdding(true)}>+ Add expense</button>}</div>
       <div className="grid g4 mb">
         <Kpi label="Total expenses" value={inr(data.totals.all_minor)} sub={`${data.rows.length} entries`} />
         <Kpi label="Direct to a project" value={inr(data.totals.direct_minor)} sub="Charged to one project" />

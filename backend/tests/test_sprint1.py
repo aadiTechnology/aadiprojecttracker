@@ -96,7 +96,9 @@ def test_cross_tenant_isolation(client, H):
 
 def test_entitlement_default_off_for_pillar_3(client, H):
     mods = {x["key"]: x["enabled"] for x in client.get("/api/org/modules", headers=H("priya.rao")).json()}
-    assert mods["ai"] is False and mods["sales"] is False and mods["core"] is True
+    from app.perms import DEFAULT_MODULES
+    assert DEFAULT_MODULES["ai"] is False and DEFAULT_MODULES["sales"] is False  # real organizations opt in
+    assert mods["sales"] is False and mods["core"] is True and mods["ai"] is True  # the demo organization has the advisory assistant switched on
 
 
 def test_project_create_rules(client, H):

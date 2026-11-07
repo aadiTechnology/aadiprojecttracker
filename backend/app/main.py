@@ -1,4 +1,6 @@
 import logging
+import os
+import time
 from pathlib import Path
 
 from alembic import command
@@ -12,7 +14,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import core
 from .perms import MODULES
-from .routers import auth, costing, delivery, demo, finance, insights, org, platform, work
+from .routers import assistant, auth, costing, delivery, demo, finance, insights, org, platform, work
 
 log = logging.getLogger("tracker")
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,12 +36,38 @@ def _startup():
     migrate()
 
 
+_hits: dict = {}
+LOGIN_RATE = int(os.environ.get("LOGIN_RATE_PER_MIN", "60"))
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    """Per-address limit on sign-in and password-reset calls (on top of the per-account lockout), so one address cannot guess passwords across accounts."""
+    if request.method == "POST" and request.url.path in ("/api/auth/login", "/api/auth/forgot", "/api/auth/reset"):
+        ip = (request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else "?"))
+        now = time.time()
+        recent = [t for t in _hits.get(ip, []) if now - t < 60]
+        if len(recent) >= LOGIN_RATE:
+            return JSONResponse(status_code=429, content={"detail": {"code": "RATE_LIMITED", "message": "Too many attempts from this address. Wait a minute and try again."}})
+        recent.append(now)
+        _hits[ip] = recent
+        if len(_hits) > 5000:
+            for k_ in [k_ for k_, v in _hits.items() if not v or now - v[-1] > 60]:
+                _hits.pop(k_, None)
+    return await call_next(request)
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     r = await call_next(request)
     r.headers.setdefault("X-Content-Type-Options", "nosniff")
     r.headers.setdefault("Referrer-Policy", "same-origin")
     r.headers.setdefault("X-Frame-Options", "DENY")
+    r.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    r.headers.setdefault("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https: http://localhost:*; "
+                         "frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+    if request.headers.get("x-forwarded-proto") == "https" or request.url.scheme == "https":
+        r.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     if request.url.path.startswith("/api"):
         r.headers.setdefault("Cache-Control", "no-store")
     return r
@@ -59,7 +87,7 @@ async def validation_error(request, exc):
     return JSONResponse({"detail": {"code": "VALIDATION", "message": f"{loc}: {first.get('msg', 'invalid value')}".strip(": ")}}, status_code=422)
 
 
-for r in (auth.router, org.router, work.router, delivery.router, costing.router, insights.router, finance.router, platform.router):
+for r in (auth.router, org.router, work.router, delivery.router, costing.router, insights.router, finance.router, assistant.router, platform.router):
     app.include_router(r)
 if core.ENV == "demo":
     app.include_router(demo.router)

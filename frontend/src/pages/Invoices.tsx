@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react'
 import { Me, api, inr, toMinor, useApi } from '../api'
-import { Chip, ErrorBox, Kpi, Loading, Modal, PageHead, toast } from '../ui'
+import { Chip, ErrorBox, ExportButton, Kpi, Loading, Modal, PageHead, toast } from '../ui'
 
 interface Inv {
   id: number; number: string; project: string; customer: string; issue_date: string; due_date: string; status: string; subtotal_minor: number; tax_pct: number; tax_minor: number
@@ -36,7 +36,7 @@ export default function Invoices({ me }: { me: Me }) {
       </div>
       <div className="tools">
         <div className="tabs" role="tablist" style={{ margin: 0 }}>{['All', 'Draft', 'Approved', 'Issued', 'Partially Paid', 'Paid', 'Overdue'].map((t) => <button key={t} role="tab" aria-selected={filter === t} className="tab" onClick={() => setFilter(t)}>{t}</button>)}</div>
-        <span style={{ flex: 1 }} />{data.can_manage && <button className="btn pri" onClick={() => setAdding(true)}>+ New invoice</button>}</div>
+        <span style={{ flex: 1 }} /><ExportButton report="invoices" />{data.can_manage && <button className="btn pri" onClick={() => setAdding(true)}>+ New invoice</button>}</div>
       <div className="card flat"><div className="tw"><table>
         <thead><tr><th>Number</th><th>Customer and project</th><th>Issued</th><th>Due</th><th className="n">Total</th><th className="n">Paid</th><th className="n">Outstanding</th><th>Status</th><th /></tr></thead>
         <tbody>{rows.length === 0 ? <tr><td colSpan={9}><div className="empty">No invoices here.</div></td></tr> : rows.map((r) => (

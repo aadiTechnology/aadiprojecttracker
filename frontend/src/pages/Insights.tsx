@@ -123,5 +123,5 @@ function Heat({ data, metric }: { data: Data; metric: 'hours' | 'cost' }) {
   const val = (d: string, t: string) => { const c = data.heat.find((x) => x.department === d && x.tag === t); return c ? (metric === 'cost' ? c.cost_minor ?? 0 : c.hours) : 0 }
   const max = Math.max(...depts.flatMap((d) => tags.map((t) => val(d, t))), 1)
   return <div className="tw"><table className="heat"><thead><tr><th>Department</th>{tags.map((t) => <th key={t} className="n">{t}</th>)}</tr></thead>
-    <tbody>{depts.map((d) => <tr key={d}><td><b>{d}</b></td>{tags.map((t) => { const v = val(d, t); return <td key={t} className="n" style={{ background: v ? `rgba(47,91,234,${0.1 + (0.75 * v) / max})` : undefined, color: v / max > 0.55 ? '#fff' : undefined }}>{v ? (metric === 'cost' ? inr(v) : `${Math.round(v)} h`) : ''}</td> })}</tr>)}</tbody></table></div>
+    <tbody>{depts.map((d) => <tr key={d}><td><b>{d}</b></td>{tags.map((t) => { const v = val(d, t); return <td key={t} className="n" style={{ background: v ? `rgba(47,91,234,${0.08 + (0.45 * v) / max})` : undefined, color: "#1c2433" }}>{v ? (metric === 'cost' ? inr(v) : `${Math.round(v)} h`) : ''}</td> })}</tr>)}</tbody></table></div>
 }

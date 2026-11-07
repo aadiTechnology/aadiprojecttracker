@@ -66,3 +66,13 @@ export const toMinor = (rupees: string) => Math.round(parseFloat(rupees || '0') 
 /** Full rupees with Indian digit grouping (costing screens show exact amounts, not lakh/crore). */
 export const inr = (minor: number | undefined | null) => (minor === undefined || minor === null ? '—' : `${minor < 0 ? '−' : ''}₹${Math.abs(Math.round(minor / 100)).toLocaleString('en-IN')}`)
 export const thisMonth = () => new Date().toISOString().slice(0, 7)
+
+/** Downloads a server-generated file (CSV export) with the signed-in token. */
+export async function download(path: string, fallbackName: string) {
+  const r = await fetch(BASE + path, { headers: token.get() ? { Authorization: `Bearer ${token.get()}` } : {} })
+  if (!r.ok) { const d = await r.json().catch(() => ({})); throw new ApiError(r.status, d.detail?.code ?? 'ERROR', d.detail?.message ?? `Export failed (${r.status})`) }
+  const name = /filename="([^"]+)"/.exec(r.headers.get('content-disposition') ?? '')?.[1] ?? fallbackName
+  const url = URL.createObjectURL(await r.blob())
+  const a = document.createElement('a')
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url)
+}
