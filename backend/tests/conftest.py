@@ -1,8 +1,8 @@
 import os
 
 os.environ["APP_ENV"] = "demo"
-os.environ["LIVE_SPRINT"] = "3"  # tests cover the Sprint 2 and 3 APIs
-os.environ["DATABASE_URL"] = "postgresql+psycopg://tracker:tracker_dev@localhost:15434/tracker_test"
+os.environ["LIVE_SPRINT"] = "4"  # tests cover the Sprint 2, 3 and 4 APIs
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://tracker:tracker_dev@localhost:15434/tracker_test")
 import pytest
 from fastapi.testclient import TestClient
 

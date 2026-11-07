@@ -208,7 +208,7 @@ def test_dashboard_delivery_blocks(client, H):
 def test_me_marks_sprint2_screens_live(client, H):
     a = get(client, H, "meera.nair", "/api/me").json()["access"]
     assert a["sprint"]["built"] and a["timesheets"]["built"] and a["handover"]["level"] == "own"
-    assert not a["invoices"]["built"]
+    assert a["invoices"]["built"]
 
 
 def test_notifications_mark_read(client, H):

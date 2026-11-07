@@ -9,6 +9,7 @@ from . import core, models as m
 from .core import hash_password
 from .seed_costing import seed_costing
 from .seed_delivery import seed_delivery
+from .seed_finance import seed_finance
 from .seed_matrix import seed_matrix
 from .tenancy import seed_roles_and_modules
 
@@ -83,6 +84,14 @@ PROJECTS = [
 ]
 
 
+def seed_finance_all(db) -> bool:
+    db.flush()
+    added = False
+    for t in db.execute(select(m.Tenant).where(m.Tenant.is_demo.is_(True))).scalars().all():
+        added = seed_finance(db, t) or added
+    return added
+
+
 def run(reset=False):
     if core.ENV != "demo":
         raise SystemExit("Demo data is loaded only when APP_ENV=demo.")
@@ -98,9 +107,10 @@ def run(reset=False):
             added = seed_delivery(db, tt)
             added = seed_costing(db, tt) or added
             added = seed_matrix(db) or added
+            added = seed_finance_all(db) or added
             if added:
                 db.commit()
-                print("Sprint 2/3 demo data added to the existing demo organization.")
+                print("Sprint 2, 3 and 4 demo data added to the existing demo organization.")
             else:
                 print("Demo data already present; nothing to do.")
             return
@@ -143,6 +153,7 @@ def run(reset=False):
         seed_delivery(db, t)
         seed_costing(db, t)
         seed_matrix(db)
+        seed_finance_all(db)
         db.commit()
         print("Demo data loaded:", len(USERS), "users,", len(CUSTOMERS), "customers,", len(PROJECTS), "projects")
 

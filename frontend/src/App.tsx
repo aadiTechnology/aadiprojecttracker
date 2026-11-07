@@ -14,6 +14,10 @@ import Employees from './pages/Employees'
 import Allocation from './pages/Allocation'
 import Costing from './pages/Costing'
 import Insights from './pages/Insights'
+import Expenses from './pages/Expenses'
+import Invoices from './pages/Invoices'
+import Performance from './pages/Performance'
+import PlannedActual from './pages/PlannedActual'
 import CostSettings from './pages/CostSettings'
 import Profitability from './pages/Profitability'
 import Targets from './pages/Targets'
@@ -37,6 +41,7 @@ const NAV: { key: string; label: string; icon: string; path: string; group?: str
   { key: 'revenue', label: 'Revenue Targets', icon: '◎', path: '/revenue' },
   { key: 'costset', label: 'Costing Settings', icon: '⚙', path: '/costing-settings' },
   { key: 'perf', label: 'Employee Performance', icon: '★', path: '/performance', group: 'Finance & Performance' },
+  { key: 'plannedactual', label: 'Planned vs Actual', icon: '⚖', path: '/planned-actual' },
   { key: 'expenses', label: 'Expenses & Cost', icon: '₹', path: '/expenses' },
   { key: 'invoices', label: 'Invoices', icon: '🧾', path: '/invoices' },
   { key: 'admin', label: 'Organization Admin', icon: '⚙', path: '/admin', group: 'Administration' },
@@ -129,6 +134,10 @@ export default function App() {
               else if (n.key === 'handover') el = <Handover me={m} />
               else if (n.key === 'timesheets') el = <Timesheets me={m} />
               else if (n.key === 'insights') el = <Insights me={m} />
+              else if (n.key === 'perf') el = <Performance me={m} />
+              else if (n.key === 'plannedactual') el = <PlannedActual me={m} />
+              else if (n.key === 'expenses') el = <Expenses me={m} />
+              else if (n.key === 'invoices') el = <Invoices me={m} />
               else if (n.key === 'employees') el = <Employees me={m} />
               else if (n.key === 'allocation') el = <Allocation me={m} />
               else if (n.key === 'costing') el = <Costing me={m} />

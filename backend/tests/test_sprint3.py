@@ -302,7 +302,7 @@ def test_dashboard_costing_block_is_masked(client, H):
 
 def test_screens_for_sprint3_are_live_and_gated(client, H):
     a = get(client, H, "sameer.joshi", "/api/me").json()["access"]
-    assert a["profit"]["level"] and a["costing"]["built"] and a["revenue"]["built"] and not a["invoices"]["built"]
+    assert a["profit"]["level"] and a["costing"]["built"] and a["revenue"]["built"] and a["invoices"]["built"]
     b = get(client, H, "vikram.shah", "/api/me").json()["access"]
     assert b["profit"]["level"] is None and b["allocation"]["level"] == "all"
     c = get(client, H, "meera.nair", "/api/me").json()["access"]

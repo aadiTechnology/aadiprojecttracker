@@ -332,3 +332,69 @@ class RevenueTarget(Base):
     month: Mapped[date] = mapped_column(Date, index=True)
     amount_minor: Mapped[int] = mapped_column(BigInteger)
     updated_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+
+# ---------------- Sprint 4: finance and performance ----------------
+class Expense(Base):
+    """Direct (project_id set) or shared (project_id null, split by alloc_method) non-salary cost. Paise."""
+    __tablename__ = "expenses"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    category: Mapped[str] = mapped_column(String(40))
+    vendor: Mapped[str] = mapped_column(String(120), default="")
+    description: Mapped[str] = mapped_column(String(300), default="")
+    amount_minor: Mapped[int] = mapped_column(BigInteger)
+    spent_on: Mapped[date] = mapped_column(Date, index=True)
+    project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True, index=True)
+    alloc_method: Mapped[str] = mapped_column(String(12), default="hours")  # shared only: equal | hours | headcount
+    status: Mapped[str] = mapped_column(String(10), default="Planned")  # Planned | Paid
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    __table_args__ = (UniqueConstraint("tenant_id", "number"),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    number: Mapped[str] = mapped_column(String(30))
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
+    issue_date: Mapped[date] = mapped_column(Date)
+    due_date: Mapped[date] = mapped_column(Date)
+    lines: Mapped[list] = mapped_column(JSON, default=list)  # [{description, amount_minor}]
+    subtotal_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    tax_pct: Mapped[float] = mapped_column(Float, default=0)  # configured per invoice; no statutory tax is assumed
+    tax_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    total_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    status: Mapped[str] = mapped_column(String(14), default="Draft")  # Draft | Approved | Issued | Void (paid states are derived)
+    note: Mapped[str] = mapped_column(String(300), default="")
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    approved_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class InvoicePayment(Base):
+    __tablename__ = "invoice_payments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    invoice_id: Mapped[int] = mapped_column(ForeignKey("invoices.id"), index=True)
+    amount_minor: Mapped[int] = mapped_column(BigInteger)
+    paid_on: Mapped[date] = mapped_column(Date)
+    reference: Mapped[str] = mapped_column(String(80), default="")
+    recorded_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+
+class PerfReview(Base):
+    """Evidence-based manager comment on an employee for a month; the employee can acknowledge and reply."""
+    __tablename__ = "perf_reviews"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    reviewer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    month: Mapped[date] = mapped_column(Date)
+    dimension: Mapped[str] = mapped_column(String(30), default="General")
+    comment: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    ack_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ack_note: Mapped[str] = mapped_column(String(300), default="")

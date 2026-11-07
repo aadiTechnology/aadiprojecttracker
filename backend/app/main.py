@@ -12,7 +12,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import core
 from .perms import MODULES
-from .routers import auth, costing, delivery, demo, insights, org, platform, work
+from .routers import auth, costing, delivery, demo, finance, insights, org, platform, work
 
 log = logging.getLogger("tracker")
 ROOT = Path(__file__).resolve().parent.parent
@@ -59,7 +59,7 @@ async def validation_error(request, exc):
     return JSONResponse({"detail": {"code": "VALIDATION", "message": f"{loc}: {first.get('msg', 'invalid value')}".strip(": ")}}, status_code=422)
 
 
-for r in (auth.router, org.router, work.router, delivery.router, costing.router, insights.router, platform.router):
+for r in (auth.router, org.router, work.router, delivery.router, costing.router, insights.router, finance.router, platform.router):
     app.include_router(r)
 if core.ENV == "demo":
     app.include_router(demo.router)
