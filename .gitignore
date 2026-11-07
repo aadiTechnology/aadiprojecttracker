@@ -18,3 +18,8 @@ mobile/dist/
 # Real salary data: never commit (public repo)
 docs/*Matrix*.xlsx
 *.xlsx
+
+# live walkthrough series: real figures and credentials, never committed
+videos/live/.*.json
+videos/live-*
+videos/live/*.log

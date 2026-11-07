@@ -20,7 +20,7 @@ export default function Platform() {
     <>
       <PageHead title="Tenants & entitlements" sub="Platform administrators manage organizations and plans only. Tenant projects, customers, employees and financials are never shown here." />
       <div className="tools"><button className="btn pri" onClick={() => setAdd(true)}>+ New organization</button></div>
-      {link && <div className="note w mb">Email is not configured, share this one-time owner link (demo only): <span className="mono">{link}</span></div>}
+      {link && <div className="note w mb">Demo environment: one-time owner link (also emailed when email is configured): <span className="mono">{link}</span></div>}
       {loading ? <Loading /> : error ? <ErrorBox msg={error} /> : <div className="card flat"><div className="tw"><table>
         <thead><tr><th>Organization</th><th>Plan</th><th className="n">People</th><th>Status</th><th>Optional modules</th><th /></tr></thead>
         <tbody>{data!.map((t) => <tr key={t.id}><td><b>{t.name}</b></td><td>{t.plan}</td><td className="n">{t.users}</td><td><Chip text={t.status} /></td>

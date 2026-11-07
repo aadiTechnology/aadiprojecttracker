@@ -39,6 +39,7 @@ class Invite(BaseModel):
     title: str = ""
     team: str = ""
     manager_user_id: int | None = None
+    send_email: bool = True  # demo environments only: false creates the invitation without sending mail (bulk set-up of sample people)
 
 
 @router.post("/users")
@@ -69,9 +70,9 @@ def invite(b: Invite, c: Ctx = Depends(ctx)):
         t, h = new_token()
         c.db.add(m.AuthToken(user_id=u.id, purpose="invite", token_hash=h, expires_at=datetime.now(timezone.utc) + timedelta(days=7)))
         subj, body = mail.invite_email(u.name, c.tenant.name, t)
-        sent = mail.send(u.email, subj, body)
-        if not sent and ENV == "demo":
-            link = f"{mail.public_url()}/reset?token={t}"  # demo only: lets the reviewer continue when SMTP is not configured
+        sent = mail.send(u.email, subj, body) if (b.send_email or ENV != "demo") else False
+        if ENV == "demo":
+            link = f"{mail.public_url()}/reset?token={t}"  # demo only: the reviewer can continue without opening an inbox
     audit(c.db, c.tid, c.user.id, "user.invite", "user", u.id, role=role.key, email_sent=sent)
     c.db.commit()
     return {"user": _user_row(c, mem, u, role), "email_sent": sent, "invite_link": link}

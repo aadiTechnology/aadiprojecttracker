@@ -40,7 +40,7 @@ def create_tenant(db: Session, name: str, owner_email: str, owner_name: str, pla
         db.add(m.AuthToken(user_id=u.id, purpose="invite", token_hash=h, expires_at=datetime.now(timezone.utc) + timedelta(days=7)))
         subj, body = mail.invite_email(u.name, name, tok)
         sent = mail.send(u.email, subj, body)
-        if not sent and ENV == "demo":
+        if ENV == "demo":  # demo only: the one-time link is shown on screen even when the email was sent, so walkthroughs can continue
             link = f"{mail.public_url()}/reset?token={tok}"
     db.add(m.Membership(tenant_id=t.id, user_id=u.id, role_id=roles["owner"].id, title="Owner"))
     return t, link, sent

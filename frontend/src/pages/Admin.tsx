@@ -39,7 +39,7 @@ function People({ full }: { full: boolean }) {
   return (
     <>
       {full && <div className="tools"><button className="btn pri" onClick={() => { setInv(true); setErr('') }}>+ Invite person</button></div>}
-      {link && <div className="note w mb">Email is not configured on this server, so share this one-time link manually (demo only): <span className="mono">{link}</span></div>}
+      {link && <div className="note w mb">Demo environment: one-time invitation link (also emailed when email is configured): <span className="mono">{link}</span></div>}
       <div className="card flat"><div className="tw"><table>
         <thead><tr><th>Name</th><th>Role</th><th>Title / team</th><th>Status</th>{full && <th />}</tr></thead>
         <tbody>{data!.map((u) => <tr key={u.id}><td><b>{u.name}</b><br /><small>{u.email}</small></td>

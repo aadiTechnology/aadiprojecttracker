@@ -35,6 +35,7 @@ export default function CostSettings({ me }: { me: Me }) {
             <tr><td>Standard value</td><td><code>hours × hourly rate</code></td></tr>
             <tr><td>Today</td><td>{data.monthly_hours} h{data.hourly_rate_minor !== undefined ? ` · ${inr(data.hourly_rate_minor)}/h` : ''} · {data.currency}</td></tr></tbody></table></div>
       </div>
+      {me.perms.some((p) => p.startsWith('tags.manage')) && <TagsCard />}
       {edit && data.project_rates && data.employee_hours && <div className="grid g2">
         <div className="card flat"><div style={{ padding: '14px 16px 0' }}><h2>Hourly rate per project</h2><small>Empty means inherit the organization rate</small></div><div className="tw"><table>
           <thead><tr><th>Project</th><th className="n">Rate ₹/h</th></tr></thead>
@@ -57,4 +58,23 @@ function HoursRow({ e, onSave }: { e: NonNullable<S['employee_hours']>[number]; 
   const [v, setV] = useState(e.hours_override ? String(e.hours_override) : '')
   return <tr><td>{e.name}</td><td className="n"><input style={{ width: 90 }} aria-label={`Hours override for ${e.name}`} inputMode="numeric" value={v} onChange={(x) => setV(x.target.value)}
     onBlur={() => { const n = v.trim() === '' ? null : Math.round(Number(v)); if (n !== (e.hours_override ?? null)) onSave(n) }} />{e.hours_override ? <> <Chip text="override" tone="warn" /></> : null}</td></tr>
+}
+
+function TagsCard() {
+  const tags = useApi<{ id: number; name: string; archived: boolean; projects: number }[]>('/api/tags')
+  const [name, setName] = useState('')
+  const run = async (fn: () => Promise<unknown>, ok: string) => { try { await fn(); toast(ok); tags.reload() } catch (x) { toast((x as Error).message) } }
+  return (
+    <div className="card mb"><h2>Project tags</h2>
+      <p className="sub">Tags classify projects for analysis, for example by industry. The first tag on a project is its primary tag, so totals by tag add up.</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '8px 0' }}>
+        {tags.data?.length === 0 && <small>No tags yet.</small>}
+        {tags.data?.map((t) => <span key={t.id} className={`chip c-acc`} style={t.archived ? { opacity: 0.5 } : undefined}>{t.name} · {t.projects}{' '}
+          <button className="btn sm" aria-label={`${t.archived ? 'Restore' : 'Archive'} tag ${t.name}`} onClick={() => run(() => api(`/api/tags/${t.id}`, { method: 'PATCH', body: { archived: !t.archived } }), t.archived ? 'Tag restored' : 'Tag archived')}>{t.archived ? 'Restore' : 'Archive'}</button></span>)}
+      </div>
+      <form className="tools" onSubmit={(e) => { e.preventDefault(); if (name.trim()) run(async () => { await api('/api/tags', { method: 'POST', body: { name } }); setName('') }, 'Tag added') }}>
+        <input aria-label="New tag name" placeholder="New tag, for example Education" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
+        <button className="btn pri" disabled={!name.trim()}>Add tag</button></form>
+    </div>
+  )
 }
