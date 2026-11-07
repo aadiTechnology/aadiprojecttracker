@@ -5,7 +5,7 @@ import { recordVideo } from './lib.mjs'
 
 const NAME = '06-sprint-4-finance-and-performance-user-manual'
 const as = async (page, name) => { await signInViaDemoList(page, name); await page.getByRole('heading', { name: 'Overview Dashboard' }).waitFor(); await page.waitForTimeout(1200) }
-const tab = async (page, name) => { await click(page.getByRole('tab', { name })); await page.waitForTimeout(2600) }
+const tab = async (page, name) => { await click(page.getByRole('tab', { name, exact: true })); await page.waitForTimeout(2600) }
 const btn = async (page, name, wait = 2200) => { await click(page.getByRole('button', { name })); await page.waitForTimeout(wait) }
 
 const scenes = [

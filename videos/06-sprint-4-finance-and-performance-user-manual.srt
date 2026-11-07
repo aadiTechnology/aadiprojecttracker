@@ -1,0 +1,63 @@
+1
+00:00:00,000 --> 00:00:31,294
+This is the user manual for Sprint four of Aadi Project Tracker. It covers expenses and shared costs, invoices and receivables, planned against actual hours, project contribution, and the employee performance matrix. We sign in as Sameer Joshi, the Finance Manager. Under Finance and Performance, the menu now lists Planned versus Actual, Expenses, Invoices and Employee Performance. Each person sees only the items their role allows.
+
+2
+00:00:31,747 --> 00:00:56,178
+Open Expenses and Cost. Pick a month at the top. The cards show the total, what is charged directly to one project, shared overhead, and what is not paid yet. The bars show spend by category, such as infrastructure, software, consulting and rent. Salary cost is not repeated here, because it already comes from allocation.
+
+3
+00:00:56,629 --> 00:01:22,269
+Some costs belong to everyone, such as servers, AI subscriptions and rent. Each shared expense carries its own split method: equal share, in proportion to planned hours, or in proportion to people. The table on the right shows the cost charged to each project, direct plus its share. The split is in whole paise, so the total charged always equals the source expense.
+
+4
+00:01:22,726 --> 00:01:41,922
+To add an expense choose Add expense. We record a shared cloud backup subscription. Choose the category, amount, vendor and date. Leave Charged to as shared by all projects and split it by planned hours. Save, and the cards and the project table update straight away.
+
+5
+00:01:42,383 --> 00:02:02,174
+Open Invoices. The cards show invoiced, collected, outstanding and overdue, and they are never called revenue. The tabs filter by status: draft, approved, issued, partially paid, paid and overdue. Overdue invoices show how many days they are late.
+
+6
+00:02:02,639 --> 00:02:19,761
+Open shows the customer, billing details, every line, tax, total, who drafted and who approved it, and each payment with its reference. Tax is whatever you enter on the invoice. The product does not assume a statutory rate.
+
+7
+00:02:20,214 --> 00:02:38,895
+To bill a customer, choose New invoice. Pick the project, the dates, and add lines. The subtotal, tax and total update as you type. Saving creates a draft. A draft cannot be issued yet: it must be approved by someone with approval rights.
+
+8
+00:02:39,420 --> 00:02:58,951
+Finance prepares, the CEO approves. We sign in as Priya Rao and open Invoices on the Draft tab. Approve moves the draft to approved, and the person who drafted it is notified. If Sameer tried to approve his own draft, the server would refuse and record the attempt in the audit trail.
+
+9
+00:02:59,408 --> 00:03:16,280
+Back as Sameer. An approved invoice can now be issued. Once issued, open it and record a payment with its reference. A part payment makes the invoice partially paid and leaves the balance outstanding. A payment can never exceed the balance.
+
+10
+00:03:30,087 --> 00:03:50,587
+Planned versus Actual compares the monthly allocation with approved timesheet hours. Planned to date prorates the month so far. Hours still waiting for approval are shown apart and are never counted as actual. Projects get a signal: over plan, behind on approved hours, or hours without any allocation.
+
+11
+00:03:51,046 --> 00:04:13,451
+Finance and the CEO also get the Project contribution tab. For each project it shows planned value, salary cost, direct expenses and shared overhead, and the contribution that is left. Invoiced, collected and outstanding sit beside it, deliberately not mixed in. The note confirms that shared costs reconcile.
+
+12
+00:04:13,909 --> 00:04:35,615
+Employee Performance shows transparent delivery measures per person: tasks done and overdue, estimate accuracy, approved against planned hours, handovers acknowledged, and timesheet rejections. There is no score and no ranking. The definitions are listed on the page, and hours alone are never treated as performance.
+
+13
+00:04:36,073 --> 00:04:52,309
+Managers add review comments with evidence. Open a person, pick a dimension such as delivery reliability, and write what happened and what you expect next. The employee is notified and must acknowledge it. You cannot review yourself.
+
+14
+00:04:57,274 --> 00:05:11,336
+Meera signs in. She sees only herself, never her colleagues, and no money. The new comment is waiting, and she acknowledges it with one click. The manager then sees it as acknowledged.
+
+15
+00:05:17,343 --> 00:05:26,086
+Employees have no menu items for invoices, expenses or contribution, and the server refuses direct calls with a forbidden error.
+
+16
+00:05:26,544 --> 00:05:52,358
+Sprint four delivered expenses and shared costs, invoices with approval and payments, planned against actual, project contribution, and the performance matrix. File attachments to object storage wait for the storage keys. Sprint five brings the advisory AI assistant, exports and advanced reports, accessibility, security and load testing, and the production cut-over.
