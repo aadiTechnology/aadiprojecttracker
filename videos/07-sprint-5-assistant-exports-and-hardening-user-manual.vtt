@@ -1,0 +1,31 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:31.010
+This is the user manual for Sprint five of Aadi Project Tracking: the advisory assistant, exports, and the hardening work. We sign in as Priya Rao, the CEO. A new Intelligence group in the menu holds the AI Assistant. The page opens with a plain statement of what it is: advisory only, rule based, no language model, and no data leaves the server. It never changes records, approves, rates people or sends messages.
+
+00:00:31.469 --> 00:00:56.603
+You can click an example or type your own question. We ask for a summary of this month. The answer gives planned hours and utilization, planned value against salary cost and margin, bench salary, the organization target, and how many high priority signals need a decision. Below it, Check it on links to the screen that holds the numbers, so a person can always verify.
+
+00:00:57.069 --> 00:01:17.015
+Now we type a question: which projects have a thin margin? The assistant names the weakest projects with their margin and money. Follow up buttons suggest the next question. We choose what should I act on, and it lists the open signals, overdue invoices and blocked tasks that this role is allowed to see.
+
+00:01:21.303 --> 00:01:39.335
+The assistant calls the same reports as the screens, as the signed in user, so it can never show more than the screens do. Sameer Joshi, the Finance Manager, asks which invoices are overdue and gets the overdue invoices, days late, and drafts waiting for approval.
+
+00:01:39.797 --> 00:01:59.109
+Anil Deshpande is a project manager in the second demonstration organization. He asks the same margin question. The assistant says margins need salary cost, which his role cannot see, and offers hours and staffing instead. Numbers that a role must not see are never in the answer.
+
+00:02:06.132 --> 00:02:24.718
+Every question is logged with its topic, and each person has a daily limit. The counter shows how many questions have been used today. Because no language model is called, the cost recorded is zero. If the business later chooses a model, the same log and limit will meter it.
+
+00:02:25.174 --> 00:02:53.828
+Authorized reports can be exported to CSV. Sameer opens Invoices and chooses Export CSV. The file contains exactly the rows the screen shows, nothing more, and the export is recorded in the audit trail. Text that starts with an equals or plus sign is neutralized so a spreadsheet cannot run it as a formula. The same button exists on expenses, planned versus actual, contribution, and performance.
+
+00:02:54.280 --> 00:03:02.568
+Meera Nair is an employee. Her menu has no assistant, and the server refuses direct calls to it with a forbidden error.
+
+00:03:07.013 --> 00:03:45.305
+The hardening pass added a content security policy, frame denial, strict transport security on secure connections, and a per address limit on sign in and password reset, on top of the account lockout. An automated sweep proves one organization can never open another organization invoices or expenses. An accessibility scan with axe core now passes with no serious or critical findings on every screen of three roles, after fixing low contrast status chips and heat map cells. A load check with thirty simultaneous users ran without errors at about fifty five requests per second on one worker.
+
+00:03:45.764 --> 00:04:20.902
+A production cut-over runbook is now in the docs folder. It lists the decisions only the business owner can make: domains, email provider, Backblaze storage keys, tax and revenue rules, and whether to use a language model. It covers environment switches, the database, backups, verification, cut-over day and rollback. Not included yet: file attachments, spreadsheet and PDF export, a language model assistant, and mobile screens for finance. That completes the five sprint plan.
