@@ -8,6 +8,11 @@ export const token = {
   clear: () => sessionStorage.removeItem(KEY),
 }
 
+export interface AuthConfig { mode: 'local' | 'both' | 'platform'; sso: boolean; local: boolean; start_url: string; logout_url: string | null; hub_url: string | null }
+let cfg: Promise<AuthConfig> | null = null
+/** Which sign-in options this environment offers (local only, local plus Aadi Identity, or Aadi Identity only). */
+export const authConfig = (): Promise<AuthConfig> => (cfg ??= fetch(BASE + '/api/auth/config').then((r) => r.json()).catch(() => ({ mode: 'local', sso: false, local: true, start_url: '', logout_url: null, hub_url: null }) as AuthConfig))
+
 export class ApiError extends Error {
   constructor(public status: number, public code: string, message: string) { super(message) }
 }

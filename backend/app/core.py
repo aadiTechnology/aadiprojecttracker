@@ -69,8 +69,8 @@ def hash_token(t: str) -> str:
     return hashlib.sha256(t.encode()).hexdigest()
 
 
-def issue_jwt(user: m.User, tenant_id: int | None) -> str:
-    exp = datetime.now(timezone.utc) + timedelta(hours=SESSION_HOURS)
+def issue_jwt(user: m.User, tenant_id: int | None, minutes: int | None = None) -> str:
+    exp = datetime.now(timezone.utc) + (timedelta(minutes=minutes) if minutes else timedelta(hours=SESSION_HOURS))
     return jwt.encode({"sub": str(user.id), "tid": tenant_id, "ep": user.token_epoch, "exp": exp}, SECRET, algorithm="HS256")
 
 

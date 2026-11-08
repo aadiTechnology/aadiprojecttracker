@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react'
-import { api, token } from '../api'
+import { api, authConfig, AuthConfig, token } from '../api'
 
 interface Demo { password: string; notice: string; accounts: { name: string; role: string; title: string; email: string; hint: string; org?: string }[] }
 
@@ -12,6 +12,20 @@ export default function Login({ onDone }: { onDone: (platform: boolean) => void 
   const [forgot, setForgot] = useState(false)
   const [info, setInfo] = useState('')
 
+  const [cfg, setCfg] = useState<AuthConfig | null>(null)
+  const ssoError = new URLSearchParams(window.location.search).get('sso_error')
+  const ssoMessages: Record<string, string> = {
+    no_access: 'You are signed in to Aadi, but you have no access to Project Tracker for that company. Ask your administrator.',
+    no_account: 'Your Aadi account has no matching Project Tracker user yet. Ask your administrator to add you.',
+    no_company: 'That company is not set up in Project Tracker yet.', denied: 'Sign-in was cancelled.',
+    expired: 'The sign-in took too long. Please try again.', state: 'The sign-in answer did not match. Please try again.', exchange: 'Aadi sign-in could not be completed. Please try again.' }
+  useEffect(() => {
+    authConfig().then((c) => {
+      setCfg(c)
+      // Identity-only environments go straight to Aadi sign-in unless there is something to explain
+      if (c.mode === 'platform' && !new URLSearchParams(window.location.search).get('sso_error')) window.location.href = c.start_url
+    })
+  }, [])
   useEffect(() => { api<Demo>('/api/demo/accounts').then(setDemo).catch(() => setDemo(null)) }, [])
 
   async function submit(e: FormEvent) {
@@ -34,7 +48,15 @@ export default function Login({ onDone }: { onDone: (platform: boolean) => void 
     <main className="login">
       <div className="box">
         <div className="brand" style={{ color: 'var(--ink)' }}><div className="logo">A</div><div><b>Aadi Project Tracker</b><small style={{ color: 'var(--mute)' }}>Business Performance &amp; Project Profitability</small></div></div>
-        <form className="card f" onSubmit={submit} aria-label="Sign in">
+        {cfg?.sso && (
+          <section className="card f" aria-label="Sign in with Aadi">
+            <h1>Sign in with Aadi</h1>
+            {ssoError && <div className="err" role="alert">{ssoMessages[ssoError] ?? 'Sign-in failed. Please try again.'}</div>}
+            <a className="btn pri" href={cfg.start_url} data-testid="sso-signin">Continue with Aadi sign-in</a>
+            {cfg.local && <p className="sub" style={{ margin: 0 }}>Or use your Project Tracker password below.</p>}
+          </section>
+        )}
+        {(!cfg || cfg.local) && <form className="card f" onSubmit={submit} aria-label="Sign in">
           <h1>{forgot ? 'Reset your password' : 'Sign in'}</h1>
           <label>Email<input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
           {!forgot && <label>Password<input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>}
@@ -42,9 +64,9 @@ export default function Login({ onDone }: { onDone: (platform: boolean) => void 
           {info && <div className="note" role="status">{info}</div>}
           <button className="btn pri" disabled={busy}>{forgot ? 'Send reset link' : 'Sign in'}</button>
           <button type="button" className="btn sm" style={{ justifySelf: 'start', border: 0 }} onClick={() => { setForgot(!forgot); setErr(''); setInfo('') }}>{forgot ? 'Back to sign in' : 'Forgot password?'}</button>
-        </form>
+        </form>}
 
-        {demo && (
+        {demo && cfg?.local !== false && (
           <section className="card" aria-labelledby="demo-h">
             <h2 id="demo-h">Demo accounts (test users for every role)</h2>
             <p className="sub" style={{ marginBottom: 8 }}>{demo.notice} Choose <b>Use</b> to fill the form, then press Sign in. Each role sees different data.</p>

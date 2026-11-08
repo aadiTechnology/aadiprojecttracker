@@ -55,8 +55,16 @@ class Login(BaseModel):
     password: str
 
 
+def _local_only():
+    from .sso import local_login_allowed
+
+    if not local_login_allowed():
+        raise err(403, "SSO_ONLY", "This environment signs in through Aadi Identity.")
+
+
 @router.post("/auth/login")
 def login(b: Login, db: Session = Depends(get_db)):
+    _local_only()
     u = db.execute(select(m.User).where(m.User.email == b.email.strip().lower())).scalar_one_or_none()
     now = datetime.now(timezone.utc)
     bad = err(401, "BAD_CREDENTIALS", "Email or password is incorrect.")
@@ -119,6 +127,7 @@ class Forgot(BaseModel):
 @router.post("/auth/forgot")
 def forgot(b: Forgot, db: Session = Depends(get_db)):
     """Always answers the same, so the response never reveals whether an account exists."""
+    _local_only()
     u = db.execute(select(m.User).where(m.User.email == b.email.strip().lower())).scalar_one_or_none()
     if u and u.status in ("active", "invited"):
         t, h = new_token()
@@ -136,6 +145,7 @@ class Reset(BaseModel):
 
 @router.post("/auth/reset")
 def reset(b: Reset, db: Session = Depends(get_db)):
+    _local_only()
     check_password_strength(b.password)
     t = db.execute(select(m.AuthToken).where(m.AuthToken.token_hash == hash_token(b.token))).scalar_one_or_none()
     now = datetime.now(timezone.utc)

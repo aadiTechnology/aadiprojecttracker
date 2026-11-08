@@ -30,6 +30,7 @@ class Tenant(Base):
     revenue_basis: Mapped[str | None] = mapped_column(String(20), nullable=True)   # invoiced|collected|recognized|milestone
     planning_markers: Mapped[dict] = mapped_column(JSON, default=dict)             # meaning of S/H markers: unset
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False)
+    identity_tenant_id: Mapped[str | None] = mapped_column(String(36), nullable=True, unique=True, index=True)  # Aadi Identity company (tid)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -44,6 +45,7 @@ class User(Base):
     failed_logins: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     token_epoch: Mapped[int] = mapped_column(Integer, default=0)  # bump to revoke every issued token
+    identity_id: Mapped[str | None] = mapped_column(String(36), nullable=True, unique=True, index=True)  # Aadi Identity user (sub); set on first platform sign-in
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 

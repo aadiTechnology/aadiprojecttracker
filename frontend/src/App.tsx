@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { Me, api, token } from './api'
+import { Me, api, authConfig, token } from './api'
 import Login from './pages/Login'
 import Reset from './pages/Reset'
 import Dashboard from './pages/Dashboard'
@@ -63,8 +63,16 @@ export default function App() {
   const [me, setMe] = useState<Me | null>(null)
   const [platform, setPlatform] = useState(false)
   const [ready, setReady] = useState(false)
+  const [hub, setHub] = useState<string | null>(null)
+  useEffect(() => { authConfig().then((c) => setHub(c.hub_url)) }, [])
 
   const load = useCallback(async () => {
+    // returning from Aadi Identity: trade the one-time code for a session
+    const code = new URLSearchParams(window.location.search).get('sso')
+    if (code) {
+      window.history.replaceState(null, '', window.location.pathname)
+      try { const r = await api<{ token: string }>('/api/auth/sso/exchange', { method: 'POST', body: { code } }); token.set(r.token) } catch { /* the sign-in screen explains and offers a retry */ }
+    }
     if (!token.get()) { setMe(null); setPlatform(false); setReady(true); return }
     try { setMe(await api<Me>('/api/me')); setPlatform(false) } catch {
       try { const p = await api<{ platform_admin: boolean }>('/api/me/platform'); setPlatform(p.platform_admin); setMe(null) } catch { token.clear() }
@@ -75,7 +83,11 @@ export default function App() {
   useEffect(() => { const f = () => { setMe(null); setPlatform(false) }; window.addEventListener('tracker:signout', f); return () => window.removeEventListener('tracker:signout', f) }, [])
   useEffect(() => { document.body.classList.remove('nav-open') }, [loc.pathname])
 
-  const signOut = () => { token.clear(); setMe(null); setPlatform(false); nav('/') }
+  const signOut = async () => {
+    token.clear(); setMe(null); setPlatform(false); nav('/')
+    const c = await authConfig()
+    if (c.logout_url) window.location.href = c.logout_url  // end the Aadi Identity session too
+  }
 
   if (!ready) return <Loading />
   if (loc.pathname === '/reset') return <Reset />
@@ -120,6 +132,7 @@ export default function App() {
           {m.tenants.length > 1 && <label>Organization <select value={m.tenant.id} onChange={async (e) => { const r = await api<{ token: string }>('/api/auth/switch', { method: 'POST', body: { tenant_id: +e.target.value } }); token.set(r.token); load() }}>{m.tenants.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>}
           <Bell />
           <div className="who"><b>{m.user.name}</b>{m.role.name}{m.team ? ` · ${m.team}` : ''}</div>
+          {hub && <a className="btn" href={hub} data-testid="switch-product">Switch product</a>}
           <button className="btn" onClick={signOut} data-testid="signout">Sign out</button>
         </header>
         <div className="content">
