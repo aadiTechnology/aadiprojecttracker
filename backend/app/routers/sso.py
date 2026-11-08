@@ -28,8 +28,8 @@ from ..core import SECRET, audit, err, get_db
 router = APIRouter(prefix="/api/auth", tags=["sso"])
 
 MODE = os.environ.get("AUTH_MODE", "local").lower()  # local | both | platform
-ISSUER = os.environ.get("IDENTITY_ISSUER", "https://id.aadiprojecttracker.aaditechnology.com").rstrip("/")
-CLIENT_ID = os.environ.get("IDENTITY_CLIENT_ID", "tracker-web")
+ISSUER = (os.environ.get("IDENTITY_ISSUER") or "https://id.aadiprojecttracker.aaditechnology.com").rstrip("/")
+CLIENT_ID = os.environ.get("IDENTITY_CLIENT_ID") or "tracker-web"
 CLIENT_SECRET = os.environ.get("IDENTITY_CLIENT_SECRET", "")  # empty = public client (PKCE only)
 PRODUCT = os.environ.get("IDENTITY_PRODUCT", "tracker")
 BASE_URL = os.environ.get("APP_BASE_URL", "").rstrip("/")

@@ -14,6 +14,10 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - DATABASE_URL=postgresql+psycopg://tracker:${POSTGRES_PASSWORD}@postgres:5432/tracker
       - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - AUTH_MODE=${AUTH_MODE:-local}
+      - IDENTITY_ISSUER=${IDENTITY_ISSUER:-}
+      - IDENTITY_CLIENT_ID=${IDENTITY_CLIENT_ID:-tracker-web}
+      - IDENTITY_CLIENT_SECRET=${IDENTITY_CLIENT_SECRET:-}
       - EMAIL_BACKEND=${EMAIL_BACKEND:-smtp}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
