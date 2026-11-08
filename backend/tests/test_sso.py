@@ -154,3 +154,25 @@ def test_sso_session_is_shorter_than_local(client, identity):
     tok = client.post("/api/auth/sso/exchange", json={"code": code}).json()["token"]
     claims = jwt.decode(tok, core.SECRET, algorithms=["HS256"])
     assert claims["exp"] - time.time() <= sso.SSO_SESSION_MINUTES * 60 + 5
+
+
+def test_a_rotated_signing_key_is_picked_up_without_a_restart(client, identity, monkeypatch, keypair):
+    """Identity rotates its key: tokens signed with the new key must verify after one refresh of the cached key list."""
+    old_pem, old_pub = keypair
+    new = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    new_pem = new.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode()
+    new_pub = jwk.construct(new.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode(), "RS256").to_dict()
+    new_pub.update({"kid": "rotated-key", "use": "sig", "alg": "RS256"})
+    fetched = []
+    monkeypatch.setattr(sso, "_get_json", lambda url, *a, **k: fetched.append(url) or {"keys": [old_pub, new_pub]})  # what Identity now publishes
+    now = int(time.time())
+    token = jwt.encode({"iss": ISS, "aud": "tracker", "sub": "x", "exp": now + 900}, new_pem, algorithm="RS256", headers={"kid": "rotated-key"})
+    assert sso.verify_identity_token(token, "tracker")["sub"] == "x"  # the cache only knew the old key, so it refreshed once
+    assert len(fetched) == 1
+    sso.verify_identity_token(token, "tracker")
+    assert len(fetched) == 1  # and now it is cached
+    # a token with a key nobody published is still refused (after one refresh, not a loop)
+    other = jwt.encode({"iss": ISS, "aud": "tracker", "sub": "x", "exp": now + 900}, old_pem, algorithm="RS256", headers={"kid": "never-published"})
+    with pytest.raises(Exception):
+        sso.verify_identity_token(other, "tracker")
+    assert len(fetched) == 2
