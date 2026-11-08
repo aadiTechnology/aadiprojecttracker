@@ -23,6 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import models as m
+from .. import identity_sync
 from ..core import SECRET, audit, err, get_db
 
 router = APIRouter(prefix="/api/auth", tags=["sso"])
@@ -206,3 +207,24 @@ def exchange(b: Exchange, db: Session = Depends(get_db)):
     if not user or user.status != "active" or user.token_epoch != p.get("ep"):
         raise err(401, "SSO_EXPIRED", "The sign-in link expired. Sign in again.")
     return {"token": issue_jwt(user, p["tid"], minutes=SSO_SESSION_MINUTES), "platform_admin": False}
+
+
+@router.post("/identity-events")
+async def identity_events(request: Request, db: Session = Depends(get_db)):
+    """Signed change events from Aadi Identity (suspended people, removed members, ended subscriptions)."""
+    if not identity_sync.WEBHOOK_SECRET:
+        raise err(404, "NOT_FOUND", "Not found.")
+    raw = (await request.body()).decode()
+    if not identity_sync.signature_ok(request.headers.get("x-aadi-signature"), raw, identity_sync.WEBHOOK_SECRET):
+        raise err(401, "BAD_SIGNATURE", "The event signature is not valid.")
+    try:
+        ev = json.loads(raw)
+        eid = ev["id"]
+    except (ValueError, KeyError, TypeError):
+        raise err(400, "BAD_EVENT", "The event could not be read.")
+    if db.get(m.IdentityEvent, eid):
+        return {"ok": True, "result": "duplicate"}
+    result = identity_sync.apply_event(db, ev)
+    db.add(m.IdentityEvent(id=eid, type=ev.get("type", "")[:40]))
+    db.commit()
+    return {"ok": True, "result": result}

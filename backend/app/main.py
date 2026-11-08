@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import core
+from . import core, identity_sync
 from .perms import MODULES
 from .routers import assistant, auth, costing, delivery, demo, finance, insights, org, platform, sso, work
 
@@ -34,6 +34,9 @@ app.add_middleware(CORSMiddleware, allow_origins=core.CORS_ORIGINS, allow_method
 @app.on_event("startup")
 def _startup():
     migrate()
+    hours = float(os.environ.get("IDENTITY_RECONCILE_HOURS") or 0)  # 0 = off; 24 = nightly, as an in-process safety net
+    if hours > 0 and sso.enabled() and identity_sync.WEBHOOK_SECRET:
+        identity_sync.start_reconcile_loop(sso.ISSUER, hours)
 
 
 _hits: dict = {}
