@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Cookie, Depends, Request
+from fastapi import APIRouter, Cookie, Depends, Header, Request
 from fastapi.responses import RedirectResponse
 from jose import JWTError, jwt
 from pydantic import BaseModel
@@ -228,3 +228,28 @@ async def identity_events(request: Request, db: Session = Depends(get_db)):
     db.add(m.IdentityEvent(id=eid, type=ev.get("type", "")[:40]))
     db.commit()
     return {"ok": True, "result": result}
+
+
+EXPORT_ENABLED = os.environ.get("IDENTITY_EXPORT_ENABLED", "false").lower() == "true"
+
+
+@router.get("/identity-export")
+def identity_export(authorization: str | None = Header(default=None), db: Session = Depends(get_db)):
+    """One-time migration aid: lets Identity pull companies, people and their password hashes so existing credentials work there.
+    Off unless IDENTITY_EXPORT_ENABLED=true AND the shared secret is set. Turn it off again after the import."""
+    if not EXPORT_ENABLED or not identity_sync.WEBHOOK_SECRET:
+        raise err(404, "NOT_FOUND", "Not found.")
+    token = authorization[7:] if authorization and authorization.lower().startswith("bearer ") else ""
+    if not secrets.compare_digest(token, identity_sync.WEBHOOK_SECRET):
+        raise err(401, "BAD_SECRET", "The shared secret is not valid.")
+    mems = db.execute(select(m.Membership, m.Role.key).join(m.Role, m.Role.id == m.Membership.role_id)).all()
+    member_ids = {mem.user_id for mem, _ in mems}
+    audit(db, None, None, "identity.export", "system", "", tenants=db.query(m.Tenant).count(), users=len(member_ids))
+    db.commit()
+    return {
+        "tenants": [{"id": t.id, "name": t.name, "slug": t.slug, "status": t.status} for t in db.execute(select(m.Tenant)).scalars()],
+        # only people who belong to a company; the platform-administrator flag is never exported
+        "users": [{"id": u.id, "email": u.email, "name": u.name, "password_hash": u.password_hash, "status": u.status}
+                  for u in db.execute(select(m.User)).scalars() if u.id in member_ids],
+        "memberships": [{"tenant_id": mem.tenant_id, "user_id": mem.user_id, "status": mem.status, "role_key": key} for mem, key in mems],
+    }

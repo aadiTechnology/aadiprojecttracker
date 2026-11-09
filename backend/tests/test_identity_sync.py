@@ -152,3 +152,4 @@ def test_reconcile_suspends_company_with_ended_subscription(client):
     with core.SessionLocal() as db:
         assert identity_sync.reconcile(db, snap)["tenants"] == 1
     assert client.get("/api/me", headers=h).status_code == 403
+
