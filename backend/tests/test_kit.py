@@ -65,6 +65,13 @@ def test_org_admin_in_trackers_roles_becomes_the_kits_organisation_capabilities_
     assert "org.admin" not in org_kit.to_tracker(["org.users.manage", "projects.view:all"])  # managing people alone is not Tracker's full admin
 
 
+def test_the_owner_can_see_the_activity_log_in_the_kit_and_scoped_audit_access_round_trips(client, H):
+    assert "audit.view" in client.get(f"{KIT}/me", headers=H("priya.rao")).json()["caps"]  # the screen shows the Activity tab only for this exact capability
+    assert client.get(f"{KIT}/audit", headers=H("priya.rao")).status_code == 200
+    assert "audit.view" in org_kit.to_kit(["audit.view:all"]) and "audit.view:all" in org_kit.to_tracker(["audit.view"])
+    assert org_kit.to_tracker(org_kit.to_kit(["audit.view:all", "projects.view:all"])) == sorted({"audit.view:all", "projects.view:all"})
+
+
 def test_adding_a_person_in_the_kit_creates_the_tracker_account_and_invites_them(client, H, sent):
     r = client.post(f"{KIT}/users", json={"email": "kit-test-one@example.test", "name": "Kit One", "title": "Analyst"}, headers=H("priya.rao"))
     assert r.status_code == 201 and "integration" not in r.json()  # Identity enrolment is off here

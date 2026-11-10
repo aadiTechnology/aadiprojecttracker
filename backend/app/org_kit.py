@@ -38,7 +38,7 @@ SALARY_CAPS = ("salary.view", "salary.manage", "costing.cost")
 
 def to_kit(perms: list[str]) -> list[str]:
     """Tracker's role permissions as kit capabilities: org.admin becomes the kit's organisation capabilities."""
-    out = [p for p in perms if p not in _TRACKERS_OWN]
+    out = [("audit.view" if p.startswith("audit.view:") else p) for p in perms if p not in _TRACKERS_OWN]  # the kit's audit.view has no scope
     if "org.admin" in perms or "departments.manage" in perms:
         out.append("org.departments.manage")
     if "org.admin" in perms:
@@ -49,6 +49,9 @@ def to_kit(perms: list[str]) -> list[str]:
 def to_tracker(caps: list[str]) -> list[str]:
     """The kit's capabilities as Tracker role permissions: users.manage together with roles.manage means org.admin."""
     out = set(caps)
+    if "audit.view" in out:
+        out.discard("audit.view")
+        out.add("audit.view:all")  # Tracker's own spelling
     if "org.users.manage" in out and "org.roles.manage" in out:
         out.add("org.admin")
     return sorted(out)
