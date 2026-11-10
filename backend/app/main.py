@@ -12,7 +12,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import core, identity_sync
+from aadi_org.router import create_org_router
+from fastapi import Depends
+
+from . import core, identity_sync, org_kit
 from .perms import MODULES
 from .routers import assistant, auth, costing, delivery, demo, finance, insights, org, platform, sso, work
 
@@ -34,6 +37,11 @@ app.add_middleware(CORSMiddleware, allow_origins=core.CORS_ORIGINS, allow_method
 @app.on_event("startup")
 def _startup():
     migrate()
+    try:  # bring the shared organisation kit's tables up to date with Tracker's people, departments and roles
+        with core.SessionLocal() as db:
+            log.info("organisation kit: %s companies in step", org_kit.sync_all(db))
+    except Exception:  # noqa: BLE001 - never stop the app; every kit request also brings its company up to date
+        log.exception("organisation kit sync at start-up failed")
     hours = float(os.environ.get("IDENTITY_RECONCILE_HOURS") or 0)  # 0 = off; 24 = nightly, as an in-process safety net
     if hours > 0 and sso.enabled() and identity_sync.WEBHOOK_SECRET:
         identity_sync.start_reconcile_loop(sso.ISSUER, hours)
@@ -92,6 +100,8 @@ async def validation_error(request, exc):
 
 for r in (auth.router, org.router, work.router, delivery.router, costing.router, insights.router, finance.router, assistant.router, platform.router, sso.router):
     app.include_router(r)
+app.include_router(create_org_router(get_db=core.get_db, principal=org_kit.principal, M=org_kit.M, catalog=org_kit.CATALOG, hooks=org_kit.TrackerHooks()),
+                   prefix="/api/kit", dependencies=[Depends(org_kit.keep_in_step)])
 if core.ENV == "demo":
     app.include_router(demo.router)
 

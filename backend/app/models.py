@@ -58,6 +58,7 @@ class Role(Base):
     name: Mapped[str] = mapped_column(String(120))
     perms: Mapped[list] = mapped_column(JSON, default=list)
     is_system: Mapped[bool] = mapped_column(Boolean, default=True)
+    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same role in the shared organisation kit (org_roles)
 
 
 class Membership(Base):
@@ -73,6 +74,7 @@ class Membership(Base):
     department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"), nullable=True)
     hours_override: Mapped[int | None] = mapped_column(Integer, nullable=True)  # monthly hours when different from the organization default
     status: Mapped[str] = mapped_column(String(20), default="active")  # active | suspended
+    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same person in the shared organisation kit (org_members)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -286,6 +288,7 @@ class Department(Base):
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
     name: Mapped[str] = mapped_column(String(80))
     head_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # Head of Department
+    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same department in the shared organisation kit (org_departments)
 
 
 class EmployeeSalary(Base):
@@ -424,3 +427,9 @@ class AIUsageLog(Base):
     tokens_out: Mapped[int] = mapped_column(Integer, default=0)
     cost_minor: Mapped[int] = mapped_column(BigInteger, default=0)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, index=True)
+
+
+# The shared organisation kit's tables (org_departments, org_roles, org_members, org_audit) live on the same Base.
+from aadi_org.models import build_models  # noqa: E402
+
+KIT = build_models(Base, id_type=Integer())
