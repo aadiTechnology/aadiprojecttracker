@@ -4,7 +4,7 @@ from datetime import date
 
 from sqlalchemy import select
 
-from . import costing, models as m
+from . import costing, models as m, people
 
 DEPTS = {"Leadership": "priya.rao", "Finance": "sameer.joshi", "Delivery": "vikram.shah", "Engineering": "rohan.mehta", "Design & Marketing": "arjun.singh", "Sales": "kabir.sethi"}
 PEOPLE = {  # user key: (department, monthly salary in rupees)
@@ -26,22 +26,18 @@ TARGETS = {"PRJ-103": 75000, "PRJ-104": 30000, "PRJ-105": 50000, "PRJ-108": 2000
 
 
 def seed_costing(db, t) -> bool:
-    if db.execute(select(m.Department).where(m.Department.tenant_id == t.id)).first():
+    if people.departments(db, t.id):
         return False
     uid = {u.email.split("@")[0]: u.id for u in db.execute(select(m.User)).scalars()}
     proj = {p.code: p.id for p in db.execute(select(m.Project).where(m.Project.tenant_id == t.id)).scalars()}
     dep = {}
     for name in DEPTS:
-        d = m.Department(tenant_id=t.id, name=name)
-        db.add(d)
-        db.flush()
-        dep[name] = d
+        dep[name] = people.create_department(db, t.id, name)
     for key, (dname, rupees) in PEOPLE.items():
-        mem = db.execute(select(m.Membership).where(m.Membership.tenant_id == t.id, m.Membership.user_id == uid[key])).scalar_one()
-        mem.department_id = dep[dname].id
+        people.set_department(db, t.id, uid[key], dep[dname].id)
         db.add(m.EmployeeSalary(tenant_id=t.id, user_id=uid[key], amount_minor=rupees * 100, effective_from=date(2026, 1, 1), created_by=uid["priya.rao"]))
     for name, head in DEPTS.items():
-        dep[name].head_user_id = uid[head]
+        people.set_head(db, dep[name], uid[head])
     tag = {}
     for name in TAGS:
         x = m.Tag(tenant_id=t.id, name=name)

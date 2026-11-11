@@ -145,8 +145,9 @@ def callback(request: Request, code: str = "", state: str = "", error: str = "",
     tenant = _local_tenant(db, claims)
     if not user or not tenant:
         return _fail("no_account" if not user else "no_company")
-    mem = db.execute(select(m.Membership).where(m.Membership.user_id == user.id, m.Membership.tenant_id == tenant.id)).scalar_one_or_none()
-    if user.status != "active" or not mem or mem.status != "active" or tenant.status == "suspended":
+    from .. import people
+    mem = people.person(db, tenant.id, user.id, live_only=False)
+    if user.status != "active" or not mem or mem.status == "suspended" or tenant.status == "suspended":
         audit(db, tenant.id, user.id, "auth.sso_denied", "user", user.id)
         db.commit()
         return _fail("no_access")
@@ -242,8 +243,13 @@ def identity_export(authorization: str | None = Header(default=None), db: Sessio
     token = authorization[7:] if authorization and authorization.lower().startswith("bearer ") else ""
     if not secrets.compare_digest(token, identity_sync.WEBHOOK_SECRET):
         raise err(401, "BAD_SECRET", "The shared secret is not valid.")
-    mems = db.execute(select(m.Membership, m.Role.key).join(m.Role, m.Role.id == m.Membership.role_id)).all()
-    member_ids = {mem.user_id for mem, _ in mems}
+    from .. import people
+    mems = []
+    for x in db.scalars(select(m.KIT.Member)):
+        r = db.get(m.KIT.Role, x.role_id)
+        if x.user_id and str(x.user_id).isdigit() and str(x.tenant_id).isdigit() and r is not None:
+            mems.append((int(x.tenant_id), int(x.user_id), "suspended" if x.status == "suspended" else "active", r.key))
+    member_ids = {u for _, u, _, _ in mems}
     audit(db, None, None, "identity.export", "system", "", tenants=db.query(m.Tenant).count(), users=len(member_ids))
     db.commit()
     return {
@@ -251,5 +257,5 @@ def identity_export(authorization: str | None = Header(default=None), db: Sessio
         # only people who belong to a company; the platform-administrator flag is never exported
         "users": [{"id": u.id, "email": u.email, "name": u.name, "password_hash": u.password_hash, "status": u.status}
                   for u in db.execute(select(m.User)).scalars() if u.id in member_ids],
-        "memberships": [{"tenant_id": mem.tenant_id, "user_id": mem.user_id, "status": mem.status, "role_key": key} for mem, key in mems],
+        "memberships": [{"tenant_id": tid, "user_id": uid, "status": status, "role_key": key} for tid, uid, status, key in mems],
     }

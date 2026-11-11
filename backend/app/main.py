@@ -37,11 +37,6 @@ app.add_middleware(CORSMiddleware, allow_origins=core.CORS_ORIGINS, allow_method
 @app.on_event("startup")
 def _startup():
     migrate()
-    try:  # bring the shared organisation kit's tables up to date with Tracker's people, departments and roles
-        with core.SessionLocal() as db:
-            log.info("organisation kit: %s companies in step", org_kit.sync_all(db))
-    except Exception:  # noqa: BLE001 - never stop the app; every kit request also brings its company up to date
-        log.exception("organisation kit sync at start-up failed")
     hours = float(os.environ.get("IDENTITY_RECONCILE_HOURS") or 0)  # 0 = off; 24 = nightly, as an in-process safety net
     if hours > 0 and sso.enabled() and identity_sync.WEBHOOK_SECRET:
         identity_sync.start_reconcile_loop(sso.ISSUER, hours)

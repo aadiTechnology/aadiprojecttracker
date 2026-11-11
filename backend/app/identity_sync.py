@@ -58,8 +58,10 @@ def find_user(db: Session, u: dict) -> m.User | None:
     return x or db.execute(select(m.User).where(m.User.email == (u.get("email") or "").strip().lower(), m.User.identity_id.is_(None))).scalar_one_or_none()
 
 
-def membership(db: Session, user: m.User, tenant: m.Tenant) -> m.Membership | None:
-    return db.execute(select(m.Membership).where(m.Membership.user_id == user.id, m.Membership.tenant_id == tenant.id)).scalar_one_or_none()
+def membership(db: Session, user: m.User, tenant: m.Tenant):
+    """The person's record in this company (the shared kit's), or None."""
+    from . import people
+    return people.member(db, tenant.id, user.id)
 
 
 # ---- the small actions (each returns True when something changed) ----
@@ -76,7 +78,7 @@ def restore_membership(db: Session, tenant: m.Tenant, user: m.User) -> bool:
     mem = membership(db, user, tenant)
     if not mem or mem.status != "suspended":
         return False
-    mem.status = "active"
+    mem.status = "invited" if user.status == "invited" else "active"
     audit(db, tenant.id, None, "identity.membership_restored", "user", user.id)
     return True
 

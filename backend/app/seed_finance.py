@@ -5,7 +5,7 @@ from math import ceil
 
 from sqlalchemy import select
 
-from . import costing, models as m
+from . import costing, models as m, people
 
 SHARED = [("Infrastructure", "Contabo", "Cloud servers for all products", 1800000, "hours", 3), ("Software", "OpenAI and ChatGPT", "AI subscriptions used by every team", 900000, "equal", 4),
           ("Rent & Utilities", "Landlord and ISP", "Office rent and Wi-Fi", 2400000, "headcount", 5), ("Marketing", "Search and social ads", "Brand campaign, shared across products", 600000, "hours", 6)]
@@ -23,10 +23,9 @@ def _weekdays(lo: date, hi: date):
 def seed_finance(db, t) -> bool:
     if db.execute(select(m.Expense).where(m.Expense.tenant_id == t.id)).first():
         return False
-    rows = db.execute(select(m.Membership, m.Role).join(m.Role, m.Role.id == m.Membership.role_id).where(m.Membership.tenant_id == t.id, m.Membership.status == "active")).all()
     by_role = {}
-    for mem, role in rows:
-        by_role.setdefault(role.key, []).append(mem.user_id)
+    for person in people.people(db, t.id).values():
+        by_role.setdefault(person.role_key, []).append(person.id)
     owner = by_role["owner"][0]
     fin = (by_role.get("finance") or [owner])[0]
     mgr = (by_role.get("pm") or by_role.get("ops") or [owner])[0]
@@ -77,7 +76,7 @@ def seed_finance(db, t) -> bool:
         elapsed = today.day / ((month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)).day
         days = _weekdays(month, today)
         allocs = db.execute(select(m.Allocation).where(m.Allocation.tenant_id == t.id, m.Allocation.month == month)).scalars().all()
-        mem = {x.user_id: x for x in db.execute(select(m.Membership).where(m.Membership.tenant_id == t.id)).scalars()}
+        mem = {x.user_id: x for x in db.execute(select(m.Membership).where(m.Membership.tenant_id == t.id)).scalars()}  # the profile rows: team and hours
         per_user, k = {}, 0
         for a in sorted(allocs, key=lambda x: (x.user_id, x.project_id)):
             k += 1
@@ -114,11 +113,11 @@ def seed_task_hours(db, t) -> bool:
         return False
     month = costing.month_start()
     when = (month - timedelta(days=1)).replace(day=15)
-    boss = db.execute(select(m.Membership).join(m.Role, m.Role.id == m.Membership.role_id).where(m.Membership.tenant_id == t.id, m.Role.key == "owner")).scalars().first()
+    boss = next((p for p in people.people(db, t.id).values() if p.role_key == "owner"), None)
     done = db.execute(select(m.Task).where(m.Task.tenant_id == t.id, m.Task.status == "Done", m.Task.est_hours > 0, m.Task.assignee_id.is_not(None)).order_by(m.Task.id)).scalars().all()
     for i, task in enumerate(done):
         db.add(m.TimeEntry(tenant_id=t.id, user_id=task.assignee_id, project_id=task.project_id, task_id=task.id, work_date=when, hours=round(task.est_hours * (0.8, 1.0, 1.3, 1.1)[i % 4] * 2) / 2 or 0.5,
-                           note="Demo estimate sample", status="Approved", decided_by=boss.user_id if boss else None, decided_at=datetime.now(timezone.utc)))
+                           note="Demo estimate sample", status="Approved", decided_by=boss.id if boss else None, decided_at=datetime.now(timezone.utc)))
     return bool(done)
 
 

@@ -54,7 +54,8 @@ def get_task(c: Ctx, tid: int, cap="sprint.view") -> m.Task:
 
 def _can_assign_to(c: Ctx, p: m.Project, uid: int):
     """The assignee must be an active member of the organization and on the project team."""
-    if not c.db.execute(select(m.Membership).where(m.Membership.user_id == uid, m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar_one_or_none():
+    from .. import people
+    if not people.is_live(c.db, c.tid, uid):
         raise err(422, "VALIDATION", "That person is not an active member of this organization.")
     if not c.db.execute(select(m.ProjectMember).where(m.ProjectMember.project_id == p.id, m.ProjectMember.user_id == uid)).scalar_one_or_none():
         raise err(422, "NOT_ON_PROJECT", "Add the person to the project team before assigning work to them.")
@@ -509,7 +510,7 @@ def submit_week(b: SubmitIn, c: Ctx = Depends(ctx)):
         p = c.db.get(m.Project, e.project_id)
         if p and p.pm_user_id and p.pm_user_id != c.user.id:
             approvers.add(p.pm_user_id)
-    tl = c.membership.manager_user_id
+    tl = c.membership.manager_user_id  # the caller's reporting manager, from the shared kit
     if tl and tl != c.user.id:
         approvers.add(tl)
     for a in approvers:

@@ -40,17 +40,17 @@ def half_up(num: int, den: int) -> int:
 def load(c, month: date) -> dict:
     """Everything the engine needs for one tenant and month."""
     t = c.tenant
-    users = c.db.execute(select(m.User, m.Membership).join(m.Membership, m.Membership.user_id == m.User.id)
-                         .where(m.Membership.tenant_id == c.tid, m.Membership.status == "active")).all()
+    from . import people
+    team = people.people(c.db, c.tid).values()
     sal = defaultdict(list)
     for r in c.db.execute(select(m.EmployeeSalary).where(m.EmployeeSalary.tenant_id == c.tid).order_by(m.EmployeeSalary.effective_from, m.EmployeeSalary.id)).scalars():
         sal[r.user_id].append((r.effective_from, r.amount_minor))
     end = month_end(month)
     emps = {}
-    for u, mem in users:
-        valid = [a for d, a in sal.get(u.id, []) if d <= end]
-        emps[u.id] = {"id": u.id, "name": u.name, "email": u.email, "title": mem.title, "team": mem.team, "dept_id": mem.department_id,
-                      "hours": mem.hours_override or t.monthly_hours, "hours_override": mem.hours_override, "salary": valid[-1] if valid else None}
+    for p in team:
+        valid = [a for d, a in sal.get(p.id, []) if d <= end]
+        emps[p.id] = {"id": p.id, "name": p.name, "email": p.email, "title": p.title, "team": p.team, "dept_id": p.department_id,
+                      "hours": p.hours_override or t.monthly_hours, "hours_override": p.hours_override, "salary": valid[-1] if valid else None}
     projects = {p.id: {"id": p.id, "code": p.code, "name": p.name, "status": p.status, "category": p.category,
                        "rate": p.rate_override_minor or t.hourly_rate_minor, "rate_override": p.rate_override_minor, "tags": []}
                 for p in c.db.execute(select(m.Project).where(m.Project.tenant_id == c.tid).order_by(m.Project.code)).scalars()}

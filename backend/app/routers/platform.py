@@ -16,7 +16,10 @@ router = APIRouter(prefix="/api/platform", tags=["platform"])
 
 @router.get("/tenants")
 def tenants(c: Ctx = Depends(platform_ctx)):
-    users = dict(c.db.execute(select(m.Membership.tenant_id, func.count()).group_by(m.Membership.tenant_id)).all())
+    users: dict[int, int] = {}
+    for x in c.db.scalars(select(m.KIT.Member)):
+        if str(x.tenant_id).isdigit():
+            users[int(x.tenant_id)] = users.get(int(x.tenant_id), 0) + 1
     ents = {}
     for e in c.db.execute(select(m.Entitlement)).scalars():
         ents.setdefault(e.tenant_id, {})[e.module] = e.enabled

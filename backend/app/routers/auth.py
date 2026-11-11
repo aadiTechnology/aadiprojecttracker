@@ -27,9 +27,13 @@ LIVE_SPRINT = int(os.environ.get("LIVE_SPRINT", "5"))  # raised as sprints ship;
 
 
 def tenant_list(db: Session, user: m.User):
-    rows = db.execute(select(m.Membership, m.Tenant, m.Role).join(m.Tenant, m.Tenant.id == m.Membership.tenant_id)
-                      .join(m.Role, m.Role.id == m.Membership.role_id).where(m.Membership.user_id == user.id, m.Membership.status == "active")).all()
-    return [{"id": t.id, "name": t.name, "role": r.name, "demo": t.is_demo} for _, t, r in rows if t.status != "suspended"]
+    from .. import people
+    out = []
+    for tid, _key, role_name in people.memberships_of(db, user.id):
+        t = db.get(m.Tenant, tid)
+        if t is not None and t.status != "suspended":
+            out.append({"id": t.id, "name": t.name, "role": role_name, "demo": t.is_demo})
+    return out
 
 
 def me_payload(c: Ctx):
@@ -153,6 +157,8 @@ def reset(b: Reset, db: Session = Depends(get_db)):
         raise err(400, "BAD_TOKEN", "This link is invalid or has expired. Ask for a new one.")
     u = db.get(m.User, t.user_id)
     u.password_hash, u.status, u.failed_logins, u.locked_until = hash_password(b.password), "active", 0, None
+    from .. import people
+    people.mark_active(db, u)  # everywhere they were invited, they are now active
     u.token_epoch += 1
     t.used_at = now
     audit(db, None, u.id, "auth.password_set", "user", u.id, purpose=t.purpose)

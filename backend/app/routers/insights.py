@@ -28,7 +28,9 @@ def insights(month: str | None = None, c: Ctx = Depends(ctx)):
     emp_ids, proj_ids, partial = visible(c, "costing.effort", d)
     r = k.compute(d, emp_ids, proj_ids)
     money = c.can("costing.cost") and not partial
-    dname_by_id = {x.id: x for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    from .. import people
+    dname_by_id = {x.id: x for x in people.departments(c.db, c.tid)}
+    head_of = people.department_heads(c.db, c.tid)
 
     def dept_of(uid):
         x = dname_by_id.get(d["emps"][uid]["dept_id"])
@@ -51,7 +53,7 @@ def insights(month: str | None = None, c: Ctx = Depends(ctx)):
         if money:
             row["cost"] += x["cost"] or 0
             row["bench_cost"] += x["bench_cost"] or 0
-    heads = {x.name: d["emps"][x.head_user_id]["name"] for x in dname_by_id.values() if x.head_user_id in d["emps"]}
+    heads = {x.name: d["emps"][head_of[x.id]]["name"] for x in dname_by_id.values() if head_of.get(x.id) in d["emps"]}
 
     # ---- per project, department mix and tag / category rollups
     mix_h, mix_cost, mix_val = defaultdict(lambda: defaultdict(float)), defaultdict(lambda: defaultdict(int)), defaultdict(lambda: defaultdict(int))

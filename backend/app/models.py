@@ -49,32 +49,16 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
-class Role(Base):
-    __tablename__ = "roles"
-    __table_args__ = (UniqueConstraint("tenant_id", "key"),)
-    id: Mapped[int] = mapped_column(primary_key=True)
-    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
-    key: Mapped[str] = mapped_column(String(40))
-    name: Mapped[str] = mapped_column(String(120))
-    perms: Mapped[list] = mapped_column(JSON, default=list)
-    is_system: Mapped[bool] = mapped_column(Boolean, default=True)
-    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same role in the shared organisation kit (org_roles)
-
-
 class Membership(Base):
+    """What Tracker knows about a person in a company beyond the shared organisation kit (which holds their role, title, department, manager and
+    status): their team and their monthly-hours override. See app/people.py."""
     __tablename__ = "memberships"
     __table_args__ = (UniqueConstraint("tenant_id", "user_id"),)
     id: Mapped[int] = mapped_column(primary_key=True)
     tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    title: Mapped[str] = mapped_column(String(120), default="")
     team: Mapped[str] = mapped_column(String(80), default="")
-    manager_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    department_id: Mapped[int | None] = mapped_column(ForeignKey("departments.id"), nullable=True)
     hours_override: Mapped[int | None] = mapped_column(Integer, nullable=True)  # monthly hours when different from the organization default
-    status: Mapped[str] = mapped_column(String(20), default="active")  # active | suspended
-    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same person in the shared organisation kit (org_members)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
@@ -281,16 +265,6 @@ class Notification(Base):
 
 
 # ---------------- Sprint 3: costing and profitability (Revision 2) ----------------
-class Department(Base):
-    __tablename__ = "departments"
-    __table_args__ = (UniqueConstraint("tenant_id", "name"),)
-    id: Mapped[int] = mapped_column(primary_key=True)
-    tenant_id: Mapped[int] = mapped_column(ForeignKey("tenants.id"), index=True)
-    name: Mapped[str] = mapped_column(String(80))
-    head_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)  # Head of Department
-    kit_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # the same department in the shared organisation kit (org_departments)
-
-
 class EmployeeSalary(Base):
     """Effective-dated monthly salary (cost to company) in paise. Restricted: only salary.view / salary.manage ever see it."""
     __tablename__ = "employee_salaries"

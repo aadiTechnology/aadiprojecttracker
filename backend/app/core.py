@@ -83,8 +83,8 @@ class Ctx:
     db: Session
     user: m.User
     tenant: m.Tenant | None
-    membership: m.Membership | None
-    role: m.Role | None
+    membership: "people.Person | None"  # the caller's place in the company (role, title, department, team, hours...), from the shared kit
+    role: object | None  # the caller's role in the kit: .key and .name
     perms: set = field(default_factory=set)
     modules: dict = field(default_factory=dict)
 
@@ -120,12 +120,12 @@ class Ctx:
 
     def team_user_ids(self) -> set:
         """Users in the same team, plus direct reports (team scope)."""
+        from . import people
         ids = {self.user.id}
-        rows = self.db.execute(select(m.Membership).where(m.Membership.tenant_id == self.tid)).scalars().all()
         mine = self.membership.team if self.membership else ""
-        for r in rows:
+        for r in people.people(self.db, self.tid).values():
             if (mine and r.team == mine) or r.manager_user_id == self.user.id:
-                ids.add(r.user_id)
+                ids.add(r.id)
         return ids
 
 
@@ -148,13 +148,14 @@ def load_ctx(db: Session, authorization: str | None, need_tenant=True) -> Ctx:
         if need_tenant:
             raise err(403, "NO_TENANT", "No organization is selected.")
         return Ctx(db, user, None, None, None)
-    mem = db.execute(select(m.Membership).where(m.Membership.user_id == user.id, m.Membership.tenant_id == tid)).scalar_one_or_none()
+    from . import org_kit, people
+    mem = people.person(db, tid, user.id, live_only=False)
     tenant = db.get(m.Tenant, tid)
-    if not mem or mem.status != "active" or not tenant or tenant.status == "suspended":
+    if not mem or mem.status == "suspended" or not tenant or tenant.status == "suspended":
         raise err(403, "NO_ACCESS", "You no longer have access to this organization.")
-    role = db.get(m.Role, mem.role_id)
+    role = db.get(m.KIT.Role, mem.role_id)
     ents = {e.module: e.enabled for e in db.execute(select(m.Entitlement).where(m.Entitlement.tenant_id == tid)).scalars()}
-    return Ctx(db, user, tenant, mem, role, set(role.perms), ents)
+    return Ctx(db, user, tenant, mem, role, set(org_kit.to_tracker(list(role.caps or []))), ents)
 
 
 def ctx(authorization: str | None = Header(default=None), db: Session = Depends(get_db)) -> Ctx:

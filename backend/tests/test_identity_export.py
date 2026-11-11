@@ -21,15 +21,15 @@ def api(monkeypatch):
         t = m.Tenant(name="Acme", slug="acme")
         db.add(t)
         db.flush()
-        owner, emp = m.Role(tenant_id=t.id, key="owner", name="Owner", perms=[]), m.Role(tenant_id=t.id, key="employee", name="Employee", perms=[])
-        db.add_all([owner, emp])
-        db.flush()
+        from app import org_kit, people
+        roles = org_kit.seed_roles(db, t.id)
         boss = m.User(email="anjali@aadi-live.demo.test", name="Anjali", password_hash="$2b$10$abcdefghijklmnopqrstuv")
         dev = m.User(email="dev@acme.test", name="Dev", password_hash="$2b$10$zzzzzzzzzzzzzzzzzzzzzz")
         admin = m.User(email="platform@acme.test", name="Platform", password_hash="$2b$10$yyyyyyyyyyyyyyyyyyyyyy", is_platform_admin=True)
         db.add_all([boss, dev, admin])
         db.flush()
-        db.add_all([m.Membership(tenant_id=t.id, user_id=boss.id, role_id=owner.id), m.Membership(tenant_id=t.id, user_id=dev.id, role_id=emp.id)])
+        people.add_person(db, t.id, boss, "owner")
+        people.add_person(db, t.id, dev, "employee")
         db.commit()
 
     def override():

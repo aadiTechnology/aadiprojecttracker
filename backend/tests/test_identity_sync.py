@@ -27,7 +27,7 @@ def linked(monkeypatch):
         db.execute(m.User.__table__.update().values(identity_id=None))
         db.execute(m.Tenant.__table__.update().values(identity_tenant_id=None))
         db.execute(m.Tenant.__table__.update().where(m.Tenant.slug == SLUG).values(status="active"))
-        db.execute(m.Membership.__table__.update().values(status="active"))
+        db.execute(m.KIT.Member.__table__.update().values(status="active"))
         db.execute(m.User.__table__.update().values(status="active"))
         db.commit()
 
@@ -85,7 +85,7 @@ def test_removed_member_is_suspended_not_deleted(client):
     post(client, event("membership.removed", tenant=TENANT, user=DEV))
     with core.SessionLocal() as db:
         u = db.execute(select(m.User).where(m.User.email == DEV["email"])).scalar_one()
-        mem = db.execute(select(m.Membership).where(m.Membership.user_id == u.id)).scalar_one()
+        mem = db.execute(select(m.KIT.Member).where(m.KIT.Member.user_id == str(u.id))).scalar_one()
         assert mem.status == "suspended"  # the record, and the person's work history, stay
 
 

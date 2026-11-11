@@ -7,6 +7,7 @@ from sqlalchemy import select
 
 from . import costing, models as m
 from .core import hash_password
+from . import people
 from .tenancy import seed_roles_and_modules
 
 SLUG = "aadi-technology-matrix-demo"
@@ -88,15 +89,12 @@ def seed_matrix(db) -> bool:
         uid[key] = u.id
     dep = {}
     for dname in HEADS:
-        d = m.Department(tenant_id=t.id, name=dname)
-        db.add(d)
-        db.flush()
-        dep[dname] = d
+        dep[dname] = people.create_department(db, t.id, dname)
     for key, name, role, title, dname, salary, mgr, _ in PEOPLE:
-        db.add(m.Membership(tenant_id=t.id, user_id=uid[key], role_id=roles[role].id, title=title, team=dname, manager_user_id=uid.get(mgr), department_id=dep[dname].id))
+        people.add_person(db, t.id, db.get(m.User, uid[key]), role, title=title, team=dname, manager_user_id=uid.get(mgr), department_id=dep[dname].id, actor="seed")
         db.add(m.EmployeeSalary(tenant_id=t.id, user_id=uid[key], amount_minor=salary * 100, effective_from=date(2026, 1, 1), created_by=uid["rhea.kulkarni"]))
     for dname, head in HEADS.items():
-        dep[dname].head_user_id = uid[head]
+        people.set_head(db, dep[dname], uid[head])
     tag = {}
     for n in INDUSTRIES:
         x = m.Tag(tenant_id=t.id, name=n)

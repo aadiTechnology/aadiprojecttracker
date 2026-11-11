@@ -11,6 +11,7 @@ from .seed_costing import seed_costing
 from .seed_delivery import seed_delivery
 from .seed_finance import enable_assistant, seed_finance, seed_task_hours
 from .seed_matrix import seed_matrix
+from . import people
 from .tenancy import seed_roles_and_modules
 
 DEMO_PASSWORD = "Tracker@Demo26"
@@ -98,9 +99,9 @@ def run(reset=False):
     if core.ENV != "demo":
         raise SystemExit("Demo data is loaded only when APP_ENV=demo.")
     if reset:
-        m.Base.metadata.drop_all(core.engine)
-        with core.engine.begin() as c:
-            c.exec_driver_sql("DROP TABLE IF EXISTS alembic_version")
+        with core.engine.begin() as c:  # a clean slate, including tables an older version of the schema left behind
+            c.exec_driver_sql("DROP SCHEMA public CASCADE")
+            c.exec_driver_sql("CREATE SCHEMA public")
         from .main import migrate
         migrate()
     with core.SessionLocal() as db:
@@ -128,7 +129,7 @@ def run(reset=False):
             db.flush()
             uid[key] = u.id
         for key, name, role, title, team, mgr, _ in USERS:
-            db.add(m.Membership(tenant_id=t.id, user_id=uid[key], role_id=roles[role].id, title=title, team=team, manager_user_id=uid.get(mgr)))
+            people.add_person(db, t.id, db.get(m.User, uid[key]), role, title=title, team=team, manager_user_id=uid.get(mgr), actor="seed")
         db.add(m.User(email=f"{PLATFORM[0]}@{DOMAIN}", name=PLATFORM[1], password_hash=pw, is_platform_admin=True))
         cid = {}
         for key, name, kind, contact, owner in CUSTOMERS:

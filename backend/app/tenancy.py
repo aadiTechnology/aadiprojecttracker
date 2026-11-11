@@ -11,11 +11,8 @@ from .perms import DEFAULT_MODULES, ROLE_DEFAULTS
 
 
 def seed_roles_and_modules(db: Session, tenant: m.Tenant) -> dict:
-    roles = {}
-    for key, (name, perms) in ROLE_DEFAULTS.items():
-        r = m.Role(tenant_id=tenant.id, key=key, name=name, perms=list(perms))
-        db.add(r)
-        roles[key] = r
+    from . import org_kit
+    roles = org_kit.seed_roles(db, tenant.id)  # the company's roles, in the shared organisation kit
     for mod, on in DEFAULT_MODULES.items():
         db.add(m.Entitlement(tenant_id=tenant.id, module=mod, enabled=on))
     db.flush()
@@ -42,5 +39,7 @@ def create_tenant(db: Session, name: str, owner_email: str, owner_name: str, pla
         sent = mail.send(u.email, subj, body)
         if ENV == "demo":  # demo only: the one-time link is shown on screen even when the email was sent, so walkthroughs can continue
             link = f"{mail.public_url()}/reset?token={tok}"
-    db.add(m.Membership(tenant_id=t.id, user_id=u.id, role_id=roles["owner"].id, title="Owner"))
+    from . import people
+    db.flush()
+    people.add_person(db, t.id, u, "owner", title="Owner", actor="system")
     return t, link, sent

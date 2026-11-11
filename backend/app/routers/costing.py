@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import func, or_, select
 
-from .. import costing as k, models as m
+from .. import costing as k, models as m, people
 from ..core import Ctx, audit, ctx, err
 from .work import assigned_project_ids
 
@@ -24,11 +24,11 @@ def _month(s):
         raise err(422, "VALIDATION", str(e))
 
 
-def _member(c: Ctx, uid: int) -> m.Membership:
-    mem = c.db.execute(select(m.Membership).where(m.Membership.tenant_id == c.tid, m.Membership.user_id == uid, m.Membership.status == "active")).scalar_one_or_none()
-    if not mem:
+def _member(c: Ctx, uid: int) -> "people.Person":
+    p = people.person(c.db, c.tid, uid)
+    if not p:
         raise err(404, "NOT_FOUND", "Employee not found.")
-    return mem
+    return p
 
 
 def _project(c: Ctx, pid: int) -> m.Project:
@@ -63,18 +63,23 @@ class DeptIn(BaseModel):
 def _check_head(c: Ctx, dept_id: int, uid: int | None):
     if uid is None:
         return
-    mem = c.db.execute(select(m.Membership).where(m.Membership.tenant_id == c.tid, m.Membership.user_id == uid, m.Membership.status == "active")).scalar_one_or_none()
-    if not mem or mem.department_id != dept_id:
+    p = people.person(c.db, c.tid, uid)
+    if not p or p.department_id != dept_id:
         raise err(422, "VALIDATION", "The Head of Department must be an active employee of that department.")
 
 
 @router.get("/departments")
 def departments(c: Ctx = Depends(ctx)):
     c.require("employees.view")
-    names = {u.id: u.name for u in c.db.execute(select(m.User)).scalars()}
-    counts = dict(c.db.execute(select(m.Membership.department_id, func.count()).where(m.Membership.tenant_id == c.tid, m.Membership.status == "active").group_by(m.Membership.department_id)).all())
-    rows = c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid).order_by(m.Department.name)).scalars().all()
-    return [{"id": x.id, "name": x.name, "head_user_id": x.head_user_id, "head": names.get(x.head_user_id), "employees": counts.get(x.id, 0)} for x in rows]
+    team = people.people(c.db, c.tid)
+    counts: dict[int, int] = {}
+    for p in team.values():
+        counts[p.department_id] = counts.get(p.department_id, 0) + 1
+    out = []
+    for x in people.departments(c.db, c.tid):
+        head = people.head_user_id(c.db, x)
+        out.append({"id": x.id, "name": x.name, "head_user_id": head, "head": team[head].name if head in team else None, "employees": counts.get(x.id, 0)})
+    return out
 
 
 @router.post("/departments")
@@ -83,11 +88,9 @@ def add_department(b: DeptIn, c: Ctx = Depends(ctx)):
     name = b.name.strip()
     if not 1 <= len(name) <= 80:
         raise err(422, "VALIDATION", "Enter a department name of 1 to 80 characters.")
-    if c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid, func.lower(m.Department.name) == name.lower())).first():
+    if any(d.name.lower() == name.lower() for d in people.departments(c.db, c.tid)):
         raise err(409, "DUPLICATE", "A department with this name already exists.")
-    x = m.Department(tenant_id=c.tid, name=name)
-    c.db.add(x)
-    c.db.flush()
+    x = people.create_department(c.db, c.tid, name)
     audit(c.db, c.tid, c.user.id, "department.create", "department", x.id, name=name)
     c.db.commit()
     return {"id": x.id}
@@ -96,17 +99,18 @@ def add_department(b: DeptIn, c: Ctx = Depends(ctx)):
 @router.patch("/departments/{did}")
 def edit_department(did: int, b: DeptIn, c: Ctx = Depends(ctx)):
     c.require("departments.manage")
-    x = c.db.get(m.Department, did)
-    if not x or x.tenant_id != c.tid:
+    x = people.department(c.db, c.tid, did)
+    if not x:
         raise err(404, "NOT_FOUND", "Department not found.")
     name = b.name.strip()
     if not 1 <= len(name) <= 80:
         raise err(422, "VALIDATION", "Enter a department name of 1 to 80 characters.")
-    if c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid, func.lower(m.Department.name) == name.lower(), m.Department.id != did)).first():
+    if any(d.name.lower() == name.lower() and d.id != did for d in people.departments(c.db, c.tid)):
         raise err(409, "DUPLICATE", "A department with this name already exists.")
     _check_head(c, did, b.head_user_id)
-    before = {"name": x.name, "head_user_id": x.head_user_id}
-    x.name, x.head_user_id = name, b.head_user_id
+    before = {"name": x.name, "head_user_id": people.head_user_id(c.db, x)}
+    x.name = name
+    people.set_head(c.db, x, b.head_user_id)
     audit(c.db, c.tid, c.user.id, "department.update", "department", x.id, before=before, head_user_id=b.head_user_id)
     c.db.commit()
     return {"ok": True}
@@ -124,7 +128,8 @@ def employees(c: Ctx = Depends(ctx)):
         pids = assigned_project_ids(c)
         emp_ids = {u for (u, p) in d["alloc"] if p in pids} | set(c.db.execute(select(m.ProjectMember.user_id).where(m.ProjectMember.project_id.in_(pids or {-1}))).scalars())
         emp_ids &= set(d["emps"])
-    depts = {x.id: x for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    depts = {x.id: x for x in people.departments(c.db, c.tid)}
+    heads = people.department_heads(c.db, c.tid)
     r = k.compute(d)
     show_alloc = c.can("allocation.view") and c.scope("allocation.view") == "all"
     show_sal = c.can("salary.view")
@@ -133,7 +138,7 @@ def employees(c: Ctx = Depends(ctx)):
         e = d["emps"][uid]
         dep = depts.get(e["dept_id"])
         row = {"id": uid, "name": e["name"], "title": e["title"], "team": e["team"], "department_id": e["dept_id"], "department": dep.name if dep else None,
-               "is_head": bool(dep and dep.head_user_id == uid), "hours": e["hours"], "hours_override": e["hours_override"]}
+               "is_head": bool(dep and heads.get(dep.id) == uid), "hours": e["hours"], "hours_override": e["hours_override"]}
         if show_alloc:
             row.update(allocated_pct=r["emp"][uid]["pct"], bench_pct=r["emp"][uid]["bench_pct"])
         if show_sal:
@@ -150,14 +155,12 @@ class EmpPatch(BaseModel):
 def edit_employee(uid: int, b: EmpPatch, c: Ctx = Depends(ctx)):
     c.require("employees.manage")
     mem = _member(c, uid)
-    if b.department_id is not None:
-        dep = c.db.get(m.Department, b.department_id)
-        if not dep or dep.tenant_id != c.tid:
-            raise err(422, "VALIDATION", "Choose an existing department.")
-    old = c.db.get(m.Department, mem.department_id) if mem.department_id else None
-    if old and old.head_user_id == uid and old.id != b.department_id:
+    if b.department_id is not None and not people.department(c.db, c.tid, b.department_id):
+        raise err(422, "VALIDATION", "Choose an existing department.")
+    old = people.department(c.db, c.tid, mem.department_id)
+    if old and people.head_user_id(c.db, old) == uid and old.id != b.department_id:
         raise err(409, "IS_HEAD", f"This person heads {old.name}. Choose another Head of Department first.")
-    mem.department_id = b.department_id
+    people.set_department(c.db, c.tid, uid, b.department_id)
     audit(c.db, c.tid, c.user.id, "employee.department", "user", uid, department_id=b.department_id)
     c.db.commit()
     return {"ok": True}
@@ -328,7 +331,7 @@ def employee_hours(uid: int, b: HoursIn, c: Ctx = Depends(ctx)):
     mem = _member(c, uid)
     if b.hours is not None and not 1 <= b.hours <= 300:
         raise err(422, "VALIDATION", "Monthly hours must be between 1 and 300 (or empty to inherit).")
-    mem.hours_override = b.hours
+    people.set_hours(c.db, c.tid, uid, b.hours)
     audit(c.db, c.tid, c.user.id, "costing.employee_hours", "user", uid, override=b.hours is not None)
     c.db.commit()
     return {"ok": True}
@@ -364,7 +367,7 @@ def allocations(month: str | None = None, c: Ctx = Depends(ctx)):
     res = k.compute(d)
     projects = [p for p in d["projects"].values() if p["status"] in OPEN_STATUSES and (s == "all" or p["id"] in proj_ids)]
     manage_ids = {p["id"] for p in projects} if c.scope("allocation.manage") == "all" else (assigned_project_ids(c) if can_manage else set())
-    depts = {x.id: x.name for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    depts = people.department_names(c.db, c.tid)
     return {"month": mo.isoformat()[:7], "can_manage": can_manage, "partial": partial,
             "employees": [{"id": u, "name": d["emps"][u]["name"], "department": depts.get(d["emps"][u]["dept_id"]), "total_pct": res["emp"][u]["pct"],
                            "hours": round(res["emp"][u]["hours"], 2)} for u in sorted(emp_ids, key=lambda i: d["emps"][i]["name"])],
@@ -481,7 +484,7 @@ def by_employee(month: str | None = None, c: Ctx = Depends(ctx)):
     emp_ids, proj_ids, partial = visible(c, "costing.effort", d)
     r = k.compute(d, emp_ids, proj_ids)
     cost_ok = c.can("costing.cost") and not partial
-    depts = {x.id: x.name for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    depts = people.department_names(c.db, c.tid)
     rows = []
     for uid in sorted(emp_ids, key=lambda i: d["emps"][i]["name"]):
         e, x = d["emps"][uid], r["emp"][uid]
@@ -545,7 +548,7 @@ def matrix(month: str | None = None, c: Ctx = Depends(ctx)):
     emp_ids, proj_ids, partial = visible(c, "costing.effort", d)
     r = k.compute(d, emp_ids, proj_ids)
     cost_ok = c.can("costing.cost") and not partial
-    dn = {x.id: x.name for x in c.db.execute(select(m.Department).where(m.Department.tenant_id == c.tid)).scalars()}
+    dn = people.department_names(c.db, c.tid)
     order = sorted(emp_ids, key=lambda i: (dn.get(d["emps"][i]["dept_id"], "~"), d["emps"][i]["name"]))  # grouped by department, like the workbook header
     projects = []
     for pid in sorted(proj_ids, key=lambda i: d["projects"][i]["code"]):

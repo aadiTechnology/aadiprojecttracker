@@ -62,7 +62,8 @@ def _tags_of(c: Ctx, pids) -> dict:
 
 
 def _names(c: Ctx) -> dict:
-    return {u.id: u.name for u in c.db.execute(select(m.User).join(m.Membership, m.Membership.user_id == m.User.id).where(m.Membership.tenant_id == c.tid)).scalars()}
+    from .. import people
+    return {p.id: p.name for p in people.people(c.db, c.tid, live_only=False).values()}
 
 
 # ---------------- customers ----------------
@@ -170,7 +171,8 @@ def _validate_project(c: Ctx, b: ProjectIn):
         raise err(422, "VALIDATION", "Amounts and hours cannot be negative.")
     if not c.db.execute(select(m.Customer).where(m.Customer.id == b.customer_id, m.Customer.tenant_id == c.tid)).scalar_one_or_none():
         raise err(422, "VALIDATION", "Choose a customer or internal business unit (every project needs one).")
-    if b.pm_user_id and not c.db.execute(select(m.Membership).where(m.Membership.user_id == b.pm_user_id, m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar_one_or_none():
+    from .. import people
+    if b.pm_user_id and not people.is_live(c.db, c.tid, b.pm_user_id):
         raise err(422, "VALIDATION", "The project manager is not an active member of this organization.")
 
 
@@ -282,7 +284,8 @@ def add_member(pid: int, b: MemberIn, c: Ctx = Depends(ctx)):
     p = _manage(c, pid)
     if not 1 <= b.allocation_pct <= 100:
         raise err(422, "VALIDATION", "Allocation must be between 1 and 100 percent.")
-    if not c.db.execute(select(m.Membership).where(m.Membership.user_id == b.user_id, m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar_one_or_none():
+    from .. import people
+    if not people.is_live(c.db, c.tid, b.user_id):
         raise err(422, "VALIDATION", "That person is not an active member of this organization.")
     if c.db.execute(select(m.ProjectMember).where(m.ProjectMember.project_id == p.id, m.ProjectMember.user_id == b.user_id)).scalar_one_or_none():
         raise err(409, "DUPLICATE", "Already on this project.")
@@ -381,7 +384,8 @@ def dashboard(c: Ctx = Depends(ctx)):
     if c.can("customers.view"):
         out["customers"] = c.db.execute(select(func.count()).select_from(customer_query(c).subquery())).scalar()
     if c.has("org.admin") or c.has("org.users.view"):
-        out["people"] = c.db.execute(select(func.count()).select_from(m.Membership).where(m.Membership.tenant_id == c.tid, m.Membership.status == "active")).scalar()
+        from .. import people
+        out["people"] = people.count_live(c.db, c.tid)
     from .delivery import delivery_summary  # imported here: delivery builds on this module
     out["delivery"] = delivery_summary(c)
     from .costing import org_summary
@@ -396,6 +400,6 @@ def people(c: Ctx = Depends(ctx)):
     """Minimal directory (id, name, title) for pickers. Needs a project/customer management capability; no emails or pay data."""
     if not (c.has("projects.manage") or c.has("customers.manage") or c.has("org.admin")):
         raise err(403, "FORBIDDEN", "Your role does not allow this action.")
-    rows = c.db.execute(select(m.User.id, m.User.name, m.Membership.title, m.Membership.team).join(m.Membership, m.Membership.user_id == m.User.id)
-                        .where(m.Membership.tenant_id == c.tid, m.Membership.status == "active").order_by(m.User.name)).all()
-    return [{"id": i, "name": n, "title": t, "team": tm} for i, n, t, tm in rows]
+    from .. import people
+    rows = sorted(people.people(c.db, c.tid).values(), key=lambda p: p.name)
+    return [{"id": p.id, "name": p.name, "title": p.title, "team": p.team} for p in rows]
