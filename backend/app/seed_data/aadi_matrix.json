@@ -1,0 +1,390 @@
+{
+ "source": "Aadi Technology Matrix_V4.xlsx / BusinessView",
+ "month": "November",
+ "monthly_hours": 160.0,
+ "hourly_rate": 250.0,
+ "departments": [
+  "Management",
+  "Marketing & Sales",
+  "Software Development"
+ ],
+ "people": [
+  {
+   "name": "Prajakta",
+   "department": "Management",
+   "salary": 30000.0
+  },
+  {
+   "name": "Akanksha",
+   "department": "Software Development",
+   "salary": 30000.0
+  },
+  {
+   "name": "Kalyani",
+   "department": "Software Development",
+   "salary": 20000.0
+  },
+  {
+   "name": "Namrata",
+   "department": "Software Development",
+   "salary": 20000.0
+  },
+  {
+   "name": "Aman",
+   "department": "Software Development",
+   "salary": 10000.0
+  },
+  {
+   "name": "Manasi",
+   "department": "Marketing & Sales",
+   "salary": 10000.0
+  },
+  {
+   "name": "Gayatri",
+   "department": "Marketing & Sales",
+   "salary": 20000.0
+  },
+  {
+   "name": "Jyoti",
+   "department": "Marketing & Sales",
+   "salary": 10000.0
+  },
+  {
+   "name": "Dhande",
+   "department": "Marketing & Sales",
+   "salary": 10000.0
+  },
+  {
+   "name": "Anjali",
+   "department": "Software Development",
+   "salary": 20000.0
+  },
+  {
+   "name": "Prital",
+   "department": "Software Development",
+   "salary": 10000.0
+  },
+  {
+   "name": "Pravin",
+   "department": "Marketing & Sales",
+   "salary": 20000.0
+  },
+  {
+   "name": "Anushka",
+   "department": "Software Development",
+   "salary": 10000.0
+  },
+  {
+   "name": "Aarti",
+   "department": "Software Development",
+   "salary": 30000.0
+  },
+  {
+   "name": "Ankita",
+   "department": "Software Development",
+   "salary": 20000.0
+  }
+ ],
+ "tags": [
+  "Business Consulting",
+  "Digital Product",
+  "Ecommerce",
+  "Education",
+  "Interior Design",
+  "Marketing",
+  "Sales",
+  "Security Solution",
+  "Software Services"
+ ],
+ "projects": [
+  {
+   "name": "RITe School",
+   "tags": [
+    "Education",
+    "Software Services"
+   ],
+   "cost": 54000.0,
+   "revenue": 102000.0,
+   "allocation": {
+    "Prajakta": 5,
+    "Akanksha": 25,
+    "Kalyani": 50,
+    "Namrata": 75,
+    "Anjali": 100
+   },
+   "hours": {
+    "Prajakta": 8.0,
+    "Akanksha": 40.0,
+    "Kalyani": 80.0,
+    "Namrata": 120.0,
+    "Anjali": 160.0
+   },
+   "cost_by_person": {
+    "Prajakta": 1500,
+    "Akanksha": 7500,
+    "Kalyani": 10000,
+    "Namrata": 15000,
+    "Anjali": 20000
+   }
+  },
+  {
+   "name": "Product",
+   "tags": [
+    "Digital Product"
+   ],
+   "cost": 29000.0,
+   "revenue": 82000.0,
+   "allocation": {
+    "Prajakta": 5,
+    "Kalyani": 50,
+    "Namrata": 25,
+    "Aman": 100,
+    "Prital": 25
+   },
+   "hours": {
+    "Prajakta": 8.0,
+    "Kalyani": 80.0,
+    "Namrata": 40.0,
+    "Aman": 160.0,
+    "Prital": 40.0
+   },
+   "cost_by_person": {
+    "Prajakta": 1500,
+    "Kalyani": 10000,
+    "Namrata": 5000,
+    "Aman": 10000,
+    "Prital": 2500
+   }
+  },
+  {
+   "name": "Atlas",
+   "tags": [
+    "Education",
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 29800.0,
+   "revenue": 75200.0,
+   "allocation": {
+    "Prajakta": 5,
+    "Jyoti": 33,
+    "Dhande": 50,
+    "Pravin": 100
+   },
+   "hours": {
+    "Prajakta": 8.0,
+    "Jyoti": 52.8,
+    "Dhande": 80.0,
+    "Pravin": 160.0
+   },
+   "cost_by_person": {
+    "Prajakta": 1500,
+    "Jyoti": 3300,
+    "Dhande": 5000,
+    "Pravin": 20000
+   }
+  },
+  {
+   "name": "Smartkidz",
+   "tags": [
+    "Education",
+    "Marketing"
+   ],
+   "cost": 4800.0,
+   "revenue": 15200.000000000002,
+   "allocation": {
+    "Prajakta": 5,
+    "Jyoti": 33
+   },
+   "hours": {
+    "Prajakta": 8.0,
+    "Jyoti": 52.8
+   },
+   "cost_by_person": {
+    "Prajakta": 1500,
+    "Jyoti": 3300
+   }
+  },
+  {
+   "name": "Internship",
+   "tags": [
+    "Education",
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 33800.0,
+   "revenue": 67200.0,
+   "allocation": {
+    "Prajakta": 10,
+    "Akanksha": 75,
+    "Jyoti": 33,
+    "Dhande": 50
+   },
+   "hours": {
+    "Prajakta": 16.0,
+    "Akanksha": 120.0,
+    "Jyoti": 52.8,
+    "Dhande": 80.0
+   },
+   "cost_by_person": {
+    "Prajakta": 3000,
+    "Akanksha": 22500,
+    "Jyoti": 3300,
+    "Dhande": 5000
+   }
+  },
+  {
+   "name": "NexaTech",
+   "tags": [
+    "Security Solution",
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 14500.0,
+   "revenue": 36000.0,
+   "allocation": {
+    "Prajakta": 15,
+    "Manasi": 50,
+    "Gayatri": 25
+   },
+   "hours": {
+    "Prajakta": 24.0,
+    "Manasi": 80.0,
+    "Gayatri": 40.0
+   },
+   "cost_by_person": {
+    "Prajakta": 4500,
+    "Manasi": 5000,
+    "Gayatri": 5000
+   }
+  },
+  {
+   "name": "Space View",
+   "tags": [
+    "Interior Design",
+    "Marketing",
+    "Business Consulting"
+   ],
+   "cost": 9500.0,
+   "revenue": 16000.0,
+   "allocation": {
+    "Prajakta": 15,
+    "Gayatri": 25
+   },
+   "hours": {
+    "Prajakta": 24.0,
+    "Gayatri": 40.0
+   },
+   "cost_by_person": {
+    "Prajakta": 4500,
+    "Gayatri": 5000
+   }
+  },
+  {
+   "name": "Paneerwala",
+   "tags": [
+    "Ecommerce",
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 18000.0,
+   "revenue": 54000.0,
+   "allocation": {
+    "Prajakta": 10,
+    "Manasi": 50,
+    "Gayatri": 25,
+    "Prital": 50
+   },
+   "hours": {
+    "Prajakta": 16.0,
+    "Manasi": 80.0,
+    "Gayatri": 40.0,
+    "Prital": 80.0
+   },
+   "cost_by_person": {
+    "Prajakta": 3000,
+    "Manasi": 5000,
+    "Gayatri": 5000,
+    "Prital": 5000
+   }
+  },
+  {
+   "name": "eCommerce",
+   "tags": [
+    "Ecommerce",
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 5500.0,
+   "revenue": 14000.0,
+   "allocation": {
+    "Prajakta": 10,
+    "Prital": 25
+   },
+   "hours": {
+    "Prajakta": 16.0,
+    "Prital": 40.0
+   },
+   "cost_by_person": {
+    "Prajakta": 3000,
+    "Prital": 2500
+   }
+  },
+  {
+   "name": "Aadi Technology",
+   "tags": [
+    "Software Services",
+    "Marketing"
+   ],
+   "cost": 8000.0,
+   "revenue": 14000.0,
+   "allocation": {
+    "Prajakta": 10,
+    "Gayatri": 25
+   },
+   "hours": {
+    "Prajakta": 16.0,
+    "Gayatri": 40.0
+   },
+   "cost_by_person": {
+    "Prajakta": 3000,
+    "Gayatri": 5000
+   }
+  },
+  {
+   "name": "Technisure",
+   "tags": [
+    "Software Services"
+   ],
+   "cost": 30000.0,
+   "revenue": 40000.0,
+   "allocation": {
+    "Aarti": 100
+   },
+   "hours": {
+    "Aarti": 160.0
+   },
+   "cost_by_person": {
+    "Aarti": 30000
+   }
+  },
+  {
+   "name": "Tata",
+   "tags": [
+    "Marketing",
+    "Sales"
+   ],
+   "cost": 3000.0,
+   "revenue": 4000.0,
+   "allocation": {
+    "Prajakta": 10
+   },
+   "hours": {
+    "Prajakta": 16.0
+   },
+   "cost_by_person": {
+    "Prajakta": 3000
+   }
+  }
+ ]
+}

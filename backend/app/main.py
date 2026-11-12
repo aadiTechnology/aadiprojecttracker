@@ -37,6 +37,15 @@ app.add_middleware(CORSMiddleware, allow_origins=core.CORS_ORIGINS, allow_method
 @app.on_event("startup")
 def _startup():
     migrate()
+    # One-time maintenance, switched on by setting all three variables (then it runs once per id, however often the app restarts):
+    #   APP_MAINTENANCE=reset-and-seed-aadi-test   APP_MAINTENANCE_ID=<any new text>   APP_MAINTENANCE_CONFIRM=ERASE-ALL-DATA
+    if (os.environ.get("APP_MAINTENANCE") == "reset-and-seed-aadi-test" and os.environ.get("APP_MAINTENANCE_CONFIRM") == "ERASE-ALL-DATA"
+            and os.environ.get("APP_MAINTENANCE_ID")):
+        from . import seed_aadi_test
+
+        with core.SessionLocal() as db:
+            out = seed_aadi_test.maintenance_once(db, os.environ["APP_MAINTENANCE_ID"])
+        print("Maintenance:", "already done for this id" if out is None else out, flush=True)
     hours = float(os.environ.get("IDENTITY_RECONCILE_HOURS") or 0)  # 0 = off; 24 = nightly, as an in-process safety net
     if hours > 0 and sso.enabled() and identity_sync.WEBHOOK_SECRET:
         identity_sync.start_reconcile_loop(sso.ISSUER, hours)

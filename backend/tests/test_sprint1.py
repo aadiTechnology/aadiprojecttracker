@@ -6,7 +6,7 @@ def test_health_and_demo_accounts(client):
     assert client.get("/api/health").json()["status"] == "ok"
     d = client.get("/api/demo/accounts").json()
     roles = {a["role"] for a in d["accounts"]}
-    assert len([a for a in d["accounts"] if a.get("org") != "matrix"]) == len(seed.USERS) + 1
+    assert len([a for a in d["accounts"] if a.get("org") not in ("matrix", "aadi-test")]) == len(seed.USERS) + 1
     for r in ["Organization Owner / CEO", "Finance Manager", "Operations / Delivery Manager", "Project Manager", "Team Lead",
               "Employee / Contributor", "Sales / Business Development", "SaaS Platform Administrator"]:
         assert r in roles

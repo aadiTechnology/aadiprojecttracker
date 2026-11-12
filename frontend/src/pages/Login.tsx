@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { api, authConfig, AuthConfig, token } from '../api'
 
-interface Demo { password: string; notice: string; accounts: { name: string; role: string; title: string; email: string; hint: string; org?: string }[] }
+interface Demo { password: string; notice: string; accounts: { name: string; role: string; title: string; email: string; hint: string; org?: string; password?: string }[] }
 
 export default function Login({ onDone }: { onDone: (platform: boolean) => void }) {
   const [email, setEmail] = useState('')
@@ -73,13 +73,13 @@ export default function Login({ onDone }: { onDone: (platform: boolean) => void 
             <div className="tw demo"><table>
               <thead><tr><th>Person</th><th>Role</th><th>What to try</th><th /></tr></thead>
               <tbody>{byRole.map((a, i) => (
-                <tr key={a.email} style={a.org === 'matrix' && byRole[i - 1]?.org !== 'matrix' ? { borderTop: '3px solid var(--acc)' } : undefined}>
-                  <td><b>{a.name}</b>{a.org === 'matrix' && <> <span className="chip c-info">Matrix org</span></>}<br /><span className="mono">{a.email}</span></td>
+                <tr key={a.email} style={a.org && byRole[i - 1]?.org !== a.org ? { borderTop: '3px solid var(--acc)' } : undefined}>
+                  <td><b>{a.name}</b>{a.org === 'matrix' && <> <span className="chip c-info">Matrix org</span></>}{a.org === 'aadi-test' && <> <span className="chip c-ok">Aadi-Test</span></>}<br /><span className="mono">{a.email}</span></td>
                   <td>{a.role}</td><td>{a.hint}</td>
-                  <td><button type="button" className="btn sm" onClick={() => { setForgot(false); setEmail(a.email); setPassword(demo.password); window.scrollTo(0, 0) }} aria-label={`Use ${a.name}`}>Use</button></td>
+                  <td><button type="button" className="btn sm" onClick={() => { setForgot(false); setEmail(a.email); setPassword(a.password ?? demo.password); window.scrollTo(0, 0) }} aria-label={`Use ${a.name}`}>Use</button></td>
                 </tr>))}</tbody>
             </table></div>
-            <p className="note" style={{ marginTop: 10 }}>Shared demo password for every account: <span className="mono">{demo.password}</span> (disposable, demo environment only).</p>
+            <p className="note" style={{ marginTop: 10 }}>Shared demo password for every account: <span className="mono">{demo.password}</span>; for the Aadi-Test people: <span className="mono">{byRole.find((x) => x.password)?.password}</span> (disposable, demo environment only).</p>
           </section>
         )}
       </div>

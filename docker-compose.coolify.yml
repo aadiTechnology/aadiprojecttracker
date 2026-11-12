@@ -10,6 +10,9 @@ services:
       - SERVICE_FQDN_APP_8000
       - APP_ENV=${APP_ENV:-production}
       - APP_SEED_DEMO=${APP_SEED_DEMO:-false}
+      - APP_MAINTENANCE=${APP_MAINTENANCE:-}
+      - APP_MAINTENANCE_ID=${APP_MAINTENANCE_ID:-}
+      - APP_MAINTENANCE_CONFIRM=${APP_MAINTENANCE_CONFIRM:-}
       - APP_BASE_URL=${APP_BASE_URL:-}
       - JWT_SECRET=${JWT_SECRET}
       - DATABASE_URL=postgresql+psycopg://tracker:${POSTGRES_PASSWORD}@postgres:5432/tracker
