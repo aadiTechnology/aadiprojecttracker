@@ -78,3 +78,15 @@ def test_maintenance_wipes_everything_but_platform_admins_and_runs_once_per_id(c
         db.commit()
         assert st.maintenance_once(db, "run-1") is None and db.scalar(select(func.count()).select_from(m.EmployeeSalary)) == 0
         assert st.maintenance_once(db, "run-2")["seeded"] is True
+
+
+def test_the_demo_seed_still_runs_when_aadi_test_is_there(client):
+    """Production once crashed at start: the start script runs the older demo seed, which touched every demo company, Aadi-Test included."""
+    with core.SessionLocal() as db:
+        fresh(db)
+        assert st.seed(db) is True
+        db.commit()
+    demo_seed.run()  # must not raise
+    with core.SessionLocal() as db:
+        names = {t.slug for t in db.execute(select(m.Tenant)).scalars()}
+        assert "aadi-test" in names and "aadi-technology-illustrative-demo" in names

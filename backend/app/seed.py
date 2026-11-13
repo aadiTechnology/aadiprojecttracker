@@ -88,7 +88,8 @@ PROJECTS = [
 def seed_finance_all(db) -> bool:
     db.flush()
     added = False
-    for t in db.execute(select(m.Tenant).where(m.Tenant.is_demo.is_(True))).scalars().all():
+    demo_slugs = ["aadi-technology-illustrative-demo", "aadi-technology-matrix-demo"]  # the Aadi-Test company is also is_demo but is not shaped like these; leave it alone
+    for t in db.execute(select(m.Tenant).where(m.Tenant.is_demo.is_(True), m.Tenant.slug.in_(demo_slugs))).scalars().all():
         added = seed_finance(db, t) or added
         added = seed_task_hours(db, t) or added
         added = enable_assistant(db, t) or added
@@ -130,7 +131,8 @@ def run(reset=False):
             uid[key] = u.id
         for key, name, role, title, team, mgr, _ in USERS:
             people.add_person(db, t.id, db.get(m.User, uid[key]), role, title=title, team=team, manager_user_id=uid.get(mgr), actor="seed")
-        db.add(m.User(email=f"{PLATFORM[0]}@{DOMAIN}", name=PLATFORM[1], password_hash=pw, is_platform_admin=True))
+        if not db.execute(select(m.User).where(m.User.email == f"{PLATFORM[0]}@{DOMAIN}")).scalar_one_or_none():  # a reset keeps platform administrators
+            db.add(m.User(email=f"{PLATFORM[0]}@{DOMAIN}", name=PLATFORM[1], password_hash=pw, is_platform_admin=True))
         cid = {}
         for key, name, kind, contact, owner in CUSTOMERS:
             c = m.Customer(tenant_id=t.id, name=name, kind=kind, contact_name=contact, contact_email=f"{contact.lower().replace(' ', '.').replace('dr..', '')}@example.test",
